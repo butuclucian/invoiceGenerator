@@ -13,6 +13,8 @@ import Reports from "./pages/Admin/Reports";
 import AddClients from "./pages/Admin/AddClients";
 import Clients from "./pages/Admin/Clients";
 import AIGenerator from "./pages/Admin/AIGenerator";
+import EditInvoice from "./pages/Admin/EditInvoice";
+import InvoicePreview from "./pages/Admin/InvoicePreview";
 
 const App = () => {
   const location = useLocation();
@@ -41,6 +43,8 @@ const App = () => {
           <Route path="clients" element={<Clients />} />
           <Route path="clients/add" element={<AddClients />} />
           <Route path="ai-generator" element={<AIGenerator />} />
+          <Route path="invoices/:id/edit" element={<EditInvoice />} />
+          <Route path="invoices/:id" element={<InvoicePreview />} />
         </Route>
       </Routes>
     </>

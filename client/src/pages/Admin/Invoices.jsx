@@ -165,14 +165,14 @@ const Invoices = () => {
                 {/* Actions */}
                 <div className="flex justify-between mt-4">
                   <button
-                    onClick={() => navigate(`/invoices/${inv._id}`)}
+                    onClick={() => navigate(`/dashboard/invoices/${inv._id}`)}
                     className="p-2 text-gray-400 hover:text-[#80FFF9] transition"
                     title="View"
                   >
                     <Eye size={18} />
                   </button>
                   <button
-                    onClick={() => navigate(`/invoices/${inv._id}/edit`)}
+                    onClick={() => navigate(`/dashboard/invoices/${inv._id}/edit`)}
                     className="p-2 text-gray-400 hover:text-indigo-400 transition"
                     title="Edit"
                   >
