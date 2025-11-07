@@ -5,40 +5,49 @@ import {
   Plus,
   Trash2,
   RotateCcw,
-  FilePlus2
+  FilePlus2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import axios from "axios";
-import assets from "../../assets/assets";
-
-const API = "http://localhost:8000/api";
+import API from "../../utils/api"; // ✅ axios global cu token interceptor
 
 const CreateInvoice = () => {
   const navigate = useNavigate();
   const [clients, setClients] = useState([]);
 
   const [formData, setFormData] = useState({
-    invoice_number: `INV-${Date.now()}`,
-    date: new Date().toISOString().split("T")[0],
-    due_date: "",
-    client_id: "",
-    status: "draft",
-    items: [{ description: "", quantity: 1, unit_price: 0, total: 0 }],
-    tax_rate: 0,
-    discount_rate: 0,
-    tax_amount: 0,
-    discount_amount: 0,
-    subtotal: 0,
-    total: 0,
-    payment_terms: "",
-    notes: "",
-  });
+  invoice_number: `INV-${Date.now()}`,
+  date: new Date().toISOString().split("T")[0],
+  due_date: "",
+  client: "",
+  status: "draft",
+  items: [{ description: "", quantity: 1, unit_price: 0, total: 0 }],
+  tax_rate: 0,
+  discount_rate: 0,
+  tax_amount: 0,
+  discount_amount: 0,
+  subtotal: 0,
+  total: 0,
+  payment_terms: "",
+  notes: "",
+  recurring: false,       // ✅ nou
+  frequency: "monthly",   // ✅ nou
+  next_billing: "",       // ✅ nou
+});
 
-  // Dummy data (since backend not active)
-  const { dummyClients } = assets;
+
+  // ✅ Fetch clients from backend
   useEffect(() => {
-    setClients(dummyClients);
+    const fetchClients = async () => {
+      try {
+        const { data } = await API.get("/clients");
+        setClients(data);
+      } catch (err) {
+        console.error("Failed to load clients:", err);
+        toast.error("Could not load clients from server");
+      }
+    };
+    fetchClients();
   }, []);
 
   const handleChange = (e) =>
@@ -97,7 +106,7 @@ const CreateInvoice = () => {
       invoice_number: `INV-${Date.now()}`,
       date: new Date().toISOString().split("T")[0],
       due_date: "",
-      client_id: "",
+      client: "",
       status: "draft",
       items: [{ description: "", quantity: 1, unit_price: 0, total: 0 }],
       tax_rate: 0,
@@ -114,16 +123,18 @@ const CreateInvoice = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.client_id) return toast.error("Please select a client");
+
+    if (!formData.client) return toast.error("Please select a client");
     if (formData.items.some((item) => !item.description))
       return toast.error("Please complete all item descriptions");
 
     try {
-      await axios.post(`${API}/invoices`, formData);
+      const { data } = await API.post("/invoices", formData);
       toast.success("Invoice created successfully!");
-      navigate("/invoices");
-    } catch {
-      toast.error("Failed to create invoice");
+      navigate("/dashboard/invoices");
+    } catch (err) {
+      console.error("❌ Create invoice error:", err.response?.data || err);
+      toast.error(err.response?.data?.message || "Failed to create invoice");
     }
   };
 
@@ -194,8 +205,8 @@ const CreateInvoice = () => {
                 Client <span className="text-red-500">*</span>
               </label>
               <select
-                name="client_id"
-                value={formData.client_id}
+                name="client"
+                value={formData.client}
                 onChange={handleChange}
                 className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
               >
@@ -405,6 +416,71 @@ const CreateInvoice = () => {
           </div>
         </section>
 
+        {/* --- SECTION 4: Recurring Settings --- */}
+        <section>
+          <h2 className="text-xl font-semibold mb-4 text-[#80FFF9] border-b border-white/10 pb-2">
+            Recurring Invoice
+          </h2>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="recurring"
+                checked={formData.recurring}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    recurring: e.target.checked,
+                  })
+                }
+                className="w-5 h-5 accent-[#80FFF9] cursor-pointer"
+              />
+              <label
+                htmlFor="recurring"
+                className="text-gray-300 text-sm select-none cursor-pointer"
+              >
+                Mark this invoice as recurring (auto-generated periodically)
+              </label>
+            </div>
+
+            {formData.recurring && (
+              <div className="grid md:grid-cols-2 gap-6 mt-4">
+                <div>
+                  <label className="text-gray-300 block mb-1">
+                    Frequency <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="frequency"
+                    value={formData.frequency}
+                    onChange={handleChange}
+                    className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
+                  >
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-gray-300 block mb-1">
+                    Next Billing Date <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    name="next_billing"
+                    value={formData.next_billing}
+                    onChange={handleChange}
+                    className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+
         {/* Sticky Footer */}
         <div className="fixed bottom-0 right-0 left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-4 z-40">
           <div className="flex justify-center gap-4 pr-8">
@@ -433,7 +509,6 @@ const CreateInvoice = () => {
             </button>
           </div>
         </div>
-
       </form>
     </div>
   );

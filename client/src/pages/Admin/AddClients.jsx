@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Save, RotateCcw, X, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import API from "../../utils/api"; // ✅ folosim instanța Axios globală
 
 const AddClients = () => {
   const navigate = useNavigate();
@@ -17,7 +18,8 @@ const AddClients = () => {
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  // ✅ Submit form -> POST request către backend
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.name || !formData.email) {
@@ -25,8 +27,18 @@ const AddClients = () => {
       return;
     }
 
-    toast.success(`Client ${formData.name} added successfully!`);
-    navigate("/clients");
+    try {
+      const { data } = await API.post("/clients", formData);
+      toast.success(`Client ${data.name} added successfully!`);
+      navigate("/dashboard/clients");
+    } catch (err) {
+      console.error(err);
+      if (err.response?.status === 401) {
+        toast.error("Unauthorized! Please login again.");
+      } else {
+        toast.error("Failed to add client. Try again!");
+      }
+    }
   };
 
   const handleReset = () => {
@@ -44,25 +56,22 @@ const AddClients = () => {
     <div className="min-h-screen bg-[#0e0e0e] text-white px-10 pt-8 overflow-hidden">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
-      <div>
-        <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
-          <UserPlus className="text-[#80FFF9]" size={26} />
-          Clients
-        </h1>
-        <p className="text-gray-400 text-sm">
-          Add clients to your business contacts
-        </p>
-        <p className="text-gray-500 text-xs mt-2">
+        <div>
+          <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
+            <UserPlus className="text-[#80FFF9]" size={26} />
+            Clients
+          </h1>
+          <p className="text-gray-400 text-sm">
+            Add clients to your business contacts
+          </p>
+          <p className="text-gray-500 text-xs mt-2">
             <span className="text-red-500">*</span> Required fields
           </p>
+        </div>
       </div>
-    </div>
 
       {/* Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-8 max-w-4xl mx-auto fade-in"
-      >
+      <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl mx-auto fade-in">
         {/* Basic Info */}
         <div className="grid md:grid-cols-2 gap-8">
           <div>
@@ -97,9 +106,7 @@ const AddClients = () => {
         {/* Contact Info */}
         <div className="grid md:grid-cols-2 gap-8">
           <div>
-            <label className="block text-sm text-gray-300 mb-2">
-              Phone Number
-            </label>
+            <label className="block text-sm text-gray-300 mb-2">Phone Number</label>
             <input
               type="text"
               name="phone"
@@ -136,35 +143,34 @@ const AddClients = () => {
           />
         </div>
 
-        {/* Buttons */}
         {/* Sticky Footer */}
-                <div className="fixed bottom-0 right-0 left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-4 z-40">
-                  <div className="flex justify-center gap-4 pr-8">
-                    <button
-                      type="button"
-                      onClick={handleReset}
-                      className="flex items-center gap-2 px-5 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition"
-                    >
-                      <RotateCcw size={16} />
-                      Reset
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => navigate(-1)}
-                      className="flex items-center gap-2 px-5 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition"
-                    >
-                      <X size={16} />
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="flex items-center gap-2 px-5 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition"
-                    >
-                      <Save size={16} />
-                      Save Invoice
-                    </button>
-                  </div>
-                </div>
+        <div className="fixed bottom-0 right-0 left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-4 z-40">
+          <div className="flex justify-center gap-4 pr-8">
+            <button
+              type="button"
+              onClick={handleReset}
+              className="flex items-center gap-2 px-5 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition"
+            >
+              <RotateCcw size={16} />
+              Reset
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 px-5 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition"
+            >
+              <X size={16} />
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="flex items-center gap-2 px-5 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition"
+            >
+              <Save size={16} />
+              Save Client
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   );

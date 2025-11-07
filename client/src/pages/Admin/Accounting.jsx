@@ -1,79 +1,137 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
-  BarChart,
-  Bar,
+  DollarSign,
+  TrendingUp,
+  CreditCard,
+  FileText,
+  Calculator,
+} from "lucide-react";
+import {
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
   Legend,
   ResponsiveContainer,
-  LineChart,
-  Line,
 } from "recharts";
-import { DollarSign, TrendingUp, CreditCard, FileText, Calculator } from "lucide-react";
+import API from "../../utils/api";
+import { toast } from "sonner";
 
 const Accounting = () => {
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        const { data } = await API.get("/invoices");
+        setInvoices(data);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load invoices");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInvoices();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-400">
+        Loading accounting data...
+      </div>
+    );
+  }
+
+  // 🧮 Calcul statistici
+  const totalIncome = invoices
+    .filter((inv) => inv.status === "paid")
+    .reduce((sum, inv) => sum + (inv.total || 0), 0);
+
+  const outstandingCount = invoices.filter(
+    (inv) => inv.status === "sent" || inv.status === "overdue"
+  ).length;
+
+  const expenses = 4800; // (dacă adaugi o colecție Expense, îl facem real)
+  const profit = totalIncome - expenses;
+
+  // 🧾 Grupare venituri pe lună (cash flow)
+  const monthlyData = {};
+  invoices.forEach((inv) => {
+    if (inv.status === "paid" && inv.date) {
+      const month = new Date(inv.date).toLocaleString("default", {
+        month: "short",
+      });
+      if (!monthlyData[month]) monthlyData[month] = { income: 0, expenses: 0 };
+      monthlyData[month].income += inv.total || 0;
+    }
+  });
+
+  const cashFlowData = Object.entries(monthlyData).map(([month, values]) => ({
+    month,
+    ...values,
+  }));
+
+  // 📑 Ultimele tranzacții (ultimele 5 facturi)
+  const recentTransactions = invoices
+    .slice()
+    .reverse()
+    .slice(0, 5)
+    .map((inv) => ({
+      id: inv._id,
+      type: "Invoice",
+      amount: `$${inv.total.toFixed(2)}`,
+      status: inv.status,
+      date: inv.date?.split("T")[0],
+    }));
+
   const stats = [
     {
       title: "Total Income",
-      value: "$12,450",
+      value: `$${totalIncome.toFixed(2)}`,
       icon: <DollarSign size={22} />,
       color: "text-green-400",
       bg: "bg-green-500/10",
     },
     {
       title: "Expenses",
-      value: "$4,800",
+      value: `$${expenses.toFixed(2)}`,
       icon: <CreditCard size={22} />,
       color: "text-red-400",
       bg: "bg-red-500/10",
     },
     {
       title: "Profit",
-      value: "$7,650",
+      value: `$${profit.toFixed(2)}`,
       icon: <TrendingUp size={22} />,
       color: "text-[#80FFF9]",
       bg: "bg-[#80FFF9]/10",
     },
     {
       title: "Outstanding Invoices",
-      value: "6 Pending",
+      value: `${outstandingCount} Pending`,
       icon: <FileText size={22} />,
       color: "text-yellow-400",
       bg: "bg-yellow-500/10",
     },
   ];
 
-  const cashFlowData = [
-    { month: "Jan", income: 2400, expenses: 1400 },
-    { month: "Feb", income: 2800, expenses: 1600 },
-    { month: "Mar", income: 3200, expenses: 2100 },
-    { month: "Apr", income: 2700, expenses: 1900 },
-    { month: "May", income: 3500, expenses: 2200 },
-    { month: "Jun", income: 3100, expenses: 1800 },
-  ];
-
-  const transactions = [
-    { id: 1, type: "Invoice Payment", amount: "$850", status: "Completed", date: "2025-10-15" },
-    { id: 2, type: "Expense", amount: "$120", status: "Approved", date: "2025-10-14" },
-    { id: 3, type: "Invoice Payment", amount: "$1,200", status: "Pending", date: "2025-10-12" },
-    { id: 4, type: "Refund", amount: "$300", status: "Processed", date: "2025-10-10" },
-  ];
-
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white px-10 pt-8 pb-16">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
-      <div>
-        <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
-          <Calculator className="text-[#80FFF9]" size={26} />
-          Accounting
-        </h1>
-        <p className="text-gray-400 text-sm">
-          Manage your financial overview and transactions
-        </p>
+        <div>
+          <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
+            <Calculator className="text-[#80FFF9]" size={26} />
+            Accounting
+          </h1>
+          <p className="text-gray-400 text-sm">
+            Manage your financial overview and transactions
+          </p>
+        </div>
       </div>
-    </div>
 
       {/* Summary Cards */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
@@ -132,23 +190,25 @@ const Accounting = () => {
               </tr>
             </thead>
             <tbody>
-              {transactions.map((t) => (
+              {recentTransactions.map((t) => (
                 <tr
                   key={t.id}
                   className="border-b border-white/5 hover:bg-white/5 transition"
                 >
                   <td className="py-3 px-4">{t.type}</td>
-                  <td className="py-3 px-4 text-[#80FFF9] font-semibold">{t.amount}</td>
+                  <td className="py-3 px-4 text-[#80FFF9] font-semibold">
+                    {t.amount}
+                  </td>
                   <td className="py-3 px-4">
                     <span
                       className={`px-3 py-1 rounded-full text-xs ${
-                        t.status === "Completed"
+                        t.status === "paid"
                           ? "bg-green-500/10 text-green-400"
-                          : t.status === "Pending"
+                          : t.status === "sent"
                           ? "bg-yellow-500/10 text-yellow-400"
-                          : t.status === "Processed"
-                          ? "bg-blue-500/10 text-blue-400"
-                          : "bg-red-500/10 text-red-400"
+                          : t.status === "overdue"
+                          ? "bg-red-500/10 text-red-400"
+                          : "bg-gray-500/10 text-gray-400"
                       }`}
                     >
                       {t.status}

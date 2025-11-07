@@ -16,35 +16,46 @@ import AIGenerator from "./pages/Admin/AIGenerator";
 import EditInvoice from "./pages/Admin/EditInvoice";
 import InvoicePreview from "./pages/Admin/InvoicePreview";
 
+// 🆕 noile pagini de autentificare
+import Login from "./pages/Auth/Login";
+import Register from "./pages/Auth/Register";
+import { Toaster } from "sonner";
+
 const App = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    const timeout = setTimeout(() => setLoading(false), 500); // efect scurt (0.5s)
+    const timeout = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timeout);
   }, [location.pathname]);
 
   return (
     <>
+      <Toaster />
       <ScrollToTop />
       {loading && <Loader />}
 
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* Protected admin routes */}
         <Route path="/dashboard" element={<Dashboard />}>
           <Route index element={<Invoices />} />
           <Route path="invoices" element={<Invoices />} />
           <Route path="invoices/create" element={<CreateInvoice />} />
           <Route path="invoices/recurring" element={<RecurringInvoice />} />
-          <Route path="accounting" element={<Accounting />} />
-          <Route path="reports" element={<Reports />} />
-          <Route path="clients" element={<Clients />} />
-          <Route path="clients/add" element={<AddClients />} />
-          <Route path="ai-generator" element={<AIGenerator />} />
           <Route path="invoices/:id/edit" element={<EditInvoice />} />
           <Route path="invoices/:id" element={<InvoicePreview />} />
+          <Route path="clients" element={<Clients />} />
+          <Route path="clients/add" element={<AddClients />} />
+          <Route path="accounting" element={<Accounting />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="ai-generator" element={<AIGenerator />} />
         </Route>
       </Routes>
     </>

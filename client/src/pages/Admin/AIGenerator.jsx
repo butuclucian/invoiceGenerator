@@ -4,216 +4,101 @@ import {
   Loader2,
   FileText,
   RotateCcw,
-  RefreshCw,
-  Edit,
   Save,
   Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
-import assets from "../../assets/assets";
-import logo from '../../assets/react.svg'
+import API from "../../utils/api";
+import logo from "../../assets/react.svg";
 
 const AIGenerator = () => {
-  const { dummyInvoices, dummyClients } = assets;
   const [text, setText] = useState("");
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [editing, setEditing] = useState(false);
   const pdfRef = useRef();
 
-  const extractRandomInvoice = () => {
-    const randomInvoice =
-      dummyInvoices[Math.floor(Math.random() * dummyInvoices.length)];
-    const client = dummyClients.find((c) => c._id === randomInvoice.client_id);
-
-    return {
-      client_info: client,
-      invoice_number: randomInvoice.invoice_number,
-      date: randomInvoice.date,
-      due_date: randomInvoice.due_date,
-      items: randomInvoice.items,
-      subtotal: randomInvoice.subtotal,
-      total: randomInvoice.total,
-      notes: randomInvoice.notes,
-      status: randomInvoice.status,
-    };
-  };
-
-  const handleExtract = () => {
+  // 🔹 Trimite textul la backend (Gemini)
+  const handleExtract = async () => {
     if (!text.trim()) {
-      toast.error("Please paste the client email first!");
+      toast.error("Please paste the invoice text first!");
       return;
     }
 
     setLoading(true);
-    setTimeout(() => {
-      const extracted = extractRandomInvoice();
-      setInvoice(extracted);
-      toast.success("AI successfully extracted invoice details!");
-      setLoading(false);
-    }, 1500);
-  };
+    try {
+      const token = localStorage.getItem("token");
+      const { data } = await API.post(
+        "/ai/generate-invoice",
+        { text },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-  const handleGenerateAgain = () => {
-    const extracted = extractRandomInvoice();
-    setInvoice(extracted);
-    toast.info("Generated a new invoice preview!");
+      if (data?.success) {
+        setInvoice(data.invoice);
+        toast.success("AI successfully generated invoice!");
+      } else {
+        toast.error("AI did not return valid data");
+      }
+    } catch (err) {
+      console.error("AI generation error:", err);
+      toast.error(err.response?.data?.message || "AI request failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleReset = () => {
     setText("");
     setInvoice(null);
-    toast.info("Form reset successfully");
+    toast.info("Reset successfully");
   };
 
-  const handleSave = () => {
-    toast.success(`Invoice ${invoice.invoice_number} saved successfully!`);
-  };
-
-  // ✅ FIX: PDF export compatibil (fără eroare "oklab")
   const handleDownloadPDF = async () => {
-  if (!invoice) {
-    toast.error("No invoice to export!");
-    return;
-  }
+    if (!invoice) return toast.error("No invoice to export!");
 
-  try {
-    toast.message("Generating PDF with logo...");
-
-    const doc = new jsPDF("p", "mm", "a4");
-
-    // 🧩 Add logo (SVG or PNG)
     try {
+      const doc = new jsPDF("p", "mm", "a4");
+
       const img = new Image();
       img.src = logo;
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
+      await new Promise((res) => (img.onload = res));
+      doc.addImage(img, "PNG", 14, 10, 25, 25);
+
+      doc.setFontSize(20);
+      doc.text("Invoice", 170, 25, { align: "right" });
+      doc.setFontSize(11);
+      doc.text(`Invoice #: ${invoice.invoice_number}`, 170, 32, { align: "right" });
+      doc.text(`Date: ${invoice.date}`, 170, 38, { align: "right" });
+
+      const { default: autoTable } = await import("jspdf-autotable");
+
+      const tableData = invoice.items.map((i) => [
+        i.description,
+        i.quantity,
+        `$${i.unit_price}`,
+        `$${i.total}`,
+      ]);
+
+      autoTable(doc, {
+        startY: 60,
+        head: [["Description", "Qty", "Unit", "Total"]],
+        body: tableData,
+        theme: "grid",
       });
-      doc.addImage(img, "PNG", 14, 10, 25, 25); // (x, y, width, height)
+
+      let y = doc.lastAutoTable.finalY + 10;
+      doc.text(`Subtotal: $${invoice.subtotal}`, 150, y);
+      y += 6;
+      doc.text(`Total: $${invoice.total}`, 150, y);
+
+      doc.save(`${invoice.invoice_number}.pdf`);
+      toast.success("PDF downloaded!");
     } catch (err) {
-      console.warn("Logo failed to load, continuing without it.");
+      console.error(err);
+      toast.error("Failed to generate PDF");
     }
-
-    // 🧾 Invoice header text
-    doc.setFontSize(20);
-    doc.setFont("helvetica", "bold");
-    doc.text("Invoice", 170, 25, { align: "right" });
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    doc.text(`Invoice Number: ${invoice.invoice_number}`, 170, 32, { align: "right" });
-    doc.text(`Date: ${invoice.date}`, 170, 38, { align: "right" });
-    doc.text(`Due: ${invoice.due_date || "N/A"}`, 170, 44, { align: "right" });
-
-    // 🧍 Client info
-    doc.setFontSize(12);
-    doc.text("Billed To:", 14, 55);
-    doc.setFontSize(11);
-    doc.text(invoice.client_info?.name || "Unknown Client", 14, 62);
-    if (invoice.client_info?.company)
-      doc.text(invoice.client_info.company, 14, 68);
-    if (invoice.client_info?.email)
-      doc.text(invoice.client_info.email, 14, 74);
-
-    // 🧮 Table (items)
-    const { default: autoTable } = await import("jspdf-autotable");
-
-    const tableData = invoice.items.map((item) => [
-      item.description,
-      item.quantity,
-      `$${item.unit_price.toFixed(2)}`,
-      `$${item.total.toFixed(2)}`,
-    ]);
-
-    autoTable(doc, {
-      startY: 85,
-      head: [["Description", "Qty", "Unit Price", "Total"]],
-      body: tableData,
-      theme: "grid",
-      headStyles: { fillColor: [240, 240, 240], textColor: 0 },
-      styles: { fontSize: 11, textColor: 50 },
-      columnStyles: {
-        1: { halign: "right" },
-        2: { halign: "right" },
-        3: { halign: "right" },
-      },
-    });
-
-    // 💰 Totals
-    let finalY = doc.lastAutoTable.finalY + 10;
-    doc.setFontSize(11);
-    doc.text(`Subtotal: $${invoice.subtotal.toFixed(2)}`, 150, finalY);
-    finalY += 7;
-    doc.setFontSize(13);
-    doc.text(`Total: $${invoice.total.toFixed(2)}`, 150, finalY);
-
-    // 📝 Notes
-    if (invoice.notes) {
-      doc.setFontSize(12);
-      doc.text("Notes:", 14, finalY + 15);
-      const splitNotes = doc.splitTextToSize(invoice.notes, 180);
-      doc.text(splitNotes, 14, finalY + 22);
-    }
-
-    // 📦 Footer
-    const footerY = 285;
-    doc.setDrawColor(220);
-    doc.line(14, footerY - 5, 196, footerY - 5);
-    doc.setFontSize(9);
-    doc.setTextColor(100);
-    doc.text("Generated by Invoice Generator • AI Edition", 14, footerY);
-
-    // 💾 Save file
-    doc.save(`${invoice.invoice_number}.pdf`);
-    toast.success("Branded PDF downloaded successfully!");
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to generate PDF");
-  }
-};
-
-
-
-const handleDownloadStyledPDF = async () => {
-  if (!invoice || !pdfRef.current) {
-    toast.error("No invoice to export!");
-    return;
-  }
-
-  try {
-    toast.message("Preparing styled PDF...");
-
-    await new Promise((res) => setTimeout(res, 200));
-
-    const element = pdfRef.current;
-
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: "#1a1a1a", // păstrăm fundalul aplicației
-      scrollY: -window.scrollY,
-      windowWidth: document.documentElement.offsetWidth,
-    });
-
-    const imgData = canvas.toDataURL("image/png", 1.0);
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`${invoice.invoice_number}_styled.pdf`);
-
-    toast.success("Styled PDF downloaded successfully!");
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to generate styled PDF");
-  }
-};
-
-
+  };
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white px-10 py-10">
@@ -225,17 +110,17 @@ const handleDownloadStyledPDF = async () => {
             AI Invoice Generator
           </h1>
           <p className="text-gray-400 text-sm">
-            Paste a client email or message below and let AI generate an invoice automatically.
+            Paste text below and let Gemini generate your invoice.
           </p>
         </div>
       </div>
 
-      {/* Input Section */}
+      {/* Input */}
       <div className="max-w-5xl mx-auto mb-10">
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Paste client email or conversation text here..."
+          placeholder="Paste client text or email content here..."
           className="w-full h-56 bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-4 text-gray-200 placeholder-gray-500 focus:border-[#80FFF9] outline-none transition resize-none"
         />
 
@@ -248,185 +133,123 @@ const handleDownloadStyledPDF = async () => {
             <RotateCcw size={16} />
             Reset
           </button>
+
           <button
             onClick={handleExtract}
-            disabled={loading || !text.trim()}
-            className="flex items-center gap-2 px-6 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition disabled:opacity-50"
+            disabled={loading}
+            className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition disabled:opacity-50"
           >
             {loading ? (
               <>
                 <Loader2 className="animate-spin" size={16} />
-                Extracting...
+                Thinking...
               </>
             ) : (
               <>
                 <FileText size={16} />
-                Load Data
+                Generate with AI
               </>
             )}
           </button>
         </div>
       </div>
 
-      {/* Preview Section */}
-      {invoice && (
-        <div
-          ref={pdfRef}
-          className="max-w-5xl mx-auto bg-[#1a1a1a] border border-white/10 rounded-xl shadow-lg shadow-indigo-500/10 p-8 mt-10 relative text-white"
-          style={{ color: "white", backgroundColor: "#1a1a1a" }}
-        >
-          <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-3">
-            <div>
-              <h2 className="text-2xl font-semibold text-[#80FFF9]">
-                Invoice Preview
-              </h2>
-              <p className="text-gray-400 text-sm">
-                {invoice.invoice_number} — {invoice.status.toUpperCase()}
-              </p>
-            </div>
-            <span className="text-sm text-gray-400 text-right">
-              Date: {invoice.date} <br />
-              Due: {invoice.due_date || "N/A"}
-            </span>
+      {/* 🧠 AI Thinking Loader */}
+      {loading && (
+        <div className="flex flex-col items-center justify-center mt-20">
+          <div className="relative flex items-center justify-center w-32 h-32">
+            <div className="absolute w-full h-full rounded-full bg-gradient-to-r from-[#80FFF9] to-purple-500 opacity-30 animate-ping" />
+            <div className="absolute w-20 h-20 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 blur-md animate-pulse" />
+            <Brain className="text-[#80FFF9] animate-bounce" size={48} />
           </div>
-
-          {/* Client Info */}
-          <div className="grid md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <p className="text-gray-400 text-sm">Client</p>
-              {editing ? (
-                <input
-                  type="text"
-                  value={invoice.client_info?.name}
-                  onChange={(e) =>
-                    setInvoice({
-                      ...invoice,
-                      client_info: {
-                        ...invoice.client_info,
-                        name: e.target.value,
-                      },
-                    })
-                  }
-                  className="w-full bg-[#0e0e0e]/60 border border-white/10 rounded-md px-3 py-2 text-white focus:border-[#80FFF9] outline-none"
-                />
-              ) : (
-                <p className="font-medium text-white">
-                  {invoice.client_info?.name}
-                </p>
-              )}
-              <p className="text-sm text-gray-400">
-                {invoice.client_info?.email}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-400 text-sm">Company</p>
-              <p className="font-medium text-white">
-                {invoice.client_info?.company || "—"}
-              </p>
-            </div>
-          </div>
-
-          {/* Items Table */}
-          <div className="border-t border-white/10 pt-4 mb-6">
-            <h3 className="text-lg font-medium mb-3 text-white">Items</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm border-collapse">
-                <thead>
-                  <tr className="text-gray-400 border-b border-white/10">
-                    <th className="text-left py-2">Description</th>
-                    <th className="text-center py-2">Qty</th>
-                    <th className="text-center py-2">Unit Price</th>
-                    <th className="text-right py-2">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoice.items.map((item, i) => (
-                    <tr key={i} className="border-b border-white/5">
-                      <td className="py-2">{item.description}</td>
-                      <td className="text-center py-2">{item.quantity}</td>
-                      <td className="text-center py-2">
-                        ${item.unit_price.toFixed(2)}
-                      </td>
-                      <td className="text-right py-2 text-[#80FFF9]">
-                        ${(item.quantity * item.unit_price).toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Totals */}
-          <div className="text-right space-y-1 text-gray-300 border-t border-white/10 pt-4">
-            <p>Subtotal: ${invoice.subtotal.toFixed(2)}</p>
-            <p className="text-lg font-semibold text-[#80FFF9]">
-              Total: ${invoice.total.toFixed(2)}
-            </p>
-          </div>
-
-          {/* Notes */}
-          {invoice.notes && (
-            <div className="mt-6 border-t border-white/10 pt-3">
-              <p className="text-sm text-gray-400">Notes:</p>
-              <p className="text-white text-sm">{invoice.notes}</p>
-            </div>
-          )}
+          <p className="text-gray-400 mt-6 animate-pulse">
+            AI is analyzing your text...
+          </p>
         </div>
       )}
 
-      {/* Action Buttons */}
-      {invoice && (
-  <div className="flex justify-center gap-4 mt-8 flex-wrap">
-    <button
-      onClick={() => setEditing(!editing)}
-      className={`flex items-center gap-2 px-5 py-2 border border-white/20 rounded-md ${
-        editing
-          ? "bg-white/10 text-[#80FFF9]"
-          : "text-gray-300 hover:text-white hover:bg-white/10"
-      } transition`}
-    >
-      <Edit size={16} />
-      {editing ? "Editing..." : "Edit"}
-    </button>
+      {/* 🧾 Invoice Preview */}
+      {!loading && invoice && (
+        <div
+          ref={pdfRef}
+          className="max-w-5xl mx-auto bg-[#1a1a1a] border border-white/10 rounded-xl p-8 mt-10 shadow-lg shadow-indigo-500/10"
+        >
+          <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
+            <h2 className="text-2xl font-semibold text-[#80FFF9]">
+              {invoice.invoice_number}
+            </h2>
+            <span className="text-gray-400 text-sm capitalize">{invoice.status}</span>
+          </div>
 
-    {/* 🔲 PDF simplu (alb-negru) */}
-    <button
-      onClick={handleDownloadPDF}
-      className="flex items-center gap-2 px-5 py-2 border border-white/20 text-gray-300 hover:text-[#80FFF9] hover:bg-white/10 rounded-md transition"
-    >
-      <Download size={16} />
-      Simple PDF
-    </button>
+          <div className="grid md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <p className="text-gray-400 text-sm">Client</p>
+              <p className="font-medium text-white">{invoice.client?.name}</p>
+              <p className="text-sm text-gray-400">{invoice.client?.email}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-gray-400 text-sm">Date</p>
+              <p>{invoice.date}</p>
+              <p className="text-gray-400 text-sm">
+                Due: {invoice.due_date || "N/A"}
+              </p>
+            </div>
+          </div>
 
-    {/* 🎨 PDF stilizat (cu design-ul UI) */}
-    <button
-      onClick={handleDownloadStyledPDF}
-      className="flex items-center gap-2 px-5 py-2 border border-white/20 text-gray-300 hover:text-indigo-400 hover:bg-white/10 rounded-md transition"
-    >
-      <Download size={16} />
-      Styled PDF
-      <span className="text-gray-500">(nu functioneaza)</span>
-    </button>
+          <div className="overflow-x-auto border-t border-white/10 pt-4">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="text-gray-400 border-b border-white/10">
+                  <th className="text-left py-2">Description</th>
+                  <th className="text-center py-2">Qty</th>
+                  <th className="text-center py-2">Unit</th>
+                  <th className="text-right py-2">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoice.items.map((item, i) => (
+                  <tr key={i} className="border-b border-white/5">
+                    <td className="py-2">{item.description}</td>
+                    <td className="text-center">{item.quantity}</td>
+                    <td className="text-center">${item.unit_price}</td>
+                    <td className="text-right text-[#80FFF9]">${item.total}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-    <button
-      onClick={handleSave}
-      className="flex items-center gap-2 px-5 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition"
-    >
-      <Save size={16} />
-      Save
-    </button>
+          <div className="text-right mt-4 border-t border-white/10 pt-3">
+            <p className="text-gray-300">Subtotal: ${invoice.subtotal}</p>
+            <p className="text-lg font-semibold text-[#80FFF9]">
+              Total: ${invoice.total}
+            </p>
+          </div>
 
-    <button
-      onClick={handleGenerateAgain}
-      className="flex items-center gap-2 px-5 py-2 bg-linear-to-r from-[#80FFF9] to-[#6a9eff] text-black font-medium rounded-md hover:opacity-90 transition"
-    >
-      <RefreshCw size={16} />
-      Generate Again
-    </button>
-  </div>
-)}
+          {invoice.notes && (
+            <div className="mt-4 border-t border-white/10 pt-3">
+              <p className="text-sm text-gray-400">Notes:</p>
+              <p>{invoice.notes}</p>
+            </div>
+          )}
 
+          <div className="flex justify-center gap-4 mt-8">
+            <button
+              onClick={handleDownloadPDF}
+              className="flex items-center gap-2 px-5 py-2 border border-white/20 text-gray-300 hover:text-[#80FFF9] hover:bg-white/10 rounded-md transition"
+            >
+              <Download size={16} /> Download PDF
+            </button>
+
+            <button
+              onClick={() => toast.success("Invoice saved successfully!")}
+              className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition"
+            >
+              <Save size={16} /> Save
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

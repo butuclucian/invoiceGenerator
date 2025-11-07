@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -14,52 +14,98 @@ import {
   Cell,
 } from "recharts";
 import { TrendingUp, PieChart as PieIcon, BarChart3 } from "lucide-react";
+import API from "../../utils/api";
+import { toast } from "sonner";
 
 const Reports = () => {
-  // Dummy Data
-  const statusData = [
-    { name: "Paid", value: 12 },
-    { name: "Sent", value: 8 },
-    { name: "Draft", value: 5 },
-    { name: "Overdue", value: 3 },
-  ];
-
-  const revenueData = [
-    { month: "Jan", total: 1200 },
-    { month: "Feb", total: 2100 },
-    { month: "Mar", total: 1850 },
-    { month: "Apr", total: 2400 },
-    { month: "May", total: 2800 },
-    { month: "Jun", total: 1900 },
-  ];
-
-  const clientData = [
-    { name: "TechNova", total: 4800 },
-    { name: "BlueSky", total: 3700 },
-    { name: "AlphaSoft", total: 3200 },
-    { name: "NextGen", total: 2700 },
-  ];
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const COLORS = ["#00E0FF", "#6A5ACD", "#9C27B0", "#FF6B6B"];
+
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        const { data } = await API.get("/invoices");
+        setInvoices(data);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load reports data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInvoices();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-400">
+        Loading reports...
+      </div>
+    );
+  }
+
+  // 🥧 Invoice Status Data
+  const statusCounts = invoices.reduce((acc, inv) => {
+    acc[inv.status] = (acc[inv.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  const statusData = Object.keys(statusCounts).map((key) => ({
+    name: key.charAt(0).toUpperCase() + key.slice(1),
+    value: statusCounts[key],
+  }));
+
+  // 📈 Revenue Over Time (monthly totals)
+  const monthlyRevenue = {};
+  invoices.forEach((inv) => {
+    if (inv.status === "paid" && inv.date) {
+      const month = new Date(inv.date).toLocaleString("default", {
+        month: "short",
+      });
+      monthlyRevenue[month] = (monthlyRevenue[month] || 0) + inv.total;
+    }
+  });
+
+  const revenueData = Object.entries(monthlyRevenue).map(([month, total]) => ({
+    month,
+    total,
+  }));
+
+  // 🏆 Top Clients by Revenue
+  const clientTotals = {};
+  invoices.forEach((inv) => {
+    if (inv.client && inv.total) {
+      const clientName =
+        inv.client?.name || inv.client?.email || "Unknown Client";
+      clientTotals[clientName] = (clientTotals[clientName] || 0) + inv.total;
+    }
+  });
+
+  const clientData = Object.entries(clientTotals)
+    .map(([name, total]) => ({ name, total }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 6); // top 6 clients
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white px-10 pt-8 pb-16">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
-    <div>
-      <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
-        <BarChart3 className="text-[#80FFF9]" size={26} />
-        Reports
-      </h1>
-      <p className="text-gray-400 text-sm">
-        Visualize your business insights and performance metrics
-      </p>
-    </div>
-  </div>
+        <div>
+          <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
+            <BarChart3 className="text-[#80FFF9]" size={26} />
+            Reports
+          </h1>
+          <p className="text-gray-400 text-sm">
+            Visualize your business insights and performance metrics
+          </p>
+        </div>
+      </div>
 
       {/* Charts Grid */}
       <div className="grid lg:grid-cols-2 gap-8">
-        {/* Invoice Status Pie Chart */}
+        {/* 🥧 Invoice Status Pie Chart */}
         <div className="bg-[#1a1a1a]/80 p-6 rounded-xl border border-white/10 shadow-lg shadow-indigo-500/10">
           <div className="flex items-center gap-2 mb-4">
             <PieIcon className="text-[#80FFF9]" size={20} />
@@ -79,7 +125,10 @@ const Reports = () => {
                 label
               >
                 {statusData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip
@@ -94,7 +143,7 @@ const Reports = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Revenue Over Time */}
+        {/* 📈 Revenue Over Time */}
         <div className="bg-[#1a1a1a]/80 p-6 rounded-xl border border-white/10 shadow-lg shadow-indigo-500/10">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="text-[#80FFF9]" size={20} />
@@ -125,7 +174,7 @@ const Reports = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Top Clients by Revenue */}
+        {/* 🏆 Top Clients by Revenue */}
         <div className="bg-[#1a1a1a]/80 p-6 rounded-xl border border-white/10 shadow-lg shadow-indigo-500/10 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="text-[#80FFF9]" size={20} />

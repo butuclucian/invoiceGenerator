@@ -1,29 +1,66 @@
 import React, { useState, useEffect } from "react";
 import { Repeat, Eye, Edit, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
-import assets from "../../assets/assets";
+import API from "../../utils/api"; // ✅ instanța globală axios
 
 const RecurringInvoice = () => {
-  const { dummyInvoices, dummyClients } = assets;
   const [recurringInvoices, setRecurringInvoices] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // ✅ Fetch recurring invoices from backend
+  const fetchRecurringInvoices = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        toast.error("Please log in to view invoices");
+        return;
+      }
+
+      const { data } = await API.get("/invoices", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Dacă în backend nu ai încă un câmp special pentru recurring, poți simula:
+      const filtered = data.filter((inv) => inv.recurring === true);
+
+      setRecurringInvoices(filtered);
+    } catch (err) {
+      console.error("❌ Fetch recurring invoices error:", err);
+      if (err.response?.status === 401) {
+        toast.error("Unauthorized. Please log in again.");
+      } else {
+        toast.error("Failed to load recurring invoices");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Simulăm doar facturile cu recurring = true din dummy data
-    const recurring = dummyInvoices
-      .filter((inv) => inv.recurring)
-      .map((inv) => ({
-        ...inv,
-        client: dummyClients.find((c) => c._id === inv.client_id),
-      }));
-    setRecurringInvoices(recurring);
+    fetchRecurringInvoices();
   }, []);
 
-  const handleDelete = (invoiceNumber) => {
-    toast.info(`Recurring invoice ${invoiceNumber} deleted (dummy only)`);
+  const handleDelete = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      await API.delete(`/invoices/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      toast.success("Recurring invoice deleted successfully");
+      fetchRecurringInvoices();
+    } catch (err) {
+      toast.error("Failed to delete recurring invoice");
+    }
   };
 
   const handleEdit = (invoiceNumber) => {
-    toast.message(`Editing recurring invoice ${invoiceNumber}`);
+    toast.info(`Editing recurring invoice ${invoiceNumber}`);
   };
 
   return (
@@ -49,8 +86,12 @@ const RecurringInvoice = () => {
         </button>
       </div>
 
-      {/* Table or Empty State */}
-      {recurringInvoices.length === 0 ? (
+      {/* Loading or Empty */}
+      {loading ? (
+        <div className="text-center py-16 text-gray-400 animate-pulse">
+          Loading recurring invoices...
+        </div>
+      ) : recurringInvoices.length === 0 ? (
         <div className="text-center py-16 border border-dashed border-white/20 rounded-xl bg-[#1a1a1a]/60">
           <Repeat className="w-16 h-16 text-white/20 mx-auto mb-3" />
           <h3 className="text-lg font-medium text-gray-300">
@@ -92,7 +133,7 @@ const RecurringInvoice = () => {
                     {inv.frequency || "Monthly"}
                   </td>
                   <td className="p-4 text-gray-400">
-                    {inv.next_billing || "2025-12-01"}
+                    {inv.next_billing || "—"}
                   </td>
                   <td className="p-4">
                     <span
@@ -124,7 +165,7 @@ const RecurringInvoice = () => {
                       <Edit size={16} />
                     </button>
                     <button
-                      onClick={() => handleDelete(inv.invoice_number)}
+                      onClick={() => handleDelete(inv._id)}
                       className="p-2 text-gray-400 hover:text-red-400 transition"
                       title="Delete"
                     >

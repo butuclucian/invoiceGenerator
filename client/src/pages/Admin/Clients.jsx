@@ -1,31 +1,74 @@
-import React, { useState } from "react";
-import { UserPlus, Edit, Trash2, Mail, Phone, Building2, MapPin, Users } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import {
+  UserPlus,
+  Edit,
+  Trash2,
+  Mail,
+  Phone,
+  Building2,
+  MapPin,
+  Users,
+} from "lucide-react";
 import { toast } from "sonner";
-import assets from "../../assets/assets";
 import AddClientPopup from "../../components/Admin/AddClientPopup";
 import EditClientPopup from "../../components/Admin/EditClientPopup";
+import API from "../../utils/api";
 
 const Clients = () => {
-  const { dummyClients } = assets;
-  const [clients, setClients] = useState(dummyClients);
+  const [clients, setClients] = useState([]);
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
 
-  const handleDelete = (name) => {
-    toast.info(`Client ${name} deleted (dummy only)`);
+  // ✅ Fetch clients from backend
+  const fetchClients = async () => {
+    try {
+      const { data } = await API.get("/clients");
+      setClients(data);
+    } catch (err) {
+      toast.error("Failed to load clients");
+    }
   };
 
-  const handleAddClient = (newClient) => {
-    setClients((prev) => [newClient, ...prev]);
-    toast.success("Client added successfully!");
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  // ✅ Add client (backend)
+  const handleAddClient = async (newClient) => {
+    try {
+      const { data } = await API.post("/clients", newClient);
+      setClients((prev) => [data, ...prev]);
+      toast.success("Client added successfully!");
+    } catch (err) {
+      toast.error("Failed to add client");
+    }
   };
 
-  const handleEditClient = (updatedClient) => {
-    setClients((prev) =>
-      prev.map((c) => (c._id === updatedClient._id ? updatedClient : c))
-    );
-    toast.success("Client updated successfully!");
+  // ✅ Edit client (backend)
+  const handleEditClient = async (updatedClient) => {
+    try {
+      const { data } = await API.put(`/clients/${updatedClient._id}`, updatedClient);
+      setClients((prev) =>
+        prev.map((c) => (c._id === data._id ? data : c))
+      );
+      toast.success("Client updated successfully!");
+    } catch (err) {
+      toast.error("Failed to update client");
+    }
+  };
+
+  // ✅ Delete client (backend)
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this client?")) return;
+
+    try {
+      await API.delete(`/clients/${id}`);
+      setClients((prev) => prev.filter((c) => c._id !== id));
+      toast.success("Client deleted successfully!");
+    } catch (err) {
+      toast.error("Failed to delete client");
+    }
   };
 
   return (
@@ -33,14 +76,14 @@ const Clients = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <div>
-        <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
-          <Users className="text-[#80FFF9]" size={26} />
-          Clients
-        </h1>
-        <p className="text-gray-400 text-sm">
-          Manage your business contacts
-        </p>
-      </div>
+          <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
+            <Users className="text-[#80FFF9]" size={26} />
+            Clients
+          </h1>
+          <p className="text-gray-400 text-sm">
+            Manage your business contacts
+          </p>
+        </div>
 
         <button
           onClick={() => setShowAddPopup(true)}
@@ -69,7 +112,9 @@ const Clients = () => {
             >
               {/* Header */}
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-semibold text-white">{client.name}</h2>
+                <h2 className="text-lg font-semibold text-white">
+                  {client.name}
+                </h2>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => {
@@ -82,7 +127,7 @@ const Clients = () => {
                     <Edit size={18} />
                   </button>
                   <button
-                    onClick={() => handleDelete(client.name)}
+                    onClick={() => handleDelete(client._id)}
                     className="p-2 text-gray-400 hover:text-red-400 transition"
                     title="Delete"
                   >

@@ -1,36 +1,38 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  Save,
-  X,
-  RotateCcw,
-  FileEdit,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { Save, X, Plus, Trash2, RotateCcw, FileEdit } from "lucide-react";
 import { toast } from "sonner";
-import assets from "../../assets/assets";
+import API from "../../utils/api";
 
 const EditInvoice = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { dummyInvoices, dummyClients } = assets;
-  const [formData, setFormData] = useState(null);
 
-  // load invoice data
+  const [formData, setFormData] = useState(null);
+  const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // ✅ Fetch invoice + clients
   useEffect(() => {
-    const found = dummyInvoices.find(
-      (inv) => inv._id === id || inv.invoice_number === id
-    );
-    if (found) {
-      setFormData({ ...found });
-    } else {
-      toast.error("Invoice not found");
-      navigate("/dashboard/invoices");
-    }
+    const fetchData = async () => {
+      try {
+        const [invoiceRes, clientsRes] = await Promise.all([
+          API.get(`/invoices/${id}`),
+          API.get("/clients"),
+        ]);
+        setFormData(invoiceRes.data);
+        setClients(clientsRes.data);
+      } catch (err) {
+        console.error("Failed to load invoice:", err);
+        toast.error("Invoice not found or server error");
+        navigate("/dashboard/invoices");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, [id]);
 
-  // helpers
   const calculateTotals = (items, tax_rate, discount_rate) => {
     const subtotal = items.reduce((sum, item) => sum + item.total, 0);
     const discount_amount = (subtotal * discount_rate) / 100;
@@ -39,9 +41,6 @@ const EditInvoice = () => {
     const total = taxable + tax_amount;
     return { subtotal, discount_amount, tax_amount, total };
   };
-
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...formData.items];
@@ -72,7 +71,6 @@ const EditInvoice = () => {
   };
 
   const removeItem = (index) => {
-    if (formData.items.length === 1) return;
     const updatedItems = formData.items.filter((_, i) => i !== index);
     const totals = calculateTotals(
       updatedItems,
@@ -82,9 +80,18 @@ const EditInvoice = () => {
     setFormData({ ...formData, items: updatedItems, ...totals });
   };
 
-  const handleSave = () => {
-    toast.success(`Invoice ${formData.invoice_number} updated successfully!`);
-    navigate("/dashboard/invoices");
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  const handleSave = async () => {
+    try {
+      await API.put(`/invoices/${id}`, formData);
+      toast.success("Invoice updated successfully!");
+      navigate("/dashboard/invoices");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update invoice");
+    }
   };
 
   const handleReset = () => {
@@ -92,7 +99,7 @@ const EditInvoice = () => {
     navigate("/dashboard/invoices");
   };
 
-  if (!formData)
+  if (loading || !formData)
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-400">
         Loading invoice...
@@ -108,12 +115,11 @@ const EditInvoice = () => {
             <FileEdit className="text-[#80FFF9]" size={26} />
             Edit Invoice
           </h1>
-          <p className="text-gray-400 text-sm">
-            Update your existing invoice details
-          </p>
+          <p className="text-gray-400 text-sm">Update existing invoice details</p>
         </div>
       </div>
 
+      {/* Form */}
       <form className="max-w-6xl mx-auto space-y-12">
         {/* --- SECTION 1: Invoice Details --- */}
         <section>
@@ -122,7 +128,7 @@ const EditInvoice = () => {
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
             <div>
-              <label className="text-gray-300 block mb-1">Invoice Number *</label>
+              <label className="text-gray-300 block mb-1">Invoice Number</label>
               <input
                 type="text"
                 name="invoice_number"
@@ -132,11 +138,11 @@ const EditInvoice = () => {
               />
             </div>
             <div>
-              <label className="text-gray-300 block mb-1">Date *</label>
+              <label className="text-gray-300 block mb-1">Date</label>
               <input
                 type="date"
                 name="date"
-                value={formData.date}
+                value={formData.date?.split("T")[0] || ""}
                 onChange={handleChange}
                 className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
               />
@@ -146,7 +152,7 @@ const EditInvoice = () => {
               <input
                 type="date"
                 name="due_date"
-                value={formData.due_date}
+                value={formData.due_date?.split("T")[0] || ""}
                 onChange={handleChange}
                 className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
               />
@@ -155,15 +161,15 @@ const EditInvoice = () => {
 
           <div className="grid md:grid-cols-2 gap-10 mt-6">
             <div>
-              <label className="text-gray-300 block mb-1">Client *</label>
+              <label className="text-gray-300 block mb-1">Client</label>
               <select
-                name="client_id"
-                value={formData.client_id}
+                name="client"
+                value={formData.client?._id || formData.client || ""}
                 onChange={handleChange}
                 className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
               >
                 <option value="">Select a client</option>
-                {dummyClients.map((c) => (
+                {clients.map((c) => (
                   <option key={c._id} value={c._id}>
                     {c.name} — {c.email}
                   </option>
@@ -172,7 +178,7 @@ const EditInvoice = () => {
             </div>
 
             <div>
-              <label className="text-gray-300 block mb-1">Status *</label>
+              <label className="text-gray-300 block mb-1">Status</label>
               <select
                 name="status"
                 value={formData.status}
@@ -207,7 +213,7 @@ const EditInvoice = () => {
               className="grid md:grid-cols-12 gap-4 items-end p-4 bg-[#1a1a1a]/70 border border-white/10 rounded-lg mb-3"
             >
               <div className="md:col-span-5">
-                <label className="text-gray-300 block mb-1">Description *</label>
+                <label className="text-gray-300 block mb-1">Description</label>
                 <input
                   type="text"
                   value={item.description}
@@ -215,11 +221,10 @@ const EditInvoice = () => {
                     handleItemChange(index, "description", e.target.value)
                   }
                   className="w-full bg-transparent border border-white/10 rounded-md px-3 py-2 text-white focus:border-[#80FFF9]"
-                  required
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="text-gray-300 block mb-1">Quantity *</label>
+                <label className="text-gray-300 block mb-1">Quantity</label>
                 <input
                   type="number"
                   value={item.quantity}
@@ -230,7 +235,7 @@ const EditInvoice = () => {
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="text-gray-300 block mb-1">Unit Price *</label>
+                <label className="text-gray-300 block mb-1">Unit Price</label>
                 <input
                   type="number"
                   value={item.unit_price}
@@ -261,7 +266,7 @@ const EditInvoice = () => {
           ))}
         </section>
 
-        {/* --- SECTION 3: Additional Info --- */}
+        {/* --- SECTION 3: Taxes, Discounts, Recurring --- */}
         <section>
           <h2 className="text-xl font-semibold mb-4 text-[#80FFF9] border-b border-white/10 pb-2">
             Additional Information
@@ -308,8 +313,74 @@ const EditInvoice = () => {
             </div>
           </div>
 
+          {/* --- Recurring Invoice --- */}
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-[#80FFF9] mb-2">
+              Recurring Invoice
+            </h3>
+
+            <div className="flex items-center gap-3 mb-4">
+              <input
+                type="checkbox"
+                id="recurring"
+                checked={formData.recurring || false}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    recurring: e.target.checked,
+                  })
+                }
+                className="w-5 h-5 accent-[#80FFF9] cursor-pointer"
+              />
+              <label
+                htmlFor="recurring"
+                className="text-gray-300 text-sm select-none cursor-pointer"
+              >
+                Mark this invoice as recurring (auto-generated periodically)
+              </label>
+            </div>
+
+            {formData.recurring && (
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-gray-300 block mb-1">
+                    Frequency
+                  </label>
+                  <select
+                    name="frequency"
+                    value={formData.frequency || "monthly"}
+                    onChange={handleChange}
+                    className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
+                  >
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-gray-300 block mb-1">
+                    Next Billing Date
+                  </label>
+                  <input
+                    type="date"
+                    name="next_billing"
+                    value={
+                      formData.next_billing
+                        ? formData.next_billing.split("T")[0]
+                        : ""
+                    }
+                    onChange={handleChange}
+                    className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Totals */}
-          <div className="mt-4 space-y-2 text-gray-300 border-t border-white/10 pt-4">
+          <div className="mt-6 space-y-2 text-gray-300 border-t border-white/10 pt-4">
             <div className="flex justify-between">
               <span>Subtotal:</span>
               <span>${formData.subtotal.toFixed(2)}</span>
@@ -317,14 +388,14 @@ const EditInvoice = () => {
 
             {formData.discount_amount > 0 && (
               <div className="flex justify-between text-red-400">
-                <span>Discount ({formData.discount_rate}%):</span>
+                <span>Discount:</span>
                 <span>- ${formData.discount_amount.toFixed(2)}</span>
               </div>
             )}
 
             {formData.tax_amount > 0 && (
               <div className="flex justify-between text-[#80FFF9]">
-                <span>Tax ({formData.tax_rate}%):</span>
+                <span>Tax:</span>
                 <span>+ ${formData.tax_amount.toFixed(2)}</span>
               </div>
             )}
@@ -334,33 +405,9 @@ const EditInvoice = () => {
               <span>${formData.total.toFixed(2)}</span>
             </div>
           </div>
-
-          <div className="grid md:grid-cols-2 gap-6 mt-6">
-            <div>
-              <label className="text-gray-300 block mb-1">Payment Terms</label>
-              <input
-                type="text"
-                name="payment_terms"
-                value={formData.payment_terms}
-                onChange={handleChange}
-                placeholder="e.g. Net 30"
-                className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
-              />
-            </div>
-            <div>
-              <label className="text-gray-300 block mb-1">Notes</label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                rows="3"
-                className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9] resize-none"
-              />
-            </div>
-          </div>
         </section>
 
-        {/* Footer */}
+        {/* Sticky Footer */}
         <div className="fixed bottom-0 right-0 left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-4 z-40">
           <div className="flex justify-center gap-4 pr-8">
             <button
