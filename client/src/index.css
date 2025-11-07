@@ -1,0 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
+@import "tailwindcss";
+
+@theme{
+  --color-primary: #F84565;
+  --color-secondary: #D63854;
+}
+
+*{
+  font-family: "Outfit", sans-serif;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #787777 #1e1e1e;
+}
+
+body{
+  color:white;
+  background-color: #09090B;
+}
+
+.no-scrollbar{
+  scrollbar-width: none;
+}
+
+@layer base {
+    button {
+        @apply cursor-pointer;
+    }
+
+    input:not([type="checkbox"]){
+        @apply outline-none focus:ring border border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-lg;
+    }
+
+    textarea{
+        @apply outline-none focus:ring border border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-lg resize-none;
+    }
+}
+
+/* ✅ Stil pentru input[type=date] ca să fie vizibil pe dark theme */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1); /* face iconița albă */
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+input[type="date"]:hover::-webkit-calendar-picker-indicator {
+  opacity: 1;
+  filter: invert(0.9) sepia(1) saturate(5) hue-rotate(150deg); /* mic accent cyan */
+}
+
+/* ✅ Corectează spacing-ul iconiței default din <select> */
+select {
+  appearance: none; /* ascunde iconița default */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='14' viewBox='0 0 20 20' width='14' xmlns='http://www.w3.org/2000/svg'><path d='M5.516 7.548l4.484 4.482 4.484-4.482L16 9.064l-6 6-6-6z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 1rem center; /* 🧭 distanță față de margine */
+  background-size: 14px;
+  padding-right: 2.5rem; /* ⚖️ spațiu extra pentru icon */
+}
+
+/* 🔧 Elimină săgețile de increment/decrement din input[type=number] */
+
+/* Chrome, Edge, Safari */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out;
+}
