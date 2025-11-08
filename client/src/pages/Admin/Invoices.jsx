@@ -66,7 +66,7 @@ const Invoices = () => {
   const doc = new jsPDF("p", "mm", "a4");
   const accent = [58, 110, 165];
   const gray = [60, 60, 60];
-  const link = `http://localhost:5173/dashboard/invoices/${invoice._id}`;
+  const link = `${window.location.origin}/dashboard/invoices/${invoice._id}`;
 
   // ===== HEADER (LOGO + TITLU) =====
   const logoUrl = "https://cdn-icons-png.flaticon.com/512/9429/9429026.png";
