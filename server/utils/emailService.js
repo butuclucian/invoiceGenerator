@@ -14,6 +14,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+
 /**
  * ✅ Creează PDF temporar pentru o factură
  */
