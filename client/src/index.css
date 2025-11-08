@@ -27,15 +27,18 @@ body{
     button {
         @apply cursor-pointer;
     }
-
-    input:not([type="checkbox"]){
-        @apply outline-none focus:ring border border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-lg;
-    }
-
-    textarea{
-        @apply outline-none focus:ring border border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-lg resize-none;
-    }
 }
+
+/* @layer base {
+  input:not([type="checkbox"]) {
+    @apply outline-none bg-[#0e0e0e] text-white focus:border-[#80FFF9] focus:ring-0 rounded-lg transition;
+  }
+
+  textarea {
+    @apply outline-none bg-[#0e0e0e] text-white focus:border-[#80FFF9] focus:ring-0 rounded-lg resize-none transition;
+  }
+} */
+
 
 /* ✅ Stil pentru input[type=date] ca să fie vizibil pe dark theme */
 input[type="date"]::-webkit-calendar-picker-indicator {

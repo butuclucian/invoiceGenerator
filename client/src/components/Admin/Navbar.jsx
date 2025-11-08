@@ -1,27 +1,39 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Bell, X, Check } from "lucide-react";
-import { UserButton } from "@clerk/clerk-react";
+import { Bell, X, Check, LogOut } from "lucide-react";
+import { UserButton, useUser } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import API from "../../utils/api";
 
 const Navbar = () => {
+  const { user } = useUser();
   const [notifications, setNotifications] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
   const popupRef = useRef(null);
+  const [today, setToday] = useState("");
 
-  // ✅ Fetch notifications from backend
+  // 📅 Formatăm data curentă (ex: Saturday, November 8, 2025)
+  useEffect(() => {
+    const now = new Date();
+    const formatted = now.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    setToday(formatted);
+  }, []);
+
+  // ✅ Fetch notifications
   const fetchNotifications = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      // Generează notificări noi (facturi near due)
       await API.get("/notifications/generate", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Apoi le preia pe toate
       const { data } = await API.get("/notifications", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -31,7 +43,7 @@ const Navbar = () => {
 
       const newCount = data.filter((n) => !n.read).length;
       if (newCount > 0) {
-        toast.warning(`⚠️ ${newCount} new invoice notification(s)!`, {
+        toast.warning(`${newCount} new invoice notification(s)!`, {
           description: "Click the bell icon to review them.",
           duration: 5000,
         });
@@ -43,8 +55,6 @@ const Navbar = () => {
 
   useEffect(() => {
     fetchNotifications();
-
-    // Auto-refresh la fiecare oră
     const interval = setInterval(fetchNotifications, 60 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
@@ -60,7 +70,7 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ Mark notifications as read (DB + UI)
+  // ✅ Mark notifications as read
   const handleMarkAsRead = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -69,7 +79,6 @@ const Navbar = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       setHasUnread(false);
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       setShowPopup(false);
@@ -79,15 +88,24 @@ const Navbar = () => {
     }
   };
 
-  return (
-    <nav className="sticky top-0 flex items-center justify-between px-6 md:px-10 h-16 bg-[#111111]/90 border-b border-white/10 backdrop-blur-xl shadow-lg shadow-indigo-500/5 z-40">
-      {/* Logo / Title */}
-      <h1 className="text-xl font-semibold text-[#80FFF9]">
-        Invoice Generator
-      </h1>
+  // 🚪 Logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  };
 
-      {/* Right Side */}
-      <div className="flex items-center gap-5 relative">
+  return (
+    <nav className="sticky top-0 flex items-center justify-between px-8 h-16 bg-[#0e0e0e]/95 border-b border-white/10 backdrop-blur-xl shadow-md shadow-indigo-500/10 z-40">
+      {/* Left — Welcome message + date */}
+      <div className="flex flex-col leading-tight">
+        <h1 className="text-xl font-semibold text-white">
+          Welcome back{user?.firstName ? `, ${user.firstName}` : ""}! 👋
+        </h1>
+        <p className="text-sm text-gray-400">{today}</p>
+      </div>
+
+      {/* Right — Notifications + Profile + Logout */}
+      <div className="flex items-center gap-4 relative">
         {/* 🔔 Notifications */}
         <div className="relative" ref={popupRef}>
           <button
@@ -105,9 +123,7 @@ const Navbar = () => {
             <div className="absolute right-0 mt-3 w-80 bg-[#1a1a1a]/95 border border-white/10 rounded-xl shadow-lg shadow-black/40 overflow-hidden animate-in fade-in slide-in-from-top-2 z-50">
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-                <h3 className="text-sm font-medium text-white">
-                  Notifications
-                </h3>
+                <h3 className="text-sm font-medium text-white">Notifications</h3>
                 {notifications.some((n) => !n.read) && (
                   <button
                     onClick={handleMarkAsRead}
@@ -129,7 +145,7 @@ const Navbar = () => {
               <div className="max-h-64 overflow-y-auto">
                 {notifications.length === 0 ? (
                   <div className="p-4 text-center text-gray-500 text-sm">
-                    🎉 No notifications yet.
+                    No notifications yet.
                   </div>
                 ) : (
                   notifications.map((note) => (
@@ -142,8 +158,6 @@ const Navbar = () => {
                       <p className="text-sm font-medium text-[#80FFF9]">
                         {note.message}
                       </p>
-
-                      {/* Factura atașată */}
                       {note.invoice && (
                         <>
                           <p className="text-xs text-gray-400">
@@ -157,7 +171,6 @@ const Navbar = () => {
                           </p>
                         </>
                       )}
-
                       <p className="text-[10px] text-gray-500 mt-1">
                         {new Date(note.createdAt).toLocaleString()}
                       </p>
@@ -169,23 +182,13 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Clerk Profile */}
-        <UserButton
-          appearance={{
-            elements: { avatarBox: "w-8 h-8" },
-          }}
-          afterSignOutUrl="/"
-        />
-
-        {/* Logout */}
+        {/* Logout — Elegant button */}
         <button
-          onClick={() => {
-            localStorage.removeItem("token");
-            window.location.href = "/login";
-          }}
-          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-linear-to-r from-[#1f2937] to-[#111827] border border-white/10 text-gray-300 hover:text-white hover:from-red-600 hover:to-red-500 hover:border-red-500 transition-all duration-200 shadow-sm"
         >
-          Logout
+          <LogOut size={16} />
+          <span className="text-sm font-medium">Logout</span>
         </button>
       </div>
     </nav>

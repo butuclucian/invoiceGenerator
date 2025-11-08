@@ -8,25 +8,35 @@ import { sendInvoiceEmail } from "../utils/emailService.js";
 export const getInvoices = async (req, res) => {
   try {
     const invoices = await Invoice.find({ user: req.user._id })
-      .populate("client", "name email company")
+      .populate("client", "name email company phone address")
       .sort({ createdAt: -1 });
 
     res.json(invoices);
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch invoices", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch invoices", error: err.message });
   }
 };
+
 
 // GET invoice by ID
 export const getInvoiceById = async (req, res) => {
   try {
-    const invoice = await Invoice.findById(req.params.id).populate("client");
-    if (!invoice) return res.status(404).json({ message: "Invoice not found" });
+    const invoice = await Invoice.findById(req.params.id)
+      .populate("client", "name email company phone address");
+    
+    if (!invoice) {
+      return res.status(404).json({ message: "Invoice not found" });
+    }
+
     res.json(invoice);
   } catch (err) {
+    console.error("❌ Error fetching invoice by ID:", err);
     res.status(500).json({ message: "Error fetching invoice" });
   }
 };
+
 
 // CREATE new invoice
 export const createInvoice = async (req, res) => {

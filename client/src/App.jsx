@@ -20,6 +20,7 @@ import InvoicePreview from "./pages/Admin/InvoicePreview";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import { Toaster } from "sonner";
+import EditClient from "./pages/Admin/EditClient";
 
 const App = () => {
   const location = useLocation();
@@ -53,6 +54,7 @@ const App = () => {
           <Route path="invoices/:id" element={<InvoicePreview />} />
           <Route path="clients" element={<Clients />} />
           <Route path="clients/add" element={<AddClients />} />
+          <Route path="clients/:id/edit" element={<EditClient />}/>
           <Route path="accounting" element={<Accounting />} />
           <Route path="reports" element={<Reports />} />
           <Route path="ai-generator" element={<AIGenerator />} />

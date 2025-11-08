@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   UserPlus,
   Edit,
@@ -10,23 +10,24 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
-import AddClientPopup from "../../components/Admin/AddClientPopup";
-import EditClientPopup from "../../components/Admin/EditClientPopup";
+import { useNavigate } from "react-router-dom";
 import API from "../../utils/api";
 
 const Clients = () => {
   const [clients, setClients] = useState([]);
-  const [showAddPopup, setShowAddPopup] = useState(false);
-  const [showEditPopup, setShowEditPopup] = useState(false);
-  const [selectedClient, setSelectedClient] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // ✅ Fetch clients from backend
+  // ✅ Fetch clients
   const fetchClients = async () => {
     try {
+      setLoading(true);
       const { data } = await API.get("/clients");
       setClients(data);
     } catch (err) {
       toast.error("Failed to load clients");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -34,31 +35,7 @@ const Clients = () => {
     fetchClients();
   }, []);
 
-  // ✅ Add client (backend)
-  const handleAddClient = async (newClient) => {
-    try {
-      const { data } = await API.post("/clients", newClient);
-      setClients((prev) => [data, ...prev]);
-      toast.success("Client added successfully!");
-    } catch (err) {
-      toast.error("Failed to add client");
-    }
-  };
-
-  // ✅ Edit client (backend)
-  const handleEditClient = async (updatedClient) => {
-    try {
-      const { data } = await API.put(`/clients/${updatedClient._id}`, updatedClient);
-      setClients((prev) =>
-        prev.map((c) => (c._id === data._id ? data : c))
-      );
-      toast.success("Client updated successfully!");
-    } catch (err) {
-      toast.error("Failed to update client");
-    }
-  };
-
-  // ✅ Delete client (backend)
+  // ✅ Delete client
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this client?")) return;
 
@@ -80,13 +57,12 @@ const Clients = () => {
             <Users className="text-[#80FFF9]" size={26} />
             Clients
           </h1>
-          <p className="text-gray-400 text-sm">
-            Manage your business contacts
-          </p>
+          <p className="text-gray-400 text-sm">Manage your business contacts</p>
         </div>
 
+        {/* 🧾 Add Client button */}
         <button
-          onClick={() => setShowAddPopup(true)}
+          onClick={() => navigate("/dashboard/clients/add")}
           className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-2 rounded-md hover:opacity-90 transition"
         >
           <UserPlus size={18} />
@@ -95,7 +71,11 @@ const Clients = () => {
       </div>
 
       {/* Clients Grid */}
-      {clients.length === 0 ? (
+      {loading ? (
+        <div className="flex justify-center items-center py-20 text-gray-400">
+          Loading clients...
+        </div>
+      ) : clients.length === 0 ? (
         <div className="text-center py-16 border border-dashed border-white/20 rounded-xl bg-[#1a1a1a]/60">
           <UserPlus className="w-16 h-16 text-white/20 mx-auto mb-3" />
           <h3 className="text-lg font-medium text-gray-300">No clients found</h3>
@@ -116,16 +96,16 @@ const Clients = () => {
                   {client.name}
                 </h2>
                 <div className="flex items-center gap-2">
+                  {/* ✏️ Edit Button - navigates to edit page */}
                   <button
-                    onClick={() => {
-                      setSelectedClient(client);
-                      setShowEditPopup(true);
-                    }}
+                    onClick={() => navigate(`/dashboard/clients/${client._id}/edit`)}
                     className="p-2 text-gray-400 hover:text-indigo-400 transition"
                     title="Edit"
                   >
                     <Edit size={18} />
                   </button>
+
+                  {/* 🗑 Delete Button */}
                   <button
                     onClick={() => handleDelete(client._id)}
                     className="p-2 text-gray-400 hover:text-red-400 transition"
@@ -163,27 +143,6 @@ const Clients = () => {
               </div>
             </div>
           ))}
-        </div>
-      )}
-
-      {/* Popup add client */}
-      {showAddPopup && (
-        <div className="animate-fadeIn fixed inset-0 flex items-center justify-center z-50">
-          <AddClientPopup
-            onClose={() => setShowAddPopup(false)}
-            onCreate={handleAddClient}
-          />
-        </div>
-      )}
-
-      {/* Popup edit client */}
-      {showEditPopup && selectedClient && (
-        <div className="animate-fadeIn fixed inset-0 flex items-center justify-center z-50">
-          <EditClientPopup
-            client={selectedClient}
-            onClose={() => setShowEditPopup(false)}
-            onSave={handleEditClient}
-          />
         </div>
       )}
     </div>

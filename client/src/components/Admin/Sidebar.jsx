@@ -104,6 +104,7 @@ const Sidebar = () => {
               {!item.submenu ? (
                 <NavLink
                   to={item.path}
+                  end
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-4 py-2 rounded-md transition-all duration-200 ${
                       isActive
@@ -115,6 +116,7 @@ const Sidebar = () => {
                   <item.icon size={18} />
                   <span>{item.name}</span>
                 </NavLink>
+
               ) : (
                 <>
                   <button
@@ -138,6 +140,7 @@ const Sidebar = () => {
                         <NavLink
                           key={i}
                           to={sub.path}
+                          end
                           className={({ isActive }) =>
                             `flex items-center gap-2 px-2 py-2 rounded-md transition-all duration-200 ${
                               isActive

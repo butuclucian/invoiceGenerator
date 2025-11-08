@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Save, X, Plus, Trash2, RotateCcw, FileEdit } from "lucide-react";
+import { Save, X, RotateCcw, FileEdit, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import API from "../../utils/api";
 
@@ -33,6 +33,7 @@ const EditInvoice = () => {
     fetchData();
   }, [id]);
 
+  // ✅ Totals calculation
   const calculateTotals = (items, tax_rate, discount_rate) => {
     const subtotal = items.reduce((sum, item) => sum + item.total, 0);
     const discount_amount = (subtotal * discount_rate) / 100;
@@ -42,6 +43,7 @@ const EditInvoice = () => {
     return { subtotal, discount_amount, tax_amount, total };
   };
 
+  // ✅ Item management
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...formData.items];
     updatedItems[index][field] =
@@ -80,10 +82,17 @@ const EditInvoice = () => {
     setFormData({ ...formData, items: updatedItems, ...totals });
   };
 
+  // ✅ Form change handler
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
+  // ✅ Save invoice
   const handleSave = async () => {
+    if (!formData.invoice_number || !formData.date || !formData.client) {
+      toast.error("Please fill all required fields!");
+      return;
+    }
+
     try {
       await API.put(`/invoices/${id}`, formData);
       toast.success("Invoice updated successfully!");
@@ -116,6 +125,9 @@ const EditInvoice = () => {
             Edit Invoice
           </h1>
           <p className="text-gray-400 text-sm">Update existing invoice details</p>
+          <p className="text-gray-500 text-xs mt-2">
+            <span className="text-red-500">*</span> Required fields
+          </p>
         </div>
       </div>
 
@@ -126,49 +138,59 @@ const EditInvoice = () => {
           <h2 className="text-xl font-semibold mb-4 text-[#80FFF9] border-b border-white/10 pb-2">
             Invoice Details
           </h2>
+
           <div className="grid md:grid-cols-3 gap-6">
             <div>
-              <label className="text-gray-300 block mb-1">Invoice Number</label>
+              <label className="block text-gray-300 mb-1">
+                Invoice Number <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 name="invoice_number"
                 value={formData.invoice_number}
                 onChange={handleChange}
-                className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
+                placeholder="INV-0001"
+                className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-[#80FFF9]"
               />
             </div>
+
             <div>
-              <label className="text-gray-300 block mb-1">Date</label>
+              <label className="block text-gray-300 mb-1">
+                Date <span className="text-red-500">*</span>
+              </label>
               <input
                 type="date"
                 name="date"
                 value={formData.date?.split("T")[0] || ""}
                 onChange={handleChange}
-                className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
+                className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-[#80FFF9]"
               />
             </div>
+
             <div>
-              <label className="text-gray-300 block mb-1">Due Date</label>
+              <label className="block text-gray-300 mb-1">Due Date</label>
               <input
                 type="date"
                 name="due_date"
                 value={formData.due_date?.split("T")[0] || ""}
                 onChange={handleChange}
-                className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
+                className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-[#80FFF9]"
               />
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-10 mt-6">
+          <div className="grid md:grid-cols-2 gap-8 mt-6">
             <div>
-              <label className="text-gray-300 block mb-1">Client</label>
+              <label className="block text-gray-300 mb-1">
+                Client <span className="text-red-500">*</span>
+              </label>
               <select
                 name="client"
                 value={formData.client?._id || formData.client || ""}
                 onChange={handleChange}
-                className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
+                className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-[#80FFF9]"
               >
-                <option value="">Select a client</option>
+                <option value="">Select client</option>
                 {clients.map((c) => (
                   <option key={c._id} value={c._id}>
                     {c.name} — {c.email}
@@ -178,12 +200,12 @@ const EditInvoice = () => {
             </div>
 
             <div>
-              <label className="text-gray-300 block mb-1">Status</label>
+              <label className="block text-gray-300 mb-1">Status</label>
               <select
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
-                className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
+                className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-[#80FFF9]"
               >
                 <option value="draft">Draft</option>
                 <option value="sent">Sent</option>
@@ -220,6 +242,7 @@ const EditInvoice = () => {
                   onChange={(e) =>
                     handleItemChange(index, "description", e.target.value)
                   }
+                  placeholder="Item description"
                   className="w-full bg-transparent border border-white/10 rounded-md px-3 py-2 text-white focus:border-[#80FFF9]"
                 />
               </div>
@@ -266,7 +289,7 @@ const EditInvoice = () => {
           ))}
         </section>
 
-        {/* --- SECTION 3: Taxes, Discounts, Recurring --- */}
+        {/* --- SECTION 3: Additional + Recurring --- */}
         <section>
           <h2 className="text-xl font-semibold mb-4 text-[#80FFF9] border-b border-white/10 pb-2">
             Additional Information
@@ -289,11 +312,14 @@ const EditInvoice = () => {
                     ),
                   })
                 }
-                className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
+                className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-[#80FFF9]"
               />
             </div>
+
             <div>
-              <label className="text-gray-300 block mb-1">Discount Rate (%)</label>
+              <label className="text-gray-300 block mb-1">
+                Discount Rate (%)
+              </label>
               <input
                 type="number"
                 value={formData.discount_rate}
@@ -308,14 +334,14 @@ const EditInvoice = () => {
                     ),
                   })
                 }
-                className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
+                className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-[#80FFF9]"
               />
             </div>
           </div>
 
           {/* --- Recurring Invoice --- */}
           <div className="mt-8">
-            <h3 className="text-lg font-semibold text-[#80FFF9] mb-2">
+            <h3 className="text-lg font-semibold text-[#80FFF9] mb-3">
               Recurring Invoice
             </h3>
 
@@ -325,10 +351,7 @@ const EditInvoice = () => {
                 id="recurring"
                 checked={formData.recurring || false}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    recurring: e.target.checked,
-                  })
+                  setFormData({ ...formData, recurring: e.target.checked })
                 }
                 className="w-5 h-5 accent-[#80FFF9] cursor-pointer"
               />
@@ -343,14 +366,12 @@ const EditInvoice = () => {
             {formData.recurring && (
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="text-gray-300 block mb-1">
-                    Frequency
-                  </label>
+                  <label className="text-gray-300 block mb-1">Frequency</label>
                   <select
                     name="frequency"
                     value={formData.frequency || "monthly"}
                     onChange={handleChange}
-                    className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
+                    className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-[#80FFF9]"
                   >
                     <option value="weekly">Weekly</option>
                     <option value="monthly">Monthly</option>
@@ -372,40 +393,40 @@ const EditInvoice = () => {
                         : ""
                     }
                     onChange={handleChange}
-                    className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
+                    className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-[#80FFF9]"
                   />
                 </div>
               </div>
             )}
           </div>
-
-          {/* Totals */}
-          <div className="mt-6 space-y-2 text-gray-300 border-t border-white/10 pt-4">
-            <div className="flex justify-between">
-              <span>Subtotal:</span>
-              <span>${formData.subtotal.toFixed(2)}</span>
-            </div>
-
-            {formData.discount_amount > 0 && (
-              <div className="flex justify-between text-red-400">
-                <span>Discount:</span>
-                <span>- ${formData.discount_amount.toFixed(2)}</span>
-              </div>
-            )}
-
-            {formData.tax_amount > 0 && (
-              <div className="flex justify-between text-[#80FFF9]">
-                <span>Tax:</span>
-                <span>+ ${formData.tax_amount.toFixed(2)}</span>
-              </div>
-            )}
-
-            <div className="flex justify-between font-semibold text-[#80FFF9] border-t border-white/10 pt-2 text-lg">
-              <span>Total:</span>
-              <span>${formData.total.toFixed(2)}</span>
-            </div>
-          </div>
         </section>
+
+        {/* Totals */}
+        <div className="mt-6 space-y-2 text-gray-300 border-t border-white/10 pt-4">
+          <div className="flex justify-between">
+            <span>Subtotal:</span>
+            <span>${formData.subtotal.toFixed(2)}</span>
+          </div>
+
+          {formData.discount_amount > 0 && (
+            <div className="flex justify-between text-red-400">
+              <span>Discount:</span>
+              <span>- ${formData.discount_amount.toFixed(2)}</span>
+            </div>
+          )}
+
+          {formData.tax_amount > 0 && (
+            <div className="flex justify-between text-[#80FFF9]">
+              <span>Tax:</span>
+              <span>+ ${formData.tax_amount.toFixed(2)}</span>
+            </div>
+          )}
+
+          <div className="flex justify-between font-semibold text-[#80FFF9] border-t border-white/10 pt-2 text-lg">
+            <span>Total:</span>
+            <span>${formData.total.toFixed(2)}</span>
+          </div>
+        </div>
 
         {/* Sticky Footer */}
         <div className="fixed bottom-0 right-0 left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-4 z-40">
