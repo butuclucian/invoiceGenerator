@@ -21,11 +21,13 @@ app.use(
   cors({
     origin: [
       "https://invoice-generator-olive-gamma.vercel.app",
+      "https://invoice-generator-ungi.vercel.app",
       "http://localhost:5173"
     ],
     credentials: true,
   })
 );
+
 
 
 app.use(morgan("dev"));
