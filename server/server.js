@@ -16,7 +16,18 @@ connectDB();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+import cors from "cors";
+
+app.use(
+  cors({
+    origin: [
+      "https://invoice-generator-olive-gamma.vercel.app",
+      "http://localhost:5173"
+    ],
+    credentials: true,
+  })
+);
+
 
 app.use(morgan("dev"));
 
