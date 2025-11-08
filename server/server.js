@@ -8,6 +8,7 @@ import clientRoutes from "./routes/clientRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 
 
 dotenv.config();
@@ -27,6 +28,7 @@ app.use("/api/clients", clientRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));

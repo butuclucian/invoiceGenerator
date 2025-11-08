@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { Repeat, Eye, Edit, Trash2, Plus } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Repeat, Eye, Edit, Trash2, Plus, Download } from "lucide-react";
 import { toast } from "sonner";
-import API from "../../utils/api"; // ✅ instanța globală axios
+import { useNavigate } from "react-router-dom";
+import API from "../../utils/api";
 
 const RecurringInvoice = () => {
-  const [recurringInvoices, setRecurringInvoices] = useState([]);
+  const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // ✅ Fetch recurring invoices from backend
   const fetchRecurringInvoices = async () => {
@@ -19,22 +21,15 @@ const RecurringInvoice = () => {
       }
 
       const { data } = await API.get("/invoices", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Dacă în backend nu ai încă un câmp special pentru recurring, poți simula:
-      const filtered = data.filter((inv) => inv.recurring === true);
-
-      setRecurringInvoices(filtered);
+      const recurringOnly = data.filter((inv) => inv.recurring === true);
+      setInvoices(recurringOnly);
     } catch (err) {
       console.error("❌ Fetch recurring invoices error:", err);
-      if (err.response?.status === 401) {
-        toast.error("Unauthorized. Please log in again.");
-      } else {
-        toast.error("Failed to load recurring invoices");
-      }
+      if (err.response?.status === 401) toast.error("Unauthorized. Please log in again.");
+      else toast.error("Failed to load recurring invoices");
     } finally {
       setLoading(false);
     }
@@ -44,23 +39,26 @@ const RecurringInvoice = () => {
     fetchRecurringInvoices();
   }, []);
 
+  // ✅ Delete recurring invoice
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem("token");
       await API.delete(`/invoices/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Recurring invoice deleted successfully");
       fetchRecurringInvoices();
-    } catch (err) {
+    } catch {
       toast.error("Failed to delete recurring invoice");
     }
   };
 
-  const handleEdit = (invoiceNumber) => {
-    toast.info(`Editing recurring invoice ${invoiceNumber}`);
+  const handleEdit = (invoiceId) => {
+    navigate(`/dashboard/invoices/${invoiceId}/edit`);
+  };
+
+  const handleDownload = (invoiceNumber) => {
+    toast.info(`Downloading ${invoiceNumber} (mock only)`);
   };
 
   return (
@@ -79,7 +77,7 @@ const RecurringInvoice = () => {
 
         <button
           onClick={() => toast.info("Add Recurring Invoice (coming soon)")}
-          className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-2 rounded-md hover:opacity-90 transition"
+          className="flex items-center gap-2 bg-linear-to-r from-indigo-600 to-purple-600 px-5 py-2 rounded-md hover:opacity-90 transition"
         >
           <Plus size={18} />
           Add Recurring Invoice
@@ -91,7 +89,7 @@ const RecurringInvoice = () => {
         <div className="text-center py-16 text-gray-400 animate-pulse">
           Loading recurring invoices...
         </div>
-      ) : recurringInvoices.length === 0 ? (
+      ) : invoices.length === 0 ? (
         <div className="text-center py-16 border border-dashed border-white/20 rounded-xl bg-[#1a1a1a]/60">
           <Repeat className="w-16 h-16 text-white/20 mx-auto mb-3" />
           <h3 className="text-lg font-medium text-gray-300">
@@ -115,7 +113,7 @@ const RecurringInvoice = () => {
               </tr>
             </thead>
             <tbody>
-              {recurringInvoices.map((inv) => (
+              {invoices.map((inv) => (
                 <tr
                   key={inv._id}
                   className="border-b border-white/5 hover:bg-white/5 transition"
@@ -124,10 +122,8 @@ const RecurringInvoice = () => {
                     {inv.invoice_number}
                   </td>
                   <td className="p-4">
-                    <p className="text-gray-200">{inv.client?.name}</p>
-                    <p className="text-xs text-gray-500">
-                      {inv.client?.email}
-                    </p>
+                    <p className="text-gray-200">{inv.client?.name || "Unknown"}</p>
+                    <p className="text-xs text-gray-500">{inv.client?.email || "N/A"}</p>
                   </td>
                   <td className="p-4 text-gray-300">
                     {inv.frequency || "Monthly"}
@@ -158,11 +154,18 @@ const RecurringInvoice = () => {
                       <Eye size={16} />
                     </button>
                     <button
-                      onClick={() => handleEdit(inv.invoice_number)}
+                      onClick={() => handleEdit(inv._id)}
                       className="p-2 text-gray-400 hover:text-indigo-400 transition"
                       title="Edit"
                     >
                       <Edit size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDownload(inv.invoice_number)}
+                      className="p-2 text-gray-400 hover:text-green-400 transition"
+                      title="Download"
+                    >
+                      <Download size={16} />
                     </button>
                     <button
                       onClick={() => handleDelete(inv._id)}

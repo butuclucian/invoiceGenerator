@@ -76,3 +76,43 @@ export const deleteInvoice = async (req, res) => {
     res.status(500).json({ message: "Error deleting invoice" });
   }
 };
+
+// GET /api/invoices/near-due
+export const getNearDueInvoices = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Data de azi (format simplu)
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0]; // "2025-11-08"
+
+    // Data de mâine (pentru intervalul de 24h)
+    const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+    const tomorrowStr = tomorrow.toISOString().split("T")[0];
+
+    console.log("🔍 Checking near-due invoices for:", todayStr, "to", tomorrowStr);
+
+    // Extragem TOATE facturile utilizatorului
+    const allInvoices = await Invoice.find({
+      user: userId,
+      status: { $ne: "paid" },
+    }).populate("client", "name email");
+
+    // Filtrare manuală tolerantă la formate
+    const nearDue = allInvoices.filter((inv) => {
+      if (!inv.due_date) return false;
+      const dueStr = inv.due_date.toString().slice(0, 10); // normalizează stringul
+      return dueStr === todayStr || dueStr === tomorrowStr;
+    });
+
+    console.log(`📋 Found ${nearDue.length} invoices near due`);
+    res.status(200).json(nearDue);
+  } catch (err) {
+    console.error("❌ Error fetching near-due invoices:", err);
+    res.status(500).json({ message: "Error fetching invoice" });
+  }
+};
+
+
+
+

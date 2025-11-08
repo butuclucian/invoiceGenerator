@@ -95,7 +95,7 @@ const Invoices = () => {
         </div>
         <button
           onClick={() => setShowPopup(true)}
-          className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-2 rounded-md hover:opacity-90 transition"
+          className="flex items-center gap-2 bg-linear-to-r from-indigo-600 to-purple-600 px-5 py-2 rounded-md hover:opacity-90 transition"
         >
           <Plus size={18} />
           Create Invoice
