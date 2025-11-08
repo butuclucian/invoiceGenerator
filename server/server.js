@@ -10,17 +10,17 @@ import userRoutes from "./routes/userRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 
-
 dotenv.config();
-connectDB();
+await connectDB(); // asigură-te că db.js exportă o funcție async
 
 const app = express();
-app.use(express.json());
+
+// ✅ Config CORS pentru local + Vercel
 app.use(
   cors({
     origin: [
-      "http://localhost:5173", // pentru dezvoltare locală
-      "https://invoicegenerator.vercel.app", // domeniul frontend-ului tău Vercel
+      "http://localhost:5173",
+      "https://invoice-generator-xwqg.vercel.app", // domeniul real din Vercel
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -28,12 +28,15 @@ app.use(
   })
 );
 
+app.use(express.json());
 app.use(morgan("dev"));
 
+// ✅ Test route
 app.get("/", (req, res) => {
-  res.send("Invoice Generator API is running...");
+  res.send("✅ Invoice Generator API (Vercel Serverless) is running...");
 });
 
+// ✅ Mount routes
 app.use("/api/auth", authRoutes);
 app.use("/api/clients", clientRoutes);
 app.use("/api/invoices", invoiceRoutes);
@@ -41,5 +44,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/notifications", notificationRoutes);
 
-const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+// ❌ IMPORTANT: eliminăm complet app.listen()
+// Vercel nu rulează servere permanente
+// În schimb, exportăm aplicația Express ca handler pentru funcția serverless
+export default app;
