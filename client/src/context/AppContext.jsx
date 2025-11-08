@@ -4,7 +4,11 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+
+axios.defaults.baseURL = API_BASE_URL;
+console.log("🔗 Backend URL:", API_BASE_URL);
 
 export const AppContext = createContext();
 
@@ -12,10 +16,8 @@ export const AppProvider = ({ children }) => {
   const { user, isLoaded } = useUser();
   const { getToken } = useAuth();
   const navigate = useNavigate();
-
   const [authToken, setAuthToken] = useState(null);
 
-  // 🔐 fetch JWT token from Clerk
   const fetchAuthToken = useCallback(async () => {
     try {
       const token = await getToken();
@@ -26,19 +28,12 @@ export const AppProvider = ({ children }) => {
     }
   }, [getToken]);
 
-  // 🔄 get token when user logs in/out
   useEffect(() => {
-    if (isLoaded && user) {
-      fetchAuthToken();
-    } else {
-      setAuthToken(null);
-    }
+    if (isLoaded && user) fetchAuthToken();
+    else setAuthToken(null);
   }, [isLoaded, user, fetchAuthToken]);
 
-  // 🔐 secured axios instance (auto includes JWT)
-  const secureAxios = axios.create({
-    baseURL: import.meta.env.VITE_BASE_URL,
-  });
+  const secureAxios = axios.create({ baseURL: API_BASE_URL });
 
   secureAxios.interceptors.request.use(async (config) => {
     const token = await getToken();
@@ -46,13 +41,7 @@ export const AppProvider = ({ children }) => {
     return config;
   });
 
-  const value = {
-    user,
-    getToken,
-    authToken,
-    navigate,
-    secureAxios,
-  };
+  const value = { user, getToken, authToken, navigate, secureAxios };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
