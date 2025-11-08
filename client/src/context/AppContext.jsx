@@ -4,9 +4,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
-axios.defaults.baseURL = API_BASE_URL;
-
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
@@ -14,6 +11,11 @@ export const AppProvider = ({ children }) => {
   const { getToken } = useAuth();
   const navigate = useNavigate();
   const [authToken, setAuthToken] = useState(null);
+
+  // ✅ Mutat aici — în interiorul componentei
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
+  axios.defaults.baseURL = API_BASE_URL;
+  console.log("🔗 Backend URL:", API_BASE_URL);
 
   const fetchAuthToken = useCallback(async () => {
     try {
