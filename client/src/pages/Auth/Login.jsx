@@ -18,7 +18,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const { data } = await axios.post("http://localhost:8000/api/auth/login", formData);
+      const { data } = await axios.post( `${import.meta.env.VITE_API_URL}/auth/login`, formData);
       localStorage.setItem("token", data.token);
       toast.success("Welcome back!");
       navigate("/");
