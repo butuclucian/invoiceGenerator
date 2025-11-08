@@ -1,11 +1,13 @@
 import Invoice from "../models/Invoice.js";
 import Client from "../models/Client.js";
 import { v4 as uuidv4 } from "uuid";
+import { sendInvoiceEmail } from "../utils/emailService.js";
+
 
 // GET all invoices
 export const getInvoices = async (req, res) => {
   try {
-    const invoices = await Invoice.find({ user: req.user._id }) // 👈 schimbat aici
+    const invoices = await Invoice.find({ user: req.user._id })
       .populate("client", "name email company")
       .sort({ createdAt: -1 });
 
@@ -41,14 +43,25 @@ export const createInvoice = async (req, res) => {
     }
 
     const newInvoice = await Invoice.create({
-      user: req.user._id, // 👈 tot user, nu createdBy
+      user: req.user._id,
       client: existingClient._id,
       invoice_number,
       date,
       ...rest,
     });
 
-    res.status(201).json(newInvoice);
+    // ✅ Trimitem email clientului
+    try {
+      await sendInvoiceEmail(newInvoice, existingClient);
+    } catch (mailErr) {
+      console.error("❌ Failed to send invoice email:", mailErr);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Invoice created and email sent (if client has email)",
+      invoice: newInvoice,
+    });
   } catch (err) {
     console.error("❌ Invoice create error:", err);
     res.status(500).json({ message: "Failed to create invoice", error: err.message });
