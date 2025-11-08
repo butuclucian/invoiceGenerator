@@ -16,7 +16,18 @@ connectDB();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173", // pentru dezvoltare locală
+      "https://invoicegenerator.vercel.app", // domeniul frontend-ului tău Vercel
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
 app.use(morgan("dev"));
 
 app.get("/", (req, res) => {
