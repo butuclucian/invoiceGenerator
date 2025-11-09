@@ -6,7 +6,6 @@ import cron from "node-cron";
 import bodyParser from "body-parser";
 import connectDB from "./config/db.js";
 
-// 🔹 Import route files
 import authRoutes from "./routes/authRoutes.js";
 import clientRoutes from "./routes/clientRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
@@ -15,7 +14,6 @@ import aiRoutes from "./routes/aiRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 
-// 🔹 Import pentru notificări automate
 import { generateNearDueNotifications } from "./controllers/notificationController.js";
 import User from "./models/User.js";
 
@@ -24,23 +22,18 @@ connectDB();
 
 const app = express();
 
-// ⚠️ IMPORTANT: Webhook Stripe trebuie să fie *înainte* de express.json()
+/* -------------------------- 🧩 STRIPE WEBHOOK -------------------------- */
+// ⚠️ Trebuie să vină înainte de express.json()!
+import { handleWebhook } from "./controllers/subscriptionController.js";
 app.post(
   "/api/subscription/webhook",
   bodyParser.raw({ type: "application/json" }),
-  (req, res, next) => {
-    // delegăm la routerul subscriptionRoutes
-    import("./routes/subscriptionRoutes.js").then((module) => {
-      module.default.handle(req, res, next);
-    });
-  }
+  handleWebhook
 );
 
-// ✅ Restul aplicației poate folosi JSON normal
+/* -------------------------- 🌍 MIDDLEWARES ----------------------------- */
 app.use(express.json());
 app.use(morgan("dev"));
-
-// ✅ CORS (pentru local + Vercel frontend)
 app.use(
   cors({
     origin: [
@@ -52,12 +45,11 @@ app.use(
   })
 );
 
-// ✅ Health check route
+/* -------------------------- ✅ ROUTES ---------------------------------- */
 app.get("/", (req, res) => {
   res.send("✅ BillForge AI API is running...");
 });
 
-// ✅ Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/clients", clientRoutes);
 app.use("/api/invoices", invoiceRoutes);
@@ -66,26 +58,23 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 
-// ✅ PORT
+/* -------------------------- 🚀 SERVER --------------------------------- */
 const PORT = process.env.PORT || 8000;
-
-// ✅ Server start
 app.listen(PORT, "0.0.0.0", () =>
   console.log(`🚀 Server running on port ${PORT}`)
 );
 
-// ✅ Cron job pentru notificări automate
+/* -------------------------- ⏰ CRON JOB ------------------------------- */
 cron.schedule("0 * * * *", async () => {
   try {
     console.log("⏰ Running hourly near-due invoice check...");
     const users = await User.find();
+
     for (const user of users) {
       await generateNearDueNotifications(
         { user },
         {
-          status: () => ({
-            json: () => {},
-          }),
+          status: () => ({ json: () => {} }),
         }
       );
     }

@@ -9,11 +9,19 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // ✅ 1. Creează o sesiune de checkout pentru upgrade
 export const createCheckoutSession = async (req, res) => {
   try {
+    console.log("🔹 createCheckoutSession user:", req.user);
+    console.log("🔹 req.body:", req.body);
+
     const { plan } = req.body;
+    const normalizedPlan = plan?.toLowerCase();
+
     const priceId =
-      plan === "enterprise"
+      normalizedPlan === "enterprise"
         ? process.env.STRIPE_PRICE_ENTERPRISE
         : process.env.STRIPE_PRICE_PRO;
+
+    if (!priceId)
+      return res.status(400).json({ message: "Invalid subscription plan" });
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -22,15 +30,20 @@ export const createCheckoutSession = async (req, res) => {
       success_url: `${process.env.CLIENT_URL}/dashboard/subscription?success=true`,
       cancel_url: `${process.env.CLIENT_URL}/dashboard/subscription?canceled=true`,
       customer_email: req.user.email,
-      metadata: { userId: req.user._id, plan },
+      metadata: {
+        userId: String(req.user._id), // ✅ convertim în string
+        plan: normalizedPlan,
+      },
     });
 
+    console.log("✅ Stripe session created:", session.id);
     res.json({ url: session.url });
   } catch (error) {
-    console.error("Stripe session error:", error);
+    console.error("❌ Stripe session error:", error);
     res.status(500).json({ message: "Failed to create checkout session" });
   }
 };
+
 
 
 // ✅ 2. Webhook handler (Stripe → App)
