@@ -160,6 +160,9 @@ export const sendInvoiceEmail = async (invoice, client) => {
     const pdfPath = await generateInvoicePDF(invoice, client);
     console.log("✅ PDF generated:", pdfPath);
 
+    const pdfData = fs.readFileSync(pdfPath);
+    const pdfBase64 = pdfData.toString("base64");
+
     const response = await resend.emails.send({
       from: process.env.RESEND_FROM,
       to: client.email,
@@ -181,7 +184,7 @@ export const sendInvoiceEmail = async (invoice, client) => {
       attachments: [
         {
           filename: `Invoice_${invoice.invoice_number}.pdf`,
-          path: pdfPath,
+          path: pdfBase64,
         },
       ],
     });
