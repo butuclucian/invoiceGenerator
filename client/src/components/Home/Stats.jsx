@@ -26,7 +26,7 @@ const stats = [
 
 const Stats = () => {
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section id="features" className="py-24 relative overflow-hidden">
       {/* Background Glow */}
       <div className="absolute inset-0 blur-[120px]" />
 

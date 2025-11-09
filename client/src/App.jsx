@@ -16,11 +16,13 @@ import AIGenerator from "./pages/Admin/AIGenerator";
 import EditInvoice from "./pages/Admin/EditInvoice";
 import InvoicePreview from "./pages/Admin/InvoicePreview";
 
+
 // 🆕 noile pagini de autentificare
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import { Toaster } from "sonner";
 import EditClient from "./pages/Admin/EditClient";
+import MySubscription from "./pages/Admin/MySubscription";
 
 const App = () => {
   const location = useLocation();
@@ -44,6 +46,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
+
         {/* Protected admin routes */}
         <Route path="/dashboard" element={<Dashboard />}>
           <Route index element={<Invoices />} />
@@ -58,6 +61,7 @@ const App = () => {
           <Route path="accounting" element={<Accounting />} />
           <Route path="reports" element={<Reports />} />
           <Route path="ai-generator" element={<AIGenerator />} />
+          <Route path="subscription" element={<MySubscription/>}/>
         </Route>
       </Routes>
     </>

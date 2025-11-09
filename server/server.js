@@ -12,6 +12,7 @@ import invoiceRoutes from "./routes/invoiceRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 
 // 🔹 Import pentru notificări automate
 import { generateNearDueNotifications } from "./controllers/notificationController.js";
@@ -41,6 +42,7 @@ app.get("/", (req, res) => {
   res.send("✅ BillForge AI API is running...");
 });
 
+
 // ✅ Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/clients", clientRoutes);
@@ -48,6 +50,7 @@ app.use("/api/invoices", invoiceRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
 
 // ✅ PORT
 const PORT = process.env.PORT || 8000;
@@ -57,9 +60,8 @@ app.listen(PORT, "0.0.0.0", () =>
   console.log(`🚀 Server running on port ${PORT}`)
 );
 
-// -----------------------------------------------------------------------------
-// 🔁 Cron job pentru notificări automate (<24h până la due date)
-// -----------------------------------------------------------------------------
+
+// pentru notificări automate (<24h până la due date)
 cron.schedule("0 * * * *", async () => {
   try {
     console.log("⏰ Running hourly near-due invoice check...");
@@ -76,8 +78,6 @@ cron.schedule("0 * * * *", async () => {
         }
       );
     }
-
-    console.log("✅ Hourly notification check complete.");
   } catch (error) {
     console.error("❌ Cron job error:", error);
   }

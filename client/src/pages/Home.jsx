@@ -2,7 +2,6 @@ import React from "react";
 import Navbar from "../components/Home/Navbar";
 import Footer from "../components/Home/Footer";
 import { ArrowRight, CheckCircle, Quote, Star } from "lucide-react";
-import Stats from "../components/Home/Stats";
 import BlurCircle from "../components/BlurCircle"
 
 const Home = () => {
@@ -38,9 +37,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      {/* ===== STATS ===== */}
-      <Stats />
 
       {/* ===== FEATURES ===== */}
       <section
@@ -88,7 +84,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ===== TESTIMONIALS ===== */}
       <section
         id="stories"
         className="py-28 bg-gradient-to-t from-[#0e0e0e] to-[#141414] relative"
@@ -143,21 +138,101 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ===== CTA FINAL ===== */}
-      <section className="py-28 text-center bg-gradient-to-r from-[#1a1a1a] via-[#111] to-[#1a1a1a] relative">
+      {/* ===== PRICING / SUBSCRIPTIONS ===== */}
+      <section id="pricing" className="py-28 text-center bg-linear-to-r from-[#1a1a1a] via-[#111] to-[#1a1a1a] relative">
         <BlurCircle top="0" left="0" />
-        <div className="max-w-3xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-semibold mb-6">
-            Ready to Simplify Your Workflow?
+            Choose the Perfect Plan for You
           </h2>
-          <p className="text-white/70 mb-10">
-            Join thousands of professionals who trust BillForgeAI to automate
-            their billing and boost productivity.
+          <p className="text-white/70 mb-16 max-w-2xl mx-auto">
+            Unlock the full power of BillForgeAI — automate your invoicing and
+            supercharge productivity with AI.
           </p>
-          <button className="bg-gradient-to-r from-indigo-600 to-purple-600 px-10 py-4 rounded-full text-lg font-medium hover:shadow-indigo-500/40 hover:-translate-y-[2px] transition-all flex items-center gap-2 mx-auto">
-            Start Free Today
-            <ArrowRight className="w-5 h-5" />
-          </button>
+
+          {/* === Pricing Cards === */}
+          <div className="grid md:grid-cols-3 gap-10">
+            {/* FREE PLAN */}
+            <div className="p-8 bg-white/5 border border-white/10 rounded-2xl hover:border-[#80FFF9]/40 transition shadow-lg shadow-black/20">
+              <h3 className="text-2xl font-semibold mb-2 text-white">Free</h3>
+              <p className="text-gray-400 mb-6 text-sm">For individuals starting out</p>
+              <div className="text-4xl font-bold mb-6 text-[#80FFF9]">
+                $0<span className="text-lg text-gray-400 font-medium"> /mo</span>
+              </div>
+
+              <ul className="text-left text-sm text-gray-300 space-y-3 mb-8">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="text-[#80FFF9]" size={16} /> Up to 3 invoices/month
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="text-[#80FFF9]" size={16} /> Basic client management
+                </li>
+                <li className="flex items-center gap-2 opacity-60">
+                  <CheckCircle size={16} /> AI invoice generation (locked)
+                </li>
+              </ul>
+
+              <button className="w-full py-3 rounded-md bg-white/10 text-gray-300 hover:text-white hover:bg-white/20 transition">
+                Get Started
+              </button>
+            </div>
+
+            {/* PRO PLAN */}
+            <div className="p-8 bg-gradient-to-b from-indigo-600/20 to-purple-600/10 border border-[#80FFF9]/30 rounded-2xl relative hover:border-[#80FFF9]/50 transition shadow-lg shadow-indigo-900/20">
+              <div className="absolute -top-3 right-4 bg-gradient-to-r from-[#80FFF9] to-[#CB52D4] text-xs font-medium px-3 py-1 rounded-full">
+                MOST POPULAR
+              </div>
+              <h3 className="text-2xl font-semibold mb-2 text-white">Pro</h3>
+              <p className="text-gray-400 mb-6 text-sm">Perfect for freelancers & teams</p>
+              <div className="text-4xl font-bold mb-6 text-[#80FFF9]">
+                $9<span className="text-lg text-gray-400 font-medium"> /mo</span>
+              </div>
+
+              <ul className="text-left text-sm text-gray-300 space-y-3 mb-8">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="text-[#80FFF9]" size={16} /> Unlimited invoices
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="text-[#80FFF9]" size={16} /> Smart client analytics
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="text-[#80FFF9]" size={16} /> AI invoice generation (unlocked)
+                </li>
+              </ul>
+
+              <button
+                onClick={() => window.location.href = "/dashboard/upgrade"}
+                className="w-full py-3 rounded-md bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:opacity-90 transition"
+              >
+                Upgrade to Pro
+              </button>
+            </div>
+
+            {/* ENTERPRISE PLAN */}
+            <div className="p-8 bg-white/5 border border-white/10 rounded-2xl hover:border-[#CB52D4]/40 transition shadow-lg shadow-black/20">
+              <h3 className="text-2xl font-semibold mb-2 text-white">Enterprise</h3>
+              <p className="text-gray-400 mb-6 text-sm">For agencies & large companies</p>
+              <div className="text-4xl font-bold mb-6 text-[#CB52D4]">
+                $29<span className="text-lg text-gray-400 font-medium"> /mo</span>
+              </div>
+
+              <ul className="text-left text-sm text-gray-300 space-y-3 mb-8">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="text-[#CB52D4]" size={16} /> Team dashboard & reports
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="text-[#CB52D4]" size={16} /> Priority AI processing
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="text-[#CB52D4]" size={16} /> Dedicated support
+                </li>
+              </ul>
+
+              <button className="w-full py-3 rounded-md bg-gradient-to-r from-[#CB52D4] to-[#80FFF9] text-white hover:opacity-90 transition">
+                Contact Sales
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -11,8 +11,9 @@ import {
   ChevronDown,
   ChevronUp,
   ArrowLeft,
-  StarIcon,
   Sparkles,
+  StarIcon,
+  CreditCard,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -29,45 +30,49 @@ const Sidebar = () => {
   };
 
   const navLinks = [
-  {
-    name: "Dashboard",
-    path: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    name: "Clients",
-    icon: Users,
-    submenu: [
-      { name: "Add Client", path: "/dashboard/clients/add", icon: UserPlus },
-      { name: "All Clients", path: "/dashboard/clients", icon: Users },
-    ],
-  },
-  {
-    name: "Invoices",
-    icon: FileText,
-    submenu: [
-      { name: "Create Invoice", path: "/dashboard/invoices/create", icon: FilePlus2 },
-      { name: "All Invoices", path: "/dashboard/invoices", icon: FileText },
-      { name: "Recurring", path: "/dashboard/invoices/recurring", icon: Repeat },
-    ],
-  },
-  {
-    name: "Accounting",
-    path: "/dashboard/accounting",
-    icon: Calculator,
-  },
-  {
-    name: "Reports",
-    path: "/dashboard/reports",
-    icon: BarChart3,
-  },
-  {
-    name: "AI Generator",
-    path: "/dashboard/ai-generator",
-    icon: Sparkles,
-  },
-];
-
+    {
+      name: "Dashboard",
+      path: "/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      name: "Clients",
+      icon: Users,
+      submenu: [
+        { name: "Add Client", path: "/dashboard/clients/add", icon: UserPlus },
+        { name: "All Clients", path: "/dashboard/clients", icon: Users },
+      ],
+    },
+    {
+      name: "Invoices",
+      icon: FileText,
+      submenu: [
+        { name: "Create Invoice", path: "/dashboard/invoices/create", icon: FilePlus2 },
+        { name: "All Invoices", path: "/dashboard/invoices", icon: FileText },
+        { name: "Recurring", path: "/dashboard/invoices/recurring", icon: Repeat },
+      ],
+    },
+    {
+      name: "Accounting",
+      path: "/dashboard/accounting",
+      icon: Calculator,
+    },
+    {
+      name: "Reports",
+      path: "/dashboard/reports",
+      icon: BarChart3,
+    },
+    {
+      name: "AI Generator",
+      path: "/dashboard/ai-generator",
+      icon: Sparkles,
+    },
+    {
+      name: "My Subscription",
+      path: "/dashboard/subscription",
+      icon: CreditCard,
+    },
+  ];
 
   return (
     <aside
@@ -83,7 +88,7 @@ const Sidebar = () => {
         z-40
       "
     >
-      {/* Content wrapper (scrollable if too tall) */}
+      {/* Scrollable content */}
       <div className="flex flex-col flex-1 overflow-y-auto py-8 px-3 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
@@ -116,7 +121,6 @@ const Sidebar = () => {
                   <item.icon size={18} />
                   <span>{item.name}</span>
                 </NavLink>
-
               ) : (
                 <>
                   <button
@@ -164,16 +168,14 @@ const Sidebar = () => {
 
       {/* Back Button */}
       <div className="relative px-4 mb-4 group">
-      <button
-        onClick={() => navigate('/')}
-        className="w-full flex items-center justify-center gap-2 bg-white/5 border border-white/10 hover:bg-[#80FFF9]/15 text-gray-300 hover:text-[#80FFF9] py-2 rounded-md transition-all relative"
-      >
-        <ArrowLeft size={16} />
-        <span>Back</span>
-      </button>
-
-    </div>
-
+        <button
+          onClick={() => navigate("/")}
+          className="w-full flex items-center justify-center gap-2 bg-white/5 border border-white/10 hover:bg-[#80FFF9]/15 text-gray-300 hover:text-[#80FFF9] py-2 rounded-md transition-all relative"
+        >
+          <ArrowLeft size={16} />
+          <span>Back</span>
+        </button>
+      </div>
     </aside>
   );
 };

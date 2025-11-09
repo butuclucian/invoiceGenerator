@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Menu, X, Sun, FileText, User, LogOut } from "lucide-react";
+import { Menu, X, FileText, User, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
@@ -56,21 +56,15 @@ const Navbar = () => {
         <a href="#features" className="hover:text-[#80FFF9] transition-all">
           Features
         </a>
-        <a href="#stories" className="hover:text-[#80FFF9] transition-all">
-          Stories
-        </a>
-        <a href="#docs" className="hover:text-[#80FFF9] transition-all">
-          Docs
+
+        {/* ✅ New Pricing/Subscriptions link */}
+        <a href="#pricing" className="hover:text-[#80FFF9] transition-all">
+          Pricing
         </a>
       </nav>
 
       {/* Right Side */}
       <div className="flex items-center gap-4">
-        {/* Theme toggle (placeholder) */}
-        {/* <button className="size-9 flex items-center justify-center border border-white/20 rounded-md hover:bg-white/10 transition-all">
-          <Sun size={18} strokeWidth={1.5} color="#80FFF9" />
-        </button> */}
-
         {/* ✅ Auth buttons */}
         {!isLoggedIn ? (
           <div className="hidden md:flex items-center gap-3">
@@ -82,19 +76,13 @@ const Navbar = () => {
             </Link>
             <Link
               to="/register"
-              className="px-4 py-2 b text-sm text-[#80FFF9] border border-white/10 rounded-md hover:bg-white/10 hover:text-white transition-all flex items-center gap-1"
+              className="px-4 py-2 text-sm text-[#80FFF9] border border-white/10 rounded-md hover:bg-white/10 hover:text-white transition-all flex items-center gap-1"
             >
               Register
             </Link>
           </div>
         ) : (
           <div className="hidden md:flex items-center gap-3">
-            {/* 👤 User icon */}
-            {/* <div className="flex items-center justify-center bg-white/5 border border-white/10 rounded-md w-9 h-9 hover:bg-white/10 transition-all">
-              <User size={18} color="#80FFF9" />
-            </div> */}
-
-            {/* 📊 Dashboard button */}
             <button
               onClick={() => navigate("/dashboard")}
               className="px-4 py-2 text-sm text-[#80FFF9] border border-white/10 rounded-md hover:bg-white/10 hover:text-white transition-all flex items-center gap-1"
@@ -103,7 +91,6 @@ const Navbar = () => {
               Dashboard
             </button>
 
-            {/* 🚪 Logout button */}
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 rounded-md bg-[#1a1a1a] border border-white/10 hover:bg-red-600/80 hover:text-white transition-all"
@@ -145,20 +132,16 @@ const Navbar = () => {
         >
           Features
         </a>
+
+        {/* ✅ New Pricing link in mobile menu */}
         <a
-          href="#stories"
+          href="#pricing"
           onClick={() => setMenuOpen(false)}
           className="hover:text-[#80FFF9] transition-all"
         >
-          Stories
+          Pricing
         </a>
-        <a
-          href="#docs"
-          onClick={() => setMenuOpen(false)}
-          className="hover:text-[#80FFF9] transition-all"
-        >
-          Docs
-        </a>
+
 
         {/* Mobile Auth Section */}
         {!isLoggedIn ? (
@@ -173,7 +156,7 @@ const Navbar = () => {
             <Link
               to="/register"
               onClick={() => setMenuOpen(false)}
-              className="w-[80%] text-center bg-linear-to-r from-indigo-600 to-purple-600 text-white py-2 rounded-md hover:opacity-90 transition-all"
+              className="w-[80%] text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2 rounded-md hover:opacity-90 transition-all"
             >
               Register
             </Link>

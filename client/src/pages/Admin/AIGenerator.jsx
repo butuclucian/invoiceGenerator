@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Brain,
   Loader2,
@@ -6,6 +6,8 @@ import {
   RotateCcw,
   Save,
   Download,
+  Lock,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { jsPDF } from "jspdf";
@@ -17,6 +19,47 @@ const AIGenerator = () => {
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(false);
   const pdfRef = useRef();
+  const [active, setActive] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  // 🔹 Verifică statusul abonamentului la mount
+  useEffect(() => {
+    const checkSubscription = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const { data } = await API.get("/subscriptions/status", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setActive(!!data.active);
+      } catch (err) {
+        console.warn("Subscription check failed:", err);
+        setActive(false);
+      } finally {
+        setChecking(false);
+      }
+    };
+    checkSubscription();
+  }, []);
+
+  // 🔹 Stripe Upgrade
+  const handleUpgrade = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const { data } = await API.post(
+        "/subscriptions/create-session",
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error("Failed to start Stripe checkout!");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Stripe checkout failed");
+    }
+  };
 
   // 🔹 Trimite textul la backend (Gemini)
   const handleExtract = async () => {
@@ -68,7 +111,9 @@ const AIGenerator = () => {
       doc.setFontSize(20);
       doc.text("Invoice", 170, 25, { align: "right" });
       doc.setFontSize(11);
-      doc.text(`Invoice #: ${invoice.invoice_number}`, 170, 32, { align: "right" });
+      doc.text(`Invoice #: ${invoice.invoice_number}`, 170, 32, {
+        align: "right",
+      });
       doc.text(`Date: ${invoice.date}`, 170, 38, { align: "right" });
 
       const { default: autoTable } = await import("jspdf-autotable");
@@ -100,6 +145,40 @@ const AIGenerator = () => {
     }
   };
 
+  // 🔄 Afișează loader cât timp verificăm subscriptia
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center text-gray-400">
+        Checking subscription...
+      </div>
+    );
+  }
+
+  // 🔒 Afișează ecran de blocare dacă userul nu e abonat
+  if (!active) {
+    return (
+      <div className="min-h-screen bg-[#0e0e0e] text-white flex items-center justify-center px-6">
+        <div className="bg-[#111]/90 border border-white/10 rounded-2xl p-10 text-center max-w-md shadow-lg shadow-indigo-600/20">
+          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+            <Lock className="text-[#80FFF9]" size={30} />
+          </div>
+          <h2 className="text-2xl font-semibold mb-2">AI Generator Locked</h2>
+          <p className="text-gray-400 mb-6">
+            Upgrade to <span className="text-[#80FFF9]">Pro</span> to unlock
+            AI-powered invoice generation.
+          </p>
+          <button
+            onClick={handleUpgrade}
+            className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2 rounded-md mx-auto hover:opacity-90 transition"
+          >
+            <Sparkles size={16} /> Upgrade to Pro
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ Dacă are abonament activ — AI Generator normal
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white px-10 py-10">
       {/* Header */}
@@ -154,7 +233,7 @@ const AIGenerator = () => {
         </div>
       </div>
 
-      {/* 🧠 AI Thinking Loader */}
+      {/* AI Loader */}
       {loading && (
         <div className="flex flex-col items-center justify-center mt-20">
           <div className="relative flex items-center justify-center w-32 h-32">
@@ -168,7 +247,7 @@ const AIGenerator = () => {
         </div>
       )}
 
-      {/* 🧾 Invoice Preview */}
+      {/* Invoice Preview */}
       {!loading && invoice && (
         <div
           ref={pdfRef}
@@ -178,7 +257,9 @@ const AIGenerator = () => {
             <h2 className="text-2xl font-semibold text-[#80FFF9]">
               {invoice.invoice_number}
             </h2>
-            <span className="text-gray-400 text-sm capitalize">{invoice.status}</span>
+            <span className="text-gray-400 text-sm capitalize">
+              {invoice.status}
+            </span>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4 mb-6">
