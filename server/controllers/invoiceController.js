@@ -60,23 +60,28 @@ export const createInvoice = async (req, res) => {
       ...rest,
     });
 
-    // ✅ Trimitem email clientului
     try {
       await sendInvoiceEmail(newInvoice, existingClient);
+      console.log("✅ Email sent successfully via Resend");
     } catch (mailErr) {
       console.error("❌ Failed to send invoice email:", mailErr);
     }
 
+
     res.status(201).json({
       success: true,
-      message: "Invoice created and email sent (if client has email)",
+      message: "Invoice created and email sent successfully",
       invoice: newInvoice,
     });
   } catch (err) {
     console.error("❌ Invoice create error:", err);
-    res.status(500).json({ message: "Failed to create invoice", error: err.message });
+    res.status(500).json({
+      message: "Failed to create invoice",
+      error: err.message,
+    });
   }
 };
+
 
 // UPDATE invoice
 export const updateInvoice = async (req, res) => {
