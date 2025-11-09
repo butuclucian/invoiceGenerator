@@ -20,8 +20,8 @@ const invoiceSchema = new mongoose.Schema(
       required: true,
     },
     invoice_number: { type: String, required: true },
-    date: { type: String, required: true },
-    due_date: { type: String },
+    date: { type: Date, required: true },
+    due_date: { type: Date },
     status: {
       type: String,
       enum: ["draft", "sent", "paid", "overdue"],

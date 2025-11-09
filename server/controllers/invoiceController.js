@@ -41,7 +41,7 @@ export const getInvoiceById = async (req, res) => {
 // CREATE new invoice
 export const createInvoice = async (req, res) => {
   try {
-    const { client, invoice_number, date, ...rest } = req.body;
+    const { client, invoice_number, date, due_date, ...rest } = req.body;
 
     if (!client || !invoice_number || !date) {
       return res.status(400).json({ message: "Client and date are required" });
@@ -56,17 +56,18 @@ export const createInvoice = async (req, res) => {
       user: req.user._id,
       client: existingClient._id,
       invoice_number,
-      date,
+      date: new Date(date),
+      due_date: due_date ? new Date(due_date) : null,
       ...rest,
     });
 
+    // ✅ Trimite email cu Resend
     try {
       await sendInvoiceEmail(newInvoice, existingClient);
       console.log("✅ Email sent successfully via Resend");
     } catch (mailErr) {
       console.error("❌ Failed to send invoice email:", mailErr);
     }
-
 
     res.status(201).json({
       success: true,
@@ -81,6 +82,7 @@ export const createInvoice = async (req, res) => {
     });
   }
 };
+
 
 
 // UPDATE invoice
