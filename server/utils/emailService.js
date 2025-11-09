@@ -141,21 +141,19 @@ export const sendInvoiceEmail = async (invoice, client) => {
       to: client.email,
       subject: `🧾 Invoice ${invoice.invoice_number} from BillForge AI`,
       html: `
-        <div style="font-family:Arial,sans-serif;padding:20px;color:#333;">
-          <h2 style="color:#3a6ea5;">Hello ${client.name || "Client"},</h2>
-          <p>You’ve received a new invoice from <b>BillForge AI</b>.</p>
+      <div style="font-family:Arial,sans-serif;padding:20px;color:#333;">
+        <img src="https://cdn-icons-png.flaticon.com/512/9429/9429026.png" alt="Logo" width="60" style="display:block;margin:auto;margin-bottom:15px;">
+        <h2 style="color:#4F46E5;text-align:center;">Hello ${client.name || "Client"},</h2>
+        <p style="text-align:center;">You’ve received a new invoice from <b>BillForge AI</b>.</p>
+        <div style="margin:20px auto;max-width:400px;background:#f5f5f5;padding:15px;border-radius:10px;">
           <p><b>Invoice Number:</b> ${invoice.invoice_number}</p>
-          <p><b>Total:</b> $${invoice.total.toFixed(2)}</p>
-          <p><b>Due Date:</b> ${
-            invoice.due_date
-              ? new Date(invoice.due_date).toLocaleDateString()
-              : "—"
-          }</p>
-          <p style="margin-top:20px;">Please find the full invoice attached as PDF.</p>
-          <hr style="margin:25px 0;border:none;border-top:1px solid #eee;" />
-          <p style="font-size:12px;color:#999;">Generated automatically by BillForge AI • www.billforge.app</p>
+          <p><b>Total:</b> $${invoice.total}</p>
+          <p><b>Due Date:</b> ${invoice.due_date || "—"}</p>
         </div>
-      `,
+        <p style="text-align:center;">The PDF invoice is attached below.</p>
+        <p style="text-align:center;margin-top:20px;color:#666;">Thank you for your business!<br><b>BillForge AI</b></p>
+      </div>
+    `,
       attachments: [
         {
           filename: `Invoice_${invoice.invoice_number}.pdf`,
