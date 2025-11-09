@@ -9,29 +9,29 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // ✅ 1. Creează o sesiune de checkout pentru upgrade
 export const createCheckoutSession = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
     const { plan } = req.body;
-
     const priceId =
-      plan === "Pro"
-        ? process.env.STRIPE_PRICE_PRO
-        : process.env.STRIPE_PRICE_ENTERPRISE;
+      plan === "enterprise"
+        ? process.env.STRIPE_PRICE_ENTERPRISE
+        : process.env.STRIPE_PRICE_PRO;
 
     const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
       payment_method_types: ["card"],
+      mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${process.env.CLIENT_URL}/dashboard/subscription?success=true`,
-      cancel_url: `${process.env.CLIENT_URL}/dashboard/subscription?cancelled=true`,
-      customer_email: user.email,
+      cancel_url: `${process.env.CLIENT_URL}/dashboard/subscription?canceled=true`,
+      customer_email: req.user.email,
+      metadata: { userId: req.user._id, plan },
     });
 
-    res.status(200).json({ url: session.url });
-  } catch (err) {
-    console.error("❌ Error creating Stripe session:", err);
+    res.json({ url: session.url });
+  } catch (error) {
+    console.error("Stripe session error:", error);
     res.status(500).json({ message: "Failed to create checkout session" });
   }
 };
+
 
 // ✅ 2. Webhook handler (Stripe → App)
 export const handleWebhook = async (req, res) => {

@@ -3,6 +3,9 @@ import Navbar from "../components/Home/Navbar";
 import Footer from "../components/Home/Footer";
 import { ArrowRight, CheckCircle, Quote, Star } from "lucide-react";
 import BlurCircle from "../components/BlurCircle"
+import API from "../utils/api";
+import { toast } from "sonner";
+
 
 const Home = () => {
   return (
@@ -201,11 +204,36 @@ const Home = () => {
               </ul>
 
               <button
-                onClick={() => window.location.href = "/dashboard/upgrade"}
-                className="w-full py-3 rounded-md bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:opacity-90 transition"
+                onClick={async () => {
+                  try {
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                      toast.error("Please log in to upgrade your plan.");
+                      window.location.href = "/login";
+                      return;
+                    }
+
+                    const { data } = await API.post(
+                      "/subscription/create-checkout-session",
+                      { plan: "pro" },
+                      { headers: { Authorization: `Bearer ${token}` } }
+                    );
+
+                    if (data?.url) {
+                      window.location.href = data.url; // redirect către Stripe
+                    } else {
+                      toast.error("Something went wrong starting checkout.");
+                    }
+                  } catch (err) {
+                    console.error(err);
+                    toast.error("Failed to start checkout.");
+                  }
+                }}
+                className="w-full py-3 rounded-md bg-linear-to-r from-indigo-600 to-purple-600 text-white hover:opacity-90 transition"
               >
                 Upgrade to Pro
               </button>
+
             </div>
 
             {/* ENTERPRISE PLAN */}
@@ -228,9 +256,37 @@ const Home = () => {
                 </li>
               </ul>
 
-              <button className="w-full py-3 rounded-md bg-gradient-to-r from-[#CB52D4] to-[#80FFF9] text-white hover:opacity-90 transition">
-                Contact Sales
-              </button>
+              <button
+              onClick={async () => {
+                try {
+                  const token = localStorage.getItem("token");
+                  if (!token) {
+                    toast.error("Please log in to upgrade your plan.");
+                    window.location.href = "/login";
+                    return;
+                  }
+
+                  const { data } = await API.post(
+                    "/subscription/create-checkout-session",
+                    { plan: "enterprise" },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                  );
+
+                  if (data?.url) {
+                    window.location.href = data.url; // redirect la Stripe
+                  } else {
+                    toast.error("Something went wrong starting checkout.");
+                  }
+                } catch (err) {
+                  console.error(err);
+                  toast.error("Failed to start checkout.");
+                }
+              }}
+              className="w-full py-3 rounded-md bg-gradient-to-r from-[#CB52D4] to-[#80FFF9] text-white hover:opacity-90 transition"
+            >
+              Upgrade to Enterprise
+            </button>
+
             </div>
           </div>
         </div>

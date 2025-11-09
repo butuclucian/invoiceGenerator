@@ -12,30 +12,49 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
+import API from "../../utils/api"; // 🔹 importă instanța Axios configurată
 
 const MySubscription = () => {
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🧩 MOCK DATA (schimbă planul aici pentru test: "Free", "Pro", "Enterprise")
+  // 🔹 Fetch real subscription data
   useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      setSubscription({
-        plan: "Pro",
-        status: "Active",
-        renewal_date: "2025-12-10T00:00:00Z",
-      });
-      setLoading(false);
-    }, 800);
+    const fetchSubscription = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          toast.error("Please log in to view your subscription.");
+          setLoading(false);
+          return;
+        }
+
+        const { data } = await API.get("/subscription/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setSubscription(data);
+      } catch (err) {
+        console.error("Subscription fetch error:", err);
+        toast.error(
+          err.response?.data?.message || "Failed to load subscription data."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubscription();
   }, []);
 
   const handleUpgrade = (target) => {
-    toast.info(`Redirecting to ${target} upgrade (mock)...`);
+    toast.info(`Redirecting to ${target} upgrade...`);
+    window.location.href = `/dashboard/upgrade?plan=${target}`;
   };
 
   const handleManageBilling = () => {
-    toast.info("Opening Stripe Billing Portal (mock)...");
+    toast.info("Opening Stripe Billing Portal...");
+    window.location.href = "/dashboard/billing";
   };
 
   if (loading) {
@@ -92,15 +111,12 @@ const MySubscription = () => {
       <div
         className={`max-w-4xl mx-auto bg-gradient-to-br ${planColors[plan]} border rounded-2xl p-10 shadow-lg shadow-indigo-900/10 relative overflow-hidden transition-all`}
       >
-        {/* Glow Effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#80FFF9]/5 to-[#CB52D4]/10 blur-3xl -z-10" />
 
         {/* HEADER INFO */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl font-bold tracking-wide">
-              {plan} Plan
-            </h2>
+            <h2 className="text-3xl font-bold tracking-wide">{plan} Plan</h2>
             <p className="text-gray-400 text-sm mt-1">
               {isActive ? "Currently Active" : "Inactive"}
             </p>
@@ -239,11 +255,19 @@ const Feature = ({ text, muted }) => (
 );
 
 /* 🔹 Upgrade Suggestion Card */
-const UpgradeCard = ({ title, desc, gradient, button, icon: Icon, onClick, disabled }) => (
+const UpgradeCard = ({
+  title,
+  desc,
+  gradient,
+  button,
+  icon: Icon,
+  onClick,
+  disabled,
+}) => (
   <div
-    className={`max-w-4xl mx-auto mt-12 bg-gradient-to-r ${gradient} border border-white/10 rounded-2xl p-8 text-center relative overflow-hidden`}
+    className={`max-w-4xl mx-auto mt-12 bg-linear-to-r ${gradient} border border-white/10 rounded-2xl p-8 text-center relative overflow-hidden`}
   >
-    <div className="absolute inset-0 bg-gradient-to-r from-[#80FFF9]/10 to-[#CB52D4]/10 blur-2xl -z-10" />
+    <div className="absolute inset-0 bg-linear-to-r from-[#80FFF9]/10 to-[#CB52D4]/10 blur-2xl -z-10" />
     <Icon className="mx-auto mb-4 text-[#80FFF9]" size={40} />
     <h3 className="text-2xl font-semibold mb-3">{title}</h3>
     <p className="text-gray-400 max-w-md mx-auto mb-6">{desc}</p>
