@@ -40,7 +40,7 @@ export const handleWebhook = async (req, res) => {
   let event;
   try {
     event = stripe.webhooks.constructEvent(
-      req.rawBody,
+      req.body,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
@@ -62,7 +62,7 @@ export const handleWebhook = async (req, res) => {
             {
               stripeCustomerId: data.customer,
               stripeSubscriptionId: data.subscription,
-              plan: data.amount_total === 900 ? "Pro" : "Enterprise",
+              plan: data.amount_total <= 900 ? "Pro" : "Enterprise",
               status: "Active",
               renewal_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
             },

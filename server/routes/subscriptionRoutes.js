@@ -17,7 +17,7 @@ router.post(
   handleWebhook
 );
 
-router.post("/create-session", protect, createCheckoutSession);
+router.post("/create-checkout-session", protect, createCheckoutSession);
 router.get("/me", protect, getMySubscription);
 router.post("/cancel", protect, cancelSubscription);
 

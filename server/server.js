@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import morgan from "morgan";
 import cron from "node-cron";
+import bodyParser from "body-parser";
 import connectDB from "./config/db.js";
 
 // 🔹 Import route files
@@ -22,6 +23,20 @@ dotenv.config();
 connectDB();
 
 const app = express();
+
+// ⚠️ IMPORTANT: Webhook Stripe trebuie să fie *înainte* de express.json()
+app.post(
+  "/api/subscription/webhook",
+  bodyParser.raw({ type: "application/json" }),
+  (req, res, next) => {
+    // delegăm la routerul subscriptionRoutes
+    import("./routes/subscriptionRoutes.js").then((module) => {
+      module.default.handle(req, res, next);
+    });
+  }
+);
+
+// ✅ Restul aplicației poate folosi JSON normal
 app.use(express.json());
 app.use(morgan("dev"));
 
@@ -42,7 +57,6 @@ app.get("/", (req, res) => {
   res.send("✅ BillForge AI API is running...");
 });
 
-
 // ✅ Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/clients", clientRoutes);
@@ -60,14 +74,11 @@ app.listen(PORT, "0.0.0.0", () =>
   console.log(`🚀 Server running on port ${PORT}`)
 );
 
-
-// pentru notificări automate (<24h până la due date)
+// ✅ Cron job pentru notificări automate
 cron.schedule("0 * * * *", async () => {
   try {
     console.log("⏰ Running hourly near-due invoice check...");
-
     const users = await User.find();
-
     for (const user of users) {
       await generateNearDueNotifications(
         { user },
