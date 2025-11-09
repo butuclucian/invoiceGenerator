@@ -64,7 +64,6 @@ export const createInvoice = async (req, res) => {
     // ✅ Trimite email cu Resend
     try {
       await sendInvoiceEmail(newInvoice, existingClient);
-      console.log("✅ Email sent successfully via Resend");
     } catch (mailErr) {
       console.error("❌ Failed to send invoice email:", mailErr);
     }

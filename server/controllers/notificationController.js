@@ -40,7 +40,7 @@ export const generateNearDueNotifications = async (req, res) => {
         const note = await Notification.create({
           user: userId,
           invoice: inv._id,
-          message: `⚠️ Invoice ${inv.invoice_number} for ${
+          message: ` Invoice ${inv.invoice_number} for ${
             inv.client?.name || "Unknown Client"
           } ${dueText}`,
         });
@@ -48,7 +48,6 @@ export const generateNearDueNotifications = async (req, res) => {
       }
     }
 
-    console.log(`🔔 Generated ${created.length} new notifications`);
     res.status(200).json({ success: true, created });
   } catch (error) {
     console.error("❌ Error generating notifications:", error);
