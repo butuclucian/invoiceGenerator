@@ -50,7 +50,7 @@ app.use("/api/invoices", invoiceRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/notifications", notificationRoutes);
-app.use("/api/subscriptions", subscriptionRoutes);
+app.use("/api/subscription", subscriptionRoutes);
 
 // ✅ PORT
 const PORT = process.env.PORT || 8000;
