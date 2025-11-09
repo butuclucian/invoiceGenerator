@@ -2,6 +2,8 @@ import fs from "fs";
 import PDFDocument from "pdfkit";
 import { Resend } from "resend";
 import dotenv from "dotenv";
+import axios from "axios"; // 👈 necesar pentru logo buffer
+
 dotenv.config();
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -14,20 +16,26 @@ const lightGray = "#dddddd";
 /**
  * ✅ Creează PDF profesional (identic cu cel din aplicație)
  */
-const generateInvoicePDF = (invoice, client) => {
+const generateInvoicePDF = async (invoice, client) => {
   const pdfPath = `./invoice_${invoice.invoice_number}.pdf`;
   const doc = new PDFDocument({ margin: 50 });
-
   const writeStream = fs.createWriteStream(pdfPath);
   doc.pipe(writeStream);
 
   // ===== HEADER =====
-  doc.image("https://cdn-icons-png.flaticon.com/512/9429/9429026.png", 50, 40, {
-    width: 40,
-  });
+  try {
+    const logoResponse = await axios.get(
+      "https://cdn-icons-png.flaticon.com/512/9429/9429026.png",
+      { responseType: "arraybuffer" }
+    );
+    const logoBuffer = Buffer.from(logoResponse.data, "binary");
+    doc.image(logoBuffer, 50, 40, { width: 40 });
+  } catch (err) {
+    console.warn("⚠️ Could not load logo image:", err.message);
+  }
+
   doc.font("Helvetica-Bold").fontSize(22).fillColor("black").text("BillForge AI", 100, 45);
   doc.font("Helvetica").fontSize(10).fillColor("#666").text("Smart Invoice Generator", 100, 65);
-
   doc.moveTo(50, 90).lineTo(550, 90).strokeColor(lightGray).stroke();
 
   // ===== COMPANY & CLIENT INFO =====
@@ -57,9 +65,13 @@ const generateInvoicePDF = (invoice, client) => {
   doc.font("Helvetica").fillColor("#333");
   doc.text(`Invoice Number: ${invoice.invoice_number}`, 50, infoY + 15);
   doc.text(`Date: ${new Date(invoice.date).toLocaleDateString()}`, 50, infoY + 30);
-  doc.text(`Due Date: ${
-    invoice.due_date ? new Date(invoice.due_date).toLocaleDateString() : "-"
-  }`, 50, infoY + 45);
+  doc.text(
+    `Due Date: ${
+      invoice.due_date ? new Date(invoice.due_date).toLocaleDateString() : "-"
+    }`,
+    50,
+    infoY + 45
+  );
   doc.text(`Status: ${invoice.status}`, 50, infoY + 60);
 
   // ===== TABLE HEADER =====
@@ -144,9 +156,11 @@ export const sendInvoiceEmail = async (invoice, client) => {
   }
 
   try {
+    console.log("📄 Generating PDF for invoice:", invoice.invoice_number);
     const pdfPath = await generateInvoicePDF(invoice, client);
+    console.log("✅ PDF generated:", pdfPath);
 
-    await resend.emails.send({
+    const response = await resend.emails.send({
       from: process.env.RESEND_FROM,
       to: client.email,
       subject: `🧾 Invoice ${invoice.invoice_number} from BillForge AI`,
@@ -172,6 +186,7 @@ export const sendInvoiceEmail = async (invoice, client) => {
       ],
     });
 
+    console.log("✅ Resend API response:", response);
     console.log("✅ Invoice email sent successfully via Resend");
 
     fs.unlink(pdfPath, (err) => {
