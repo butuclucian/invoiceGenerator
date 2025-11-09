@@ -10,104 +10,137 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const accent = [58 / 255, 110 / 255, 165 / 255];
 const lightGray = "#dddddd";
 
-/**
- * ✅ Creează PDF profesional (identic cu cel din aplicație)
- */
+// design pdf
 const generateInvoicePDF = (invoice, client) => {
   const pdfPath = `./invoice_${invoice.invoice_number}.pdf`;
-  const doc = new PDFDocument({ margin: 50 });
+  const doc = new PDFDocument({ margin: 40 });
   const writeStream = fs.createWriteStream(pdfPath);
   doc.pipe(writeStream);
 
-  // ===== HEADER =====
+  const accent = "#3A6EA5";
+  const gray = "#3C3C3C";
+  const lightGray = "#E5E7EB";
+
+  // ===== HEADER (LOGO + TITLU + LINIE) =====
   try {
-    doc.image("server/assets/logo.png", 50, 40, { width: 40 });
+    doc.image("server/assets/logo.png", 40, 30, { width: 30 });
   } catch {
-    console.warn("⚠️ Logo local missing, skipping image");
+    console.warn("⚠️ Missing logo, skipping image");
   }
 
-  doc.font("Helvetica-Bold").fontSize(22).fillColor("black").text("BillForge AI", 100, 45);
-  doc.font("Helvetica").fontSize(10).fillColor("#666").text("Smart Invoice Generator", 100, 65);
-  doc.moveTo(50, 90).lineTo(550, 90).strokeColor(lightGray).stroke();
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(22)
+    .fillColor("black")
+    .text("BillForge AI", 80, 32);
+  doc
+    .font("Helvetica")
+    .fontSize(10)
+    .fillColor("#666")
+    .text("Smart Invoice Generator", 80, 50);
+
+  // Linie subțire
+  doc.moveTo(40, 70).lineTo(555, 70).strokeColor(lightGray).stroke();
 
   // ===== COMPANY & CLIENT INFO =====
-  let y = 110;
-  doc.fontSize(14).fillColor("rgb(58,110,165)").font("Helvetica-Bold").text("From:", 50, y);
-  doc.fontSize(12).fillColor("#333").font("Helvetica");
-  y += 18;
-  doc.text("BillForge AI Inc.", 50, y);
-  doc.text("123 Innovation Blvd", 50, (y += 15));
-  doc.text("Timișoara, Romania", 50, (y += 15));
-  doc.text("support@billforge.ai", 50, (y += 15));
+  let y = 90;
+  doc.fontSize(13).fillColor(accent).font("Helvetica-Bold").text("From:", 40, y);
+  doc.fontSize(11).fillColor(gray).font("Helvetica");
+  y += 16;
+  doc.text("BillForge AI Inc.", 40, y);
+  doc.text("123 Innovation Blvd", 40, (y += 14));
+  doc.text("Timișoara, Romania", 40, (y += 14));
+  doc.text("support@billforge.ai", 40, (y += 14));
 
-  let rightY = 110;
-  doc.font("Helvetica-Bold").fillColor("rgb(58,110,165)").text("Bill To:", 320, rightY);
-  doc.font("Helvetica").fillColor("#333");
-  rightY += 18;
-
+  let rightY = 90;
   const c = client || {};
-  doc.text(c.name || "Unknown Client", 320, rightY);
-  if (c.company && c.company !== c.name) doc.text(c.company, 320, (rightY += 15));
-  if (c.email) doc.text(c.email, 320, (rightY += 15));
-  if (c.phone) doc.text(c.phone, 320, (rightY += 15));
-  if (c.address) doc.text(c.address, 320, (rightY += 15));
+  doc.font("Helvetica-Bold").fillColor(accent).text("Bill To:", 330, rightY);
+  doc.font("Helvetica").fillColor(gray);
+  rightY += 16;
+  doc.text(c.name || "Unknown Client", 330, rightY);
+  if (c.company && c.company !== c.name) doc.text(c.company, 330, (rightY += 14));
+  if (c.email) doc.text(c.email, 330, (rightY += 14));
+  if (c.phone) doc.text(c.phone, 330, (rightY += 14));
+  if (c.address) doc.text(c.address, 330, (rightY += 14));
 
   // ===== INVOICE INFO =====
-  let infoY = Math.max(y, rightY) + 25;
-  doc.font("Helvetica-Bold").fillColor("rgb(58,110,165)").text("Invoice Details:", 50, infoY);
-  doc.font("Helvetica").fillColor("#333");
-  doc.text(`Invoice Number: ${invoice.invoice_number}`, 50, infoY + 15);
-  doc.text(`Date: ${new Date(invoice.date).toLocaleDateString()}`, 50, infoY + 30);
-  doc.text(`Due Date: ${
-    invoice.due_date ? new Date(invoice.due_date).toLocaleDateString() : "-"
-  }`, 50, infoY + 45);
-  doc.text(`Status: ${invoice.status}`, 50, infoY + 60);
+  const infoY = Math.max(y, rightY) + 25;
+  doc.font("Helvetica-Bold").fillColor(accent).text("Invoice Details:", 40, infoY);
+  doc.font("Helvetica").fillColor(gray);
+  doc.text(`Invoice Number: ${invoice.invoice_number}`, 40, infoY + 15);
+  doc.text(`Date: ${new Date(invoice.date).toLocaleDateString()}`, 40, infoY + 30);
+  doc.text(
+    `Due Date: ${
+      invoice.due_date ? new Date(invoice.due_date).toLocaleDateString() : "-"
+    }`,
+    40,
+    infoY + 45
+  );
+  doc.text(`Status: ${invoice.status}`, 40, infoY + 60);
 
   // ===== TABLE HEADER =====
   const tableY = infoY + 90;
-  doc.rect(50, tableY, 500, 25).fill("rgb(58,110,165)");
+  doc.rect(40, tableY, 520, 25).fill(accent);
   doc.fillColor("white").font("Helvetica-Bold").fontSize(12);
-  doc.text("Description", 60, tableY + 7);
-  doc.text("Qty", 290, tableY + 7);
-  doc.text("Unit Price", 370, tableY + 7);
-  doc.text("Total", 470, tableY + 7);
+  doc.text("Description", 50, tableY + 7);
+  doc.text("Quantity", 280, tableY + 7);
+  doc.text("Unit Price", 380, tableY + 7);
+  doc.text("Total", 480, tableY + 7);
 
   // ===== TABLE ROWS =====
   let rowY = tableY + 25;
-  doc.font("Helvetica").fontSize(11).fillColor("#333");
+  doc.font("Helvetica").fontSize(11);
 
   invoice.items.forEach((item, i) => {
-    const bg = i % 2 === 0 ? "#f5f7fa" : "#ffffff";
-    doc.rect(50, rowY, 500, 20).fill(bg);
-    doc.fillColor("#333");
-    doc.text(item.description, 60, rowY + 5, { width: 220 });
-    doc.text(item.quantity.toString(), 290, rowY + 5);
-    doc.text(`$${item.unit_price.toFixed(2)}`, 370, rowY + 5);
-    doc.text(`$${item.total.toFixed(2)}`, 470, rowY + 5);
+    const bg = i % 2 === 0 ? "#F5F7FA" : "#FFFFFF";
+    doc.rect(40, rowY, 520, 20).fill(bg);
+    doc.fillColor(gray);
+    doc.text(item.description, 50, rowY + 5, { width: 200 });
+    doc.text(String(item.quantity), 290, rowY + 5);
+    doc.text(`$${item.unit_price.toFixed(2)}`, 380, rowY + 5);
+    doc.text(`$${item.total.toFixed(2)}`, 480, rowY + 5);
     rowY += 20;
   });
 
   // ===== TOTALS =====
   rowY += 15;
-  doc.font("Helvetica-Bold").fillColor("rgb(58,110,165)").text("Summary", 380, rowY);
-  doc.font("Helvetica").fillColor("#333");
+  doc.font("Helvetica-Bold").fillColor(accent).text("Summary", 390, rowY);
+  doc.font("Helvetica").fillColor(gray).fontSize(11);
   rowY += 15;
-  doc.text("Subtotal:", 380, rowY);
+  doc.text("Subtotal:", 390, rowY);
   doc.text(`$${invoice.subtotal.toFixed(2)}`, 480, rowY, { align: "right" });
   rowY += 15;
-  doc.text("Tax Rate:", 380, rowY);
+  doc.text("Tax Rate:", 390, rowY);
   doc.text(`${invoice.tax_rate}%`, 480, rowY, { align: "right" });
   rowY += 15;
-  doc.text("Discount:", 380, rowY);
+  doc.text("Discount:", 390, rowY);
   doc.text(`${invoice.discount_rate}%`, 480, rowY, { align: "right" });
   rowY += 20;
-  doc.font("Helvetica-Bold").fillColor("rgb(58,110,165)").fontSize(13);
-  doc.text("Total:", 380, rowY);
+  doc.font("Helvetica-Bold").fillColor(accent).fontSize(13);
+  doc.text("Total:", 390, rowY);
   doc.text(`$${invoice.total.toFixed(2)}`, 480, rowY, { align: "right" });
+
+  // ===== NOTES =====
+  if (invoice.notes) {
+    rowY += 40;
+    doc.font("Helvetica-Bold").fillColor(accent).text("Notes:", 40, rowY);
+    doc.font("Helvetica").fillColor(gray).fontSize(11);
+    doc.text(invoice.notes, 40, rowY + 15, { width: 500 });
+  }
+
+  // ===== SIGNATURES =====
+  const signY = rowY + 70;
+  doc.moveTo(80, signY).lineTo(220, signY).strokeColor(lightGray).stroke();
+  doc.moveTo(330, signY).lineTo(470, signY).strokeColor(lightGray).stroke();
+  doc.fontSize(10).fillColor("#666");
+  doc.text("Client Signature", 110, signY + 5);
+  doc.text("Authorized Signature", 355, signY + 5);
 
   // ===== FOOTER =====
   doc.fontSize(9).fillColor("#999");
-  doc.text("Generated by BillForge AI • www.billforge.app", 50, 780, { align: "center" });
+  doc.text("Generated by BillForge AI • www.billforge.app", 40, 780, {
+    align: "center",
+  });
 
   doc.end();
 
@@ -116,6 +149,7 @@ const generateInvoicePDF = (invoice, client) => {
     writeStream.on("error", reject);
   });
 };
+
 
 /**
  * ✅ Trimite email cu Resend + PDF identic cu cel din app
