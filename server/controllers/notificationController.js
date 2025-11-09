@@ -5,18 +5,25 @@ import Invoice from "../models/Invoice.js";
 export const generateNearDueNotifications = async (req, res) => {
   try {
     const userId = req.user._id;
-    const today = new Date().toISOString().split("T")[0];
 
+    // 📅 Azi și Mâine
+    const now = new Date();
+    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+    // 🕐 Normalizează la zi (fără ore)
+    const startOfToday = new Date(now.setHours(0, 0, 0, 0));
+    const endOfTomorrow = new Date(tomorrow.setHours(23, 59, 59, 999));
+
+    // 🔍 Caută facturile near due
     const nearDueInvoices = await Invoice.find({
       user: userId,
       status: { $ne: "paid" },
-      due_date: today,
+      due_date: { $gte: startOfToday, $lte: endOfTomorrow },
     }).populate("client");
 
     const created = [];
 
     for (const inv of nearDueInvoices) {
-      // verificăm dacă notificarea există deja
       const existing = await Notification.findOne({
         user: userId,
         invoice: inv._id,
@@ -24,21 +31,31 @@ export const generateNearDueNotifications = async (req, res) => {
       });
 
       if (!existing) {
+        const dueText =
+          new Date(inv.due_date).toDateString() ===
+          new Date().toDateString()
+            ? "is due today!"
+            : "is due within 24 hours!";
+
         const note = await Notification.create({
           user: userId,
           invoice: inv._id,
-          message: `Invoice ${inv.invoice_number} for ${inv.client?.name || "Unknown"} is due today!`,
+          message: `⚠️ Invoice ${inv.invoice_number} for ${
+            inv.client?.name || "Unknown Client"
+          } ${dueText}`,
         });
         created.push(note);
       }
     }
 
+    console.log(`🔔 Generated ${created.length} new notifications`);
     res.status(200).json({ success: true, created });
   } catch (error) {
     console.error("❌ Error generating notifications:", error);
     res.status(500).json({ message: "Failed to generate notifications" });
   }
 };
+
 
 // ✅ Obține toate notificările utilizatorului
 export const getUserNotifications = async (req, res) => {
