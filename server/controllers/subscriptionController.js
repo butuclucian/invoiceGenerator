@@ -156,3 +156,22 @@ export const createBillingPortal = async (req, res) => {
     res.status(500).json({ message: "Failed to create billing portal session" });
   }
 };
+
+// ✅ 6. Fetch Stripe invoices for user
+export const getInvoices = async (req, res) => {
+  try {
+    const sub = await Subscription.findOne({ user: req.user._id });
+    if (!sub || !sub.stripeCustomerId)
+      return res.status(404).json({ message: "No invoices found" });
+
+    const invoices = await stripe.invoices.list({
+      customer: sub.stripeCustomerId,
+      limit: 5,
+    });
+
+    res.json(invoices.data);
+  } catch (err) {
+    console.error("❌ Invoice fetch error:", err);
+    res.status(500).json({ message: "Failed to fetch invoices" });
+  }
+};

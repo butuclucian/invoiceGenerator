@@ -9,14 +9,18 @@ import {
   Loader2,
   Wallet,
   Crown,
+  FileText,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 
 const Billing = () => {
   const [subscription, setSubscription] = useState(null);
+  const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
 
-  // 🔹 Fetch current subscription info
+  // 🔹 Fetch subscription + invoices
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -26,10 +30,17 @@ const Billing = () => {
           return;
         }
 
-        const { data } = await API.get("/subscription/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setSubscription(data);
+        const [subRes, invRes] = await Promise.all([
+          API.get("/subscription/me", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          API.get("/subscription/invoices", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
+        setSubscription(subRes.data);
+        setInvoices(invRes.data || []);
       } catch (err) {
         console.error("Billing fetch error:", err);
         toast.error("Failed to load billing info.");
@@ -83,12 +94,6 @@ const Billing = () => {
   const { plan, status, renewal_date } = subscription;
   const isActive = status === "Active";
 
-  const planColors = {
-    Free: "from-gray-800/60 to-gray-900/80 border-white/10",
-    Pro: "from-indigo-600/25 to-purple-600/25 border-[#80FFF9]/30",
-    Enterprise: "from-[#CB52D4]/25 to-[#80FFF9]/25 border-[#CB52D4]/30",
-  };
-
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white px-8 py-12">
       {/* ===== HEADER ===== */}
@@ -99,7 +104,7 @@ const Billing = () => {
             Billing & Payments
           </h1>
           <p className="text-gray-400 text-sm">
-            View and manage your current plan, payments, and invoices
+            Manage your payment methods and view your invoice history
           </p>
         </div>
 
@@ -119,98 +124,146 @@ const Billing = () => {
         )}
       </div>
 
-      {/* ===== BILLING CARD ===== */}
-      <div
-        className={`max-w-4xl mx-auto bg-gradient-to-br ${planColors[plan]} border rounded-2xl p-10 shadow-lg shadow-indigo-900/10 relative overflow-hidden transition-all`}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-[#80FFF9]/5 to-[#CB52D4]/10 blur-3xl -z-10" />
-
-        {/* HEADER INFO */}
-        <div className="flex flex-col md:flex-row items-center justify-between mb-8">
+      {/* ===== CURRENT PLAN ===== */}
+      <section className="max-w-5xl mx-auto mb-14">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           <div>
-            <h2 className="text-3xl font-bold tracking-wide">{plan} Plan</h2>
-            <p className="text-gray-400 text-sm mt-1">
-              {isActive ? "Currently Active" : "Inactive"}
+            <h2 className="text-2xl font-bold">{plan} Plan</h2>
+            <p
+              className={`text-sm mt-2 ${
+                isActive ? "text-green-400" : "text-gray-400"
+              }`}
+            >
+              {isActive ? "Active subscription" : "Inactive"}
             </p>
             {renewal_date && (
-              <p className="text-gray-500 text-sm flex items-center gap-1 mt-1">
+              <p className="text-gray-400 text-sm flex items-center gap-1 mt-1">
                 <Calendar size={14} />
                 Next renewal:{" "}
                 {new Date(renewal_date).toLocaleDateString("en-US")}
               </p>
             )}
           </div>
+
           <div className="text-right">
-            <p className="text-5xl font-bold text-[#80FFF9]">
-              {plan === "Free"
-                ? "$0"
-                : plan === "Pro"
-                ? "$9"
-                : "$29"}
+            <p className="text-4xl font-bold text-[#80FFF9]">
+              {plan === "Free" ? "$0" : plan === "Pro" ? "$9" : "$29"}
               <span className="text-lg text-gray-400 font-medium">/mo</span>
             </p>
             <p className="text-gray-500 text-xs mt-1">Billed monthly</p>
+
+            <button
+              onClick={handleOpenBillingPortal}
+              disabled={portalLoading}
+              className={`mt-5 flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:opacity-90 transition ${
+                portalLoading ? "opacity-60 cursor-wait" : ""
+              }`}
+            >
+              {portalLoading ? (
+                <>
+                  <Loader2 className="animate-spin" size={16} /> Opening...
+                </>
+              ) : (
+                <>
+                  <CreditCard size={16} /> Manage Billing
+                </>
+              )}
+            </button>
           </div>
         </div>
+      </section>
 
-        {/* BILLING MANAGEMENT */}
-        <div className="border border-white/10 rounded-xl p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <CreditCard className="text-[#80FFF9]" size={18} /> Manage Billing
-          </h2>
-          <p className="text-gray-400 text-sm mb-4">
-            Access your Stripe billing portal to update payment methods, view
-            invoices, or cancel your subscription.
+      {/* ===== PLAN BENEFITS ===== */}
+      <section className="max-w-5xl mx-auto mb-20">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <ShieldCheck className="text-[#CB52D4]" size={18} /> Plan Benefits
+        </h2>
+
+        {plan === "Pro" && (
+          <ul className="text-gray-300 text-sm grid md:grid-cols-2 gap-y-2">
+            <li>✅ Unlimited invoices</li>
+            <li>✅ Smart analytics dashboard</li>
+            <li>✅ AI invoice generation</li>
+            <li>✅ Priority email delivery</li>
+          </ul>
+        )}
+        {plan === "Enterprise" && (
+          <ul className="text-gray-300 text-sm grid md:grid-cols-2 gap-y-2">
+            <li>🚀 Dedicated AI processing</li>
+            <li>👥 Team collaboration & analytics</li>
+            <li>🔒 Premium support 24/7</li>
+            <li>⚙️ Custom integrations & API</li>
+          </ul>
+        )}
+        {plan === "Free" && (
+          <ul className="text-gray-400 text-sm grid md:grid-cols-2 gap-y-2">
+            <li>⚙️ Limited invoices (max 3/month)</li>
+            <li>🔒 Upgrade to unlock AI features</li>
+          </ul>
+        )}
+      </section>
+
+      {/* ===== PAYMENT HISTORY ===== */}
+      <section className="max-w-5xl mx-auto">
+        <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+          <FileText className="text-[#80FFF9]" size={18} /> Payment History
+        </h2>
+
+        {invoices.length === 0 ? (
+          <p className="text-gray-500 text-sm">
+            No invoices found. Your payment history will appear here.
           </p>
-
-          <button
-            onClick={handleOpenBillingPortal}
-            disabled={portalLoading}
-            className={`flex items-center gap-2 px-6 py-3 rounded-md bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:opacity-90 transition ${
-              portalLoading ? "opacity-60 cursor-wait" : ""
-            }`}
-          >
-            {portalLoading ? (
-              <>
-                <Loader2 className="animate-spin" size={16} /> Opening...
-              </>
-            ) : (
-              <>
-                <CreditCard size={16} /> Open Billing Portal
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* PLAN BENEFITS */}
-        <div className="border border-white/10 rounded-xl p-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <ShieldCheck className="text-[#CB52D4]" size={18} /> Plan Benefits
-          </h2>
-          {plan === "Pro" && (
-            <ul className="text-gray-300 text-sm space-y-2">
-              <li>✅ Unlimited invoices</li>
-              <li>✅ Smart analytics dashboard</li>
-              <li>✅ AI invoice generation</li>
-              <li>✅ Priority email delivery</li>
-            </ul>
-          )}
-          {plan === "Enterprise" && (
-            <ul className="text-gray-300 text-sm space-y-2">
-              <li>🚀 Dedicated AI processing</li>
-              <li>👥 Team collaboration & analytics</li>
-              <li>🔒 Premium support 24/7</li>
-              <li>⚙️ Custom integrations & API</li>
-            </ul>
-          )}
-          {plan === "Free" && (
-            <ul className="text-gray-400 text-sm space-y-2">
-              <li>⚙️ Limited invoices (max 3/month)</li>
-              <li>🔒 Upgrade to unlock AI features</li>
-            </ul>
-          )}
-        </div>
-      </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-separate border-spacing-y-2">
+              <thead>
+                <tr className="text-gray-400 text-left">
+                  <th className="py-2 px-3">Date</th>
+                  <th className="py-2 px-3">Amount</th>
+                  <th className="py-2 px-3">Status</th>
+                  <th className="py-2 px-3">Invoice</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoices.map((inv, i) => (
+                  <tr
+                    key={i}
+                    className="bg-[#1a1a1a]/70 hover:bg-[#202020] transition"
+                  >
+                    <td className="py-3 px-3 text-gray-300">
+                      {new Date(inv.created * 1000).toLocaleDateString("en-US")}
+                    </td>
+                    <td className="py-3 px-3 text-[#80FFF9] font-medium">
+                      ${(inv.amount_paid / 100).toFixed(2)}
+                    </td>
+                    <td className="py-3 px-3">
+                      {inv.paid ? (
+                        <span className="flex items-center gap-1 text-green-400">
+                          <CheckCircle size={14} /> Paid
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-red-400">
+                          <XCircle size={14} /> Failed
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3 px-3">
+                      <a
+                        href={inv.hosted_invoice_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#80FFF9] hover:underline"
+                      >
+                        View Invoice
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </div>
   );
 };
