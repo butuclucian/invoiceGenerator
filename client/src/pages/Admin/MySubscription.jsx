@@ -12,7 +12,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
-import API from "../../utils/api"; // 🔹 importă instanța Axios configurată
+import API from "../../utils/api";
+
 
 const MySubscription = () => {
   const [subscription, setSubscription] = useState(null);
@@ -47,10 +48,34 @@ const MySubscription = () => {
     fetchSubscription();
   }, []);
 
-  const handleUpgrade = (target) => {
-    toast.info(`Redirecting to ${target} upgrade...`);
-    window.location.href = `/dashboard/upgrade?plan=${target}`;
+  const handleUpgrade = async (target) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please log in to upgrade your plan.");
+        window.location.href = "/login";
+        return;
+      }
+
+      // ✅ Trimite cererea la backend pentru a crea o sesiune Stripe
+      const { data } = await API.post(
+        "/subscription/create-checkout-session",
+        { plan: target.toLowerCase() },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (data?.url) {
+        toast.success(`Redirecting to Stripe Checkout (${target})...`);
+        window.location.href = data.url; // Stripe Checkout Page
+      } else {
+        toast.error("Failed to start checkout.");
+      }
+    } catch (err) {
+      console.error("Upgrade error:", err);
+      toast.error("Stripe checkout failed. Try again later.");
+    }
   };
+
 
   const handleManageBilling = () => {
     toast.info("Opening Stripe Billing Portal...");
@@ -109,9 +134,9 @@ const MySubscription = () => {
 
       {/* ===== MAIN CARD ===== */}
       <div
-        className={`max-w-4xl mx-auto bg-gradient-to-br ${planColors[plan]} border rounded-2xl p-10 shadow-lg shadow-indigo-900/10 relative overflow-hidden transition-all`}
+        className={`max-w-4xl mx-auto bg-linear-to-br ${planColors[plan]} border rounded-2xl p-10 shadow-lg shadow-indigo-900/10 relative overflow-hidden transition-all`}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-[#80FFF9]/5 to-[#CB52D4]/10 blur-3xl -z-10" />
+        <div className="absolute inset-0 bg-linear-to-r from-[#80FFF9]/5 to-[#CB52D4]/10 blur-3xl -z-10" />
 
         {/* HEADER INFO */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-8">
@@ -173,7 +198,7 @@ const MySubscription = () => {
           {plan === "Free" && (
             <button
               onClick={() => handleUpgrade("Pro")}
-              className="flex items-center gap-2 px-6 py-3 rounded-md bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:opacity-90 transition-all shadow-lg shadow-indigo-800/20"
+              className="flex items-center gap-2 px-6 py-3 rounded-md bg-linear-to-r from-indigo-600 to-purple-600 text-white hover:opacity-90 transition-all shadow-lg shadow-indigo-800/20"
             >
               <Zap size={18} />
               Upgrade to Pro
@@ -192,7 +217,7 @@ const MySubscription = () => {
 
           {plan === "Enterprise" && isActive && (
             <button
-              onClick={() => toast.success("You're at the top tier! 🎉")}
+              onClick={() => toast.success("You're at the top tier!")}
               className="flex items-center gap-2 px-6 py-3 border border-white/10 rounded-md text-gray-300 hover:bg-white/10 hover:text-white transition"
             >
               <ShieldCheck size={16} />
@@ -230,7 +255,7 @@ const MySubscription = () => {
           title="You're at the top!"
           desc="Thank you for being part of our elite users. You’re enjoying full access to every feature BillForgeAI offers."
           gradient="from-[#CB52D4]/20 to-[#80FFF9]/20"
-          button="Exclusive Perks Coming Soon 🚀"
+          button="Exclusive Perks Coming Soon"
           icon={Sparkles}
           disabled
         />
@@ -241,8 +266,7 @@ const MySubscription = () => {
 
 /* 🔹 Reusable Feature */
 const Feature = ({ text, muted }) => (
-  <div
-    className={`flex items-center gap-2 ${
+  <div className={`flex items-center gap-2 ${
       muted ? "opacity-50 text-gray-500" : "text-gray-200"
     }`}
   >
@@ -255,31 +279,18 @@ const Feature = ({ text, muted }) => (
 );
 
 /* 🔹 Upgrade Suggestion Card */
-const UpgradeCard = ({
-  title,
-  desc,
-  gradient,
-  button,
-  icon: Icon,
-  onClick,
-  disabled,
-}) => (
-  <div
-    className={`max-w-4xl mx-auto mt-12 bg-linear-to-r ${gradient} border border-white/10 rounded-2xl p-8 text-center relative overflow-hidden`}
-  >
+const UpgradeCard = ({ title, desc, gradient, button, icon: Icon, onClick, disabled,}) => (
+  <div className={`max-w-4xl mx-auto mt-12 bg-linear-to-r ${gradient} border border-white/10 rounded-2xl p-8 text-center relative overflow-hidden`}>
     <div className="absolute inset-0 bg-linear-to-r from-[#80FFF9]/10 to-[#CB52D4]/10 blur-2xl -z-10" />
     <Icon className="mx-auto mb-4 text-[#80FFF9]" size={40} />
     <h3 className="text-2xl font-semibold mb-3">{title}</h3>
     <p className="text-gray-400 max-w-md mx-auto mb-6">{desc}</p>
-    <button
-      onClick={!disabled ? onClick : null}
-      disabled={disabled}
+    <button onClick={!disabled ? onClick : null} disabled={disabled}
       className={`px-8 py-3 rounded-full text-white font-medium transition flex items-center justify-center gap-2 mx-auto ${
         disabled
           ? "bg-white/10 text-gray-400 cursor-not-allowed"
-          : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90"
-      }`}
-    >
+          : "bg-linear-to-r from-indigo-600 to-purple-600 hover:opacity-90"
+      }`}>
       <ArrowUpRight size={18} />
       {button}
     </button>

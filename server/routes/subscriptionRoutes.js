@@ -4,6 +4,7 @@ import {
   handleWebhook,
   getMySubscription,
   cancelSubscription,
+  createBillingPortal
 } from "../controllers/subscriptionController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import bodyParser from "body-parser";
@@ -20,5 +21,6 @@ router.post(
 router.post("/create-checkout-session", protect, createCheckoutSession);
 router.get("/me", protect, getMySubscription);
 router.post("/cancel", protect, cancelSubscription);
+router.post("/create-billing-portal", protect, createBillingPortal);
 
 export default router;

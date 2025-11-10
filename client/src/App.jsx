@@ -23,6 +23,7 @@ import Register from "./pages/Auth/Register";
 import { Toaster } from "sonner";
 import EditClient from "./pages/Admin/EditClient";
 import MySubscription from "./pages/Admin/MySubscription";
+import Billing from "./pages/Admin/Billing";
 
 const App = () => {
   const location = useLocation();
@@ -62,6 +63,8 @@ const App = () => {
           <Route path="reports" element={<Reports />} />
           <Route path="ai-generator" element={<AIGenerator />} />
           <Route path="subscription" element={<MySubscription/>}/>
+          <Route path="billing" element={<Billing />} />
+
         </Route>
       </Routes>
     </>

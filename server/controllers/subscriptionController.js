@@ -45,7 +45,6 @@ export const createCheckoutSession = async (req, res) => {
 };
 
 
-
 // ✅ 2. Webhook handler (Stripe → App)
 export const handleWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
@@ -136,5 +135,24 @@ export const cancelSubscription = async (req, res) => {
   } catch (err) {
     console.error("❌ Cancel subscription error:", err);
     res.status(500).json({ message: "Failed to cancel subscription" });
+  }
+};
+
+// ✅ 5. Open Billing Portal
+export const createBillingPortal = async (req, res) => {
+  try {
+    const sub = await Subscription.findOne({ user: req.user._id });
+    if (!sub || !sub.stripeCustomerId)
+      return res.status(404).json({ message: "No active subscription found" });
+
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: sub.stripeCustomerId,
+      return_url: `${process.env.CLIENT_URL}/dashboard/billing`,
+    });
+
+    res.json({ url: portalSession.url });
+  } catch (err) {
+    console.error("❌ Billing portal error:", err);
+    res.status(500).json({ message: "Failed to create billing portal session" });
   }
 };
