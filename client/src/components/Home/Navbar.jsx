@@ -39,7 +39,7 @@ const Navbar = () => {
       {/* Logo */}
       <Link to="/" className="flex items-center gap-2">
         <img
-          src="https://cdn-icons-png.flaticon.com/512/9429/9429026.png"
+          src="invoicelogo.png"
           alt="BillForge Logo"
           className="w-8 h-8"
         />

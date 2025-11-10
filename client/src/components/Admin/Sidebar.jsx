@@ -93,7 +93,7 @@ const Sidebar = () => {
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <img
-            src="https://cdn-icons-png.flaticon.com/512/9429/9429026.png"
+            src="invoicelogo.png"
             alt="BillForgeAI"
             className="w-10 h-10 rounded-full"
           />
