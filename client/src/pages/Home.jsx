@@ -5,9 +5,13 @@ import { ArrowRight, CheckCircle, Quote, Star } from "lucide-react";
 import BlurCircle from "../components/BlurCircle"
 import API from "../utils/api";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 
 const Home = () => {
+
+  const navigate = useNavigate();
+
   return (
     <div className="bg-[#0e0e0e] text-white overflow-x-hidden">
       <Navbar />
@@ -30,7 +34,7 @@ const Home = () => {
           </p>
 
           <div className="flex justify-center gap-4">
-            <button className="bg-linear-to-r from-indigo-600 to-purple-600 px-8 py-4 rounded-full text-lg font-medium hover:shadow-indigo-500/40 hover:-translate-y-[2px] transition-all flex items-center gap-2">
+            <button onClick={()=> navigate('/register')} className="bg-linear-to-r from-indigo-600 to-purple-600 px-8 py-4 rounded-full text-lg font-medium hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all flex items-center gap-2">
               Get Started Free
               <ArrowRight className="w-5 h-5" />
             </button>
