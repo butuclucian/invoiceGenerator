@@ -161,14 +161,11 @@ export const sendInvoiceEmail = async (invoice, client) => {
   }
 
   try {
-    console.log("📄 [EmailService] Generating PDF for:", invoice.invoice_number);
     const pdfPath = await generateInvoicePDF(invoice, client);
-    console.log("✅ [EmailService] PDF generated:", pdfPath);
 
     const pdfData = fs.readFileSync(pdfPath);
     const pdfBase64 = pdfData.toString("base64");
 
-    console.log("📤 [EmailService] Sending email via Resend to:", client.email);
 
     const response = await resend.emails.send({
       from: process.env.RESEND_FROM,
@@ -176,7 +173,7 @@ export const sendInvoiceEmail = async (invoice, client) => {
       subject: `🧾 Invoice ${invoice.invoice_number} from BillForge AI`,
       html: `
       <div style="font-family:Arial,sans-serif;padding:20px;color:#333;">
-        <img src="https://cdn-icons-png.flaticon.com/512/9429/9429026.png" alt="Logo" width="60" style="display:block;margin:auto;margin-bottom:15px;">
+        <img src="invoicelogo.png" alt="Logo" width="60" style="display:block;margin:auto;margin-bottom:15px;">
         <h2 style="color:#4F46E5;text-align:center;">Hello ${client.name || "Client"},</h2>
         <p style="text-align:center;">You’ve received a new invoice from <b>BillForge AI</b>.</p>
         <div style="margin:20px auto;max-width:400px;background:#f5f5f5;padding:15px;border-radius:10px;">
@@ -195,8 +192,6 @@ export const sendInvoiceEmail = async (invoice, client) => {
         },
       ],
     });
-
-    console.log("📩 [EmailService] Resend API response:", JSON.stringify(response, null, 2));
 
     if (response.error) {
       console.error("❌ [EmailService] Resend error:", response.error);

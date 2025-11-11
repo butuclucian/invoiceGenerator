@@ -67,7 +67,6 @@ app.listen(PORT, "0.0.0.0", () =>
 /* -------------------------- ⏰ CRON JOB ------------------------------- */
 cron.schedule("0 * * * *", async () => {
   try {
-    console.log("⏰ Running hourly near-due invoice check...");
     const users = await User.find();
 
     for (const user of users) {
