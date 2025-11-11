@@ -31,7 +31,7 @@ export const createCheckoutSession = async (req, res) => {
       cancel_url: `${process.env.CLIENT_URL}/dashboard/subscription?canceled=true`,
       customer_email: req.user.email,
       metadata: {
-        userId: String(req.user._id), // ✅ convertim în string
+        userId: String(req.user._id), // ✅ mereu string
         plan: normalizedPlan,
       },
     });
@@ -43,7 +43,6 @@ export const createCheckoutSession = async (req, res) => {
     res.status(500).json({ message: "Failed to create checkout session" });
   }
 };
-
 
 // ✅ 2. Webhook handler (Stripe → App)
 export const handleWebhook = async (req, res) => {
@@ -65,25 +64,42 @@ export const handleWebhook = async (req, res) => {
 
   try {
     switch (event.type) {
+      // ✅ Când plata s-a finalizat — creăm sau actualizăm abonamentul
       case "checkout.session.completed": {
         const customerEmail = data.customer_email;
         const user = await User.findOne({ email: customerEmail });
+
+        console.log("🔔 Webhook received for:", customerEmail);
+
         if (user) {
-          await Subscription.findOneAndUpdate(
+          console.log("✅ Found user:", user._id);
+
+          // 🔹 Asigurăm user field și plan corect
+          const newSub = await Subscription.findOneAndUpdate(
             { user: user._id },
             {
+              user: user._id, // ✅ crucial
               stripeCustomerId: data.customer,
               stripeSubscriptionId: data.subscription,
-              plan: data.amount_total <= 900 ? "Pro" : "Enterprise",
+              plan:
+                data.amount_total && data.amount_total > 900
+                  ? "Enterprise"
+                  : "Pro",
               status: "Active",
               renewal_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
             },
             { upsert: true, new: true }
           );
+
+          console.log("✅ Subscription created/updated:", newSub.plan);
+        } else {
+          console.warn("⚠️ No user found for webhook email:", customerEmail);
         }
+
         break;
       }
 
+      // ✅ Când o subscriptie e anulată
       case "customer.subscription.deleted": {
         const sub = await Subscription.findOne({
           stripeSubscriptionId: data.id,
@@ -91,9 +107,13 @@ export const handleWebhook = async (req, res) => {
         if (sub) {
           sub.status = "Cancelled";
           await sub.save();
+          console.log("❌ Subscription cancelled for:", sub.user);
         }
         break;
       }
+
+      default:
+        console.log(`ℹ️ Unhandled event type: ${event.type}`);
     }
 
     res.status(200).json({ received: true });
