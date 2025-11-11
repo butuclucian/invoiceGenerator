@@ -21,7 +21,7 @@ const Home = () => {
         <BlurCircle top="0" right="0" />
         <div className="max-w-6xl mx-auto px-6">
           <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full mb-8 border border-white/20">
-            <span className="text-sm text-[#80FFF9]">⚡ Powered by Gemini AI</span>
+            <span className="text-sm text-[#80FFF9]">Powered by AI</span>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold leading-tight bg-linear-to-r from-[#80FFF9] to-[#CB52D4] bg-clip-text text-transparent mb-6">

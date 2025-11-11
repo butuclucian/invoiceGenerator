@@ -1,5 +1,7 @@
 import express from "express";
 import User from "../models/User.js";
+import { getMe, updateUser } from "../controllers/userController.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -28,5 +30,8 @@ router.post("/sync", async (req, res) => {
     res.status(500).json({ message: "Server error syncing user" });
   }
 });
+
+router.get("/me", protect, getMe);
+router.put("/me", protect, updateUser);
 
 export default router;

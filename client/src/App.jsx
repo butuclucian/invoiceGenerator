@@ -24,6 +24,8 @@ import { Toaster } from "sonner";
 import EditClient from "./pages/Admin/EditClient";
 import MySubscription from "./pages/Admin/MySubscription";
 import Billing from "./pages/Admin/Billing";
+import Settings from "./pages/Admin/Settings";
+import CalendarPage from "./pages/Admin/CalendarPage";
 
 const App = () => {
   const location = useLocation();
@@ -64,6 +66,8 @@ const App = () => {
           <Route path="ai-generator" element={<AIGenerator />} />
           <Route path="subscription" element={<MySubscription/>}/>
           <Route path="billing" element={<Billing />} />
+          <Route path="calendar" element={<CalendarPage />}/>
+          <Route path="settings" element={<Settings />}/>
 
         </Route>
       </Routes>

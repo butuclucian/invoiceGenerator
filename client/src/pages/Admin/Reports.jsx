@@ -110,7 +110,7 @@ const Reports = () => {
           <div className="flex items-center gap-2 mb-4">
             <PieIcon className="text-[#80FFF9]" size={20} />
             <h2 className="text-xl font-semibold text-white">
-              Invoice Status Overview
+              Invoice Status Overvirew
             </h2>
           </div>
           <ResponsiveContainer width="100%" height={300}>

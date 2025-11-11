@@ -14,6 +14,9 @@ import {
   Sparkles,
   StarIcon,
   CreditCard,
+  Calendar1Icon,
+  Settings2Icon,
+  SettingsIcon,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -71,6 +74,16 @@ const Sidebar = () => {
       name: "My Subscription",
       path: "/dashboard/subscription",
       icon: CreditCard,
+    },
+    {
+      name: "Calendar",
+      path: "/dashboard/calendar",
+      icon: Calendar1Icon,
+    },
+    {
+      name: "Settings",
+      path: "/dashboard/settings",
+      icon: SettingsIcon,
     },
   ];
 
