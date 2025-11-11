@@ -31,7 +31,7 @@ export const createCheckoutSession = async (req, res) => {
       cancel_url: `${process.env.CLIENT_URL}/dashboard/subscription?canceled=true`,
       customer_email: req.user.email,
       metadata: {
-        userId: String(req.user._id), // ✅ mereu string
+        userId: String(req.user._id), // 🧠 pentru backup
         plan: normalizedPlan,
       },
     });
@@ -47,8 +47,8 @@ export const createCheckoutSession = async (req, res) => {
 // ✅ 2. Webhook handler (Stripe → App)
 export const handleWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
-
   let event;
+
   try {
     event = stripe.webhooks.constructEvent(
       req.body,
@@ -64,25 +64,23 @@ export const handleWebhook = async (req, res) => {
 
   try {
     switch (event.type) {
-      // ✅ Când plata s-a finalizat — creăm sau actualizăm abonamentul
+      // 🔹 Caz 1: Checkout finalizat (Stripe Checkout completat)
       case "checkout.session.completed": {
-        const customerEmail = data.customer_email;
-        const user = await User.findOne({ email: customerEmail });
+        const email = data.customer_email;
+        const planMeta = data.metadata?.plan || "pro";
 
-        console.log("🔔 Webhook received for:", customerEmail);
+        console.log("🔔 Webhook: checkout.session.completed for:", email);
 
+        const user = await User.findOne({ email });
         if (user) {
-          console.log("✅ Found user:", user._id);
-
-          // 🔹 Asigurăm user field și plan corect
-          const newSub = await Subscription.findOneAndUpdate(
+          const updated = await Subscription.findOneAndUpdate(
             { user: user._id },
             {
-              user: user._id, // ✅ crucial
-              stripeCustomerId: data.customer,
-              stripeSubscriptionId: data.subscription,
+              user: user._id,
+              stripeCustomerId: data.customer || "",
+              stripeSubscriptionId: data.subscription || "",
               plan:
-                data.amount_total && data.amount_total > 900
+                planMeta === "enterprise"
                   ? "Enterprise"
                   : "Pro",
               status: "Active",
@@ -90,24 +88,59 @@ export const handleWebhook = async (req, res) => {
             },
             { upsert: true, new: true }
           );
-
-          console.log("✅ Subscription created/updated:", newSub.plan);
+          console.log(`✅ Subscription created/updated for ${user.email}: ${updated.plan}`);
         } else {
-          console.warn("⚠️ No user found for webhook email:", customerEmail);
+          console.warn("⚠️ No user found for email:", email);
         }
-
         break;
       }
 
-      // ✅ Când o subscriptie e anulată
+      // 🔹 Caz 2: Subscriptie nouă (Stripe Customer -> Subscription)
+      case "customer.subscription.created": {
+        const sub = data;
+        const customerId = sub.customer;
+
+        console.log("🔔 Webhook: customer.subscription.created:", sub.id);
+
+        const customer = await stripe.customers.retrieve(customerId);
+        const email = customer.email;
+        const user = await User.findOne({ email });
+
+        if (user) {
+          const updated = await Subscription.findOneAndUpdate(
+            { user: user._id },
+            {
+              user: user._id,
+              stripeCustomerId: customerId,
+              stripeSubscriptionId: sub.id,
+              plan:
+                sub.items.data[0].price.id === process.env.STRIPE_PRICE_ENTERPRISE
+                  ? "Enterprise"
+                  : "Pro",
+              status: sub.status === "active" ? "Active" : "Pending",
+              renewal_date: new Date(sub.current_period_end * 1000),
+            },
+            { upsert: true, new: true }
+          );
+          console.log(`✅ Subscription synced for ${user.email}: ${updated.plan}`);
+        } else {
+          console.warn("⚠️ No user found for customer email:", email);
+        }
+        break;
+      }
+
+      // 🔹 Caz 3: Subscriptie ștearsă / anulată
       case "customer.subscription.deleted": {
+        const subId = data.id;
+        console.log("❌ Webhook: customer.subscription.deleted:", subId);
+
         const sub = await Subscription.findOne({
-          stripeSubscriptionId: data.id,
+          stripeSubscriptionId: subId,
         });
         if (sub) {
           sub.status = "Cancelled";
           await sub.save();
-          console.log("❌ Subscription cancelled for:", sub.user);
+          console.log("🟥 Subscription cancelled for user:", sub.user);
         }
         break;
       }
@@ -118,7 +151,7 @@ export const handleWebhook = async (req, res) => {
 
     res.status(200).json({ received: true });
   } catch (err) {
-    console.error("Webhook handling failed:", err);
+    console.error("❌ Webhook handling failed:", err);
     res.status(500).send("Webhook handler error");
   }
 };
@@ -128,13 +161,11 @@ export const getMySubscription = async (req, res) => {
   try {
     const sub = await Subscription.findOne({ user: req.user._id });
     if (!sub) {
-      return res.json({
-        plan: "Free",
-        status: "Inactive",
-      });
+      return res.json({ plan: "Free", status: "Inactive" });
     }
     res.json(sub);
   } catch (err) {
+    console.error("❌ getMySubscription error:", err);
     res.status(500).json({ message: "Failed to fetch subscription data" });
   }
 };
@@ -143,9 +174,8 @@ export const getMySubscription = async (req, res) => {
 export const cancelSubscription = async (req, res) => {
   try {
     const sub = await Subscription.findOne({ user: req.user._id });
-    if (!sub || !sub.stripeSubscriptionId) {
+    if (!sub || !sub.stripeSubscriptionId)
       return res.status(404).json({ message: "Subscription not found" });
-    }
 
     await stripe.subscriptions.cancel(sub.stripeSubscriptionId);
     sub.status = "Cancelled";
