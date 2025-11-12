@@ -6,6 +6,7 @@ import { checkSubscription } from "../middleware/checkSubscription.js";
 const router = express.Router();
 
 // POST /api/ai/generate-invoice
-router.post("/generate-invoice", protect, checkSubscription, generateInvoiceFromText);
+// router.post("/generate-invoice", protect, checkSubscription, generateInvoiceFromText);
+router.post("/generate-invoice", protect, generateInvoiceFromText);
 
 export default router;
