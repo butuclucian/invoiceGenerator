@@ -10,7 +10,7 @@ import {
 import { toast } from "sonner";
 import { jsPDF } from "jspdf";
 import API from "../../utils/api";
-import logo from "../../assets/react.svg";
+import logo from "../../assets/invoicelogo.png";
 
 const AIGenerator = () => {
   const [text, setText] = useState("");
