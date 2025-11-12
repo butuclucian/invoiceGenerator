@@ -12,14 +12,14 @@ export const generateInvoiceFromText = async (req, res) => {
       return res.status(400).json({ message: "Missing 'text' in request body" });
     }
 
-    // ✅ Check dacă userul are abonament activ
+    // ✅ Check dacă userul are abonament activ - pentru testare valabil fara abonament!
     const sub = await Subscription.findOne({ user: userId });
-    if (!sub || sub.status !== "Active") {
-      console.warn("⚠️ AI access denied — inactive subscription:", sub?.plan, sub?.status);
-      return res
-        .status(403)
-        .json({ message: "AI access restricted. Please upgrade your plan." });
+    if (!sub) {
+      console.warn("⚠️ No subscription found — defaulting to Free plan");
+    } else if (sub.status !== "Active") {
+      return res.status(403).json({ message: "AI access restricted. Please upgrade your plan." });
     }
+
 
     console.log("✅ AI access granted for plan:", sub.plan);
 

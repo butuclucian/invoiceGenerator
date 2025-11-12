@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import {
   Brain,
   Loader2,
@@ -6,8 +6,6 @@ import {
   RotateCcw,
   Save,
   Download,
-  Lock,
-  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { jsPDF } from "jspdf";
@@ -19,68 +17,6 @@ const AIGenerator = () => {
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(false);
   const pdfRef = useRef();
-
-  const [plan, setPlan] = useState("Free");
-  const [checking, setChecking] = useState(true);
-
-  // 🔹 Verifică statusul abonamentului
-  useEffect(() => {
-    const checkSubscription = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setPlan("Free");
-          setChecking(false);
-          return;
-        }
-
-        const { data } = await API.get("/subscription/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (data?.plan) {
-          setPlan(data.plan);
-        } else {
-          setPlan("Free");
-        }
-      } catch (err) {
-        console.warn("Subscription check failed:", err);
-        setPlan("Free");
-      } finally {
-        setChecking(false);
-      }
-    };
-
-    checkSubscription();
-  }, []);
-
-  // 🔹 Stripe Upgrade
-  const handleUpgrade = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Please log in to upgrade your plan.");
-        window.location.href = "/login";
-        return;
-      }
-
-      const { data } = await API.post(
-        "/subscription/create-checkout-session",
-        { plan: "pro" },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (data.url) {
-        toast.loading("Redirecting to Stripe checkout...");
-        window.location.href = data.url;
-      } else {
-        toast.error("Failed to start Stripe checkout.");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Stripe checkout failed.");
-    }
-  };
 
   // 🔹 Trimite textul la backend (Gemini)
   const handleExtract = async () => {
@@ -162,45 +98,10 @@ const AIGenerator = () => {
     }
   };
 
-  // 🔄 Afișează loader cât timp verificăm subscriptia
-  if (checking) {
-    return (
-      <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center text-gray-400">
-        Checking subscription...
-      </div>
-    );
-  }
-
-  // 🔒 Dacă userul NU are plan Pro sau Enterprise → blocăm AI
-  const aiUnlocked = plan === "Pro" || plan === "Enterprise";
-  if (!aiUnlocked) {
-    return (
-      <div className="min-h-screen bg-[#0e0e0e] text-white flex items-center justify-center px-6">
-        <div className="bg-[#111]/90 border border-white/10 rounded-2xl p-10 text-center max-w-md shadow-lg shadow-indigo-600/20">
-          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
-            <Lock className="text-[#80FFF9]" size={30} />
-          </div>
-          <h2 className="text-2xl font-semibold mb-2">AI Generator Locked</h2>
-          <p className="text-gray-400 mb-6">
-            Upgrade to <span className="text-[#80FFF9]">Pro</span> or{" "}
-            <span className="text-[#CB52D4]">Enterprise</span> to unlock
-            AI-powered invoice generation.
-          </p>
-          <button
-            onClick={handleUpgrade}
-            className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2 rounded-md mx-auto hover:opacity-90 transition"
-          >
-            <Sparkles size={16} /> Upgrade Now
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ✅ Dacă are abonament activ (Pro/Enterprise) — AI Generator normal
+  // ✅ UI simplificat
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white px-10 py-10">
-      {/* Header */}
+      {/* ===== HEADER ===== */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
@@ -208,15 +109,12 @@ const AIGenerator = () => {
             AI Invoice Generator
           </h1>
           <p className="text-gray-400 text-sm">
-            Paste text below and let Gemini generate your invoice.
+            Paste text below and let AI generate your invoice.
           </p>
-        </div>
-        <div className="px-4 py-2 rounded-full border border-[#80FFF9]/30 bg-[#80FFF9]/10 text-[#80FFF9] text-sm">
-          {plan} Plan Active
         </div>
       </div>
 
-      {/* Input */}
+      {/* ===== INPUT SECTION ===== */}
       <div className="max-w-5xl mx-auto mb-10">
         <textarea
           value={text}
@@ -255,7 +153,7 @@ const AIGenerator = () => {
         </div>
       </div>
 
-      {/* Loader / Result */}
+      {/* ===== RESULT ===== */}
       {loading ? (
         <div className="flex flex-col items-center justify-center mt-20">
           <div className="relative flex items-center justify-center w-32 h-32">
