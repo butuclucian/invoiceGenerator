@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import assets from "../../assets/assets";
+import API from "../../utils/api";
+
 
 const InvoicePreview = () => {
   const { id } = useParams();
@@ -15,18 +17,24 @@ const InvoicePreview = () => {
   const [client, setClient] = useState(null);
 
   useEffect(() => {
-    const found = dummyInvoices.find(
-      (inv) => inv._id === id || inv.invoice_number === id
-    );
-    if (found) {
-      setInvoice(found);
-      const c = dummyClients.find((cl) => cl._id === found.client_id);
-      setClient(c);
-    } else {
+  const fetchInvoice = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const { data } = await API.get(`/invoices/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setInvoice(data);
+      setClient(data.client);
+    } catch (err) {
       toast.error("Invoice not found");
       navigate("/dashboard/invoices");
     }
-  }, [id]);
+  };
+
+  fetchInvoice();
+}, [id]);
+
 
   if (!invoice)
     return (
@@ -35,7 +43,7 @@ const InvoicePreview = () => {
       </div>
     );
 
-  // ✅ Generate PDF
+  //  Generate PDF
   const handleDownload = () => {
     const doc = new jsPDF();
 
@@ -121,33 +129,34 @@ const InvoicePreview = () => {
     <div className="min-h-screen bg-[#0e0e0e] text-white px-10 py-10">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-4">
+        {/* title */}
         <div className="flex items-center gap-2">
           <FileText className="text-[#80FFF9]" size={26} />
           <h1 className="text-3xl font-semibold">Invoice Preview</h1>
         </div>
+
+        {/* button */}
         <div className="flex gap-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 px-4 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition"
-          >
+          {/* back */}
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 px-4 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition">
             <ArrowLeft size={16} />
             Back
           </button>
-          <button
-            onClick={() => navigate(`/dashboard/invoices/${invoice._id}/edit`)}
-            className="flex items-center gap-2 px-4 py-2 border border-white/20 rounded-md text-indigo-400 hover:text-white hover:bg-indigo-500/10 transition"
-          >
+
+          {/* edit */}
+          <button onClick={() => navigate(`/dashboard/invoices/${invoice._id}/edit`)} className="flex items-center gap-2 px-4 py-2 border border-white/20 rounded-md text-indigo-400 hover:text-white hover:bg-indigo-500/10 transition">
             <Edit size={16} />
             Edit
           </button>
-          <button
-            onClick={handleDownload}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition"
-          >
+
+          {/* download */}
+          <button onClick={handleDownload} className="flex items-center gap-2 px-4 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition">
             <Download size={16} />
             Download
           </button>
+
         </div>
+
       </div>
 
       {/* Invoice Content */}
@@ -194,7 +203,10 @@ const InvoicePreview = () => {
 
         {/* Items Table */}
         <div className="overflow-x-auto mb-6">
+          
           <table className="w-full text-left border-collapse">
+            
+            {/* desc + quantity + unit price + total */}
             <thead>
               <tr className="text-gray-300 border-b border-white/10 text-sm">
                 <th className="pb-3">Description</th>
@@ -203,12 +215,10 @@ const InvoicePreview = () => {
                 <th className="pb-3 text-right">Total</th>
               </tr>
             </thead>
+
             <tbody>
               {invoice.items.map((item, index) => (
-                <tr
-                  key={index}
-                  className="border-b border-white/5 text-gray-400 hover:bg-white/5 transition"
-                >
+                <tr key={index} className="border-b border-white/5 text-gray-400 hover:bg-white/5 transition">
                   <td className="py-2">{item.description}</td>
                   <td className="py-2 text-right">{item.quantity}</td>
                   <td className="py-2 text-right">
@@ -220,16 +230,19 @@ const InvoicePreview = () => {
                 </tr>
               ))}
             </tbody>
+
           </table>
         </div>
 
         {/* Totals */}
         <div className="border-t border-white/10 pt-6 text-gray-300 text-sm">
+          {/* subtotal */}
           <div className="flex justify-between">
             <span>Subtotal:</span>
             <span>${invoice.subtotal.toFixed(2)}</span>
           </div>
 
+          {/* discount */}
           {invoice.discount_amount > 0 && (
             <div className="flex justify-between text-red-400">
               <span>Discount ({invoice.discount_rate}%):</span>
@@ -237,6 +250,7 @@ const InvoicePreview = () => {
             </div>
           )}
 
+          {/* tax */}
           {invoice.tax_amount > 0 && (
             <div className="flex justify-between text-[#80FFF9]">
               <span>Tax ({invoice.tax_rate}%):</span>
@@ -244,10 +258,12 @@ const InvoicePreview = () => {
             </div>
           )}
 
+          {/* total = subtotal + tax - dscount */}
           <div className="flex justify-between font-semibold text-[#80FFF9] border-t border-white/10 pt-2 text-lg mt-2">
             <span>Total:</span>
             <span>${invoice.total.toFixed(2)}</span>
           </div>
+
         </div>
 
         {/* Notes */}
@@ -259,7 +275,9 @@ const InvoicePreview = () => {
             </p>
           </div>
         )}
+
       </div>
+
     </div>
   );
 };

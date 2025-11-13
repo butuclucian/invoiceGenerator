@@ -1,14 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Brain,
-  Loader2,
-  FileText,
-  RotateCcw,
-  Save,
-  Download,
-  Lock,
-  Sparkles,
-} from "lucide-react";
+import { Brain, Loader2, FileText, RotateCcw, Save, Download, Lock, Sparkles,} from "lucide-react";
 import { toast } from "sonner";
 import { jsPDF } from "jspdf";
 import API from "../../utils/api";
@@ -25,7 +16,7 @@ const AIGenerator = () => {
   const [plan, setPlan] = useState("Free");
   const [checking, setChecking] = useState(true);
 
-  // 🔹 Verifică statusul abonamentului
+  //  check statusul abonamentului - momentan scos
   useEffect(() => {
     const checkSubscription = async () => {
       try {
@@ -52,7 +43,7 @@ const AIGenerator = () => {
     checkSubscription();
   }, []);
 
-  // 🔹 Stripe Upgrade
+  // Stripe Upgrade - momentan scos
   const handleUpgrade = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -80,7 +71,7 @@ const AIGenerator = () => {
     }
   };
 
-  // 🔹 Trimite textul la backend (Gemini)
+
   const handleExtract = async () => {
     if (!text.trim()) {
       toast.error("Please paste the invoice text first!");
@@ -116,7 +107,7 @@ const AIGenerator = () => {
     toast.info("Reset successfully");
   };
 
-  // ✅ PDF Export complet cu 2 zecimale + semnături + logo local
+
   const handleDownloadPDF = async () => {
     if (!invoice) return toast.error("No invoice to export!");
 
@@ -295,7 +286,7 @@ const AIGenerator = () => {
     }
   };
 
-  // 🔄 Loader while checking subscription
+  //  Loader while checking subscription - momentan scos
   if (checking) {
     return (
       <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center text-gray-400">
@@ -304,7 +295,7 @@ const AIGenerator = () => {
     );
   }
 
-  // 🔒 Lock screen if not Pro/Enterprise
+  //  Lock screen if not Pro/Enterprise - scos
   const aiUnlocked = plan === "Pro" || plan === "Enterprise";
   if (!aiUnlocked) {
     return (
@@ -330,7 +321,7 @@ const AIGenerator = () => {
     );
   }
 
-  // ✅ Normal UI
+
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white px-10 py-10">
       {/* Header */}
@@ -351,28 +342,16 @@ const AIGenerator = () => {
 
       {/* Input */}
       <div className="max-w-5xl mx-auto mb-10">
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Paste client text or email content here..."
-          className="w-full h-56 bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-4 text-gray-200 placeholder-gray-500 focus:border-[#80FFF9] outline-none transition resize-none"
-        />
+        <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste client text or email content here..." className="w-full h-56 bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-4 text-gray-200 placeholder-gray-500 focus:border-[#80FFF9] outline-none transition resize-none"/>
 
         <div className="flex justify-center gap-4 mt-6">
-          <button
-            onClick={handleReset}
-            disabled={loading}
-            className="flex items-center gap-2 px-6 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition disabled:opacity-50"
-          >
+          {/* Reset button */}
+          <button onClick={handleReset} disabled={loading} className="flex items-center gap-2 px-6 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition disabled:opacity-50">
             <RotateCcw size={16} />
             Reset
           </button>
 
-          <button
-            onClick={handleExtract}
-            disabled={loading}
-            className="flex items-center gap-2 px-6 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition disabled:opacity-50"
-          >
+          <button onClick={handleExtract} disabled={loading} className="flex items-center gap-2 px-6 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition disabled:opacity-50">
             {loading ? (
               <>
                 <Loader2 className="animate-spin" size={16} />
@@ -386,14 +365,12 @@ const AIGenerator = () => {
             )}
           </button>
         </div>
+
       </div>
 
-      {/* Result */}
+      {/* Result - preview + buttons */} 
       {!loading && invoice && (
-        <div
-          ref={pdfRef}
-          className="max-w-5xl mx-auto bg-[#1a1a1a] border border-white/10 rounded-xl p-8 mt-10 shadow-lg shadow-indigo-500/10"
-        >
+        <div ref={pdfRef} className="max-w-5xl mx-auto bg-[#1a1a1a] border border-white/10 rounded-xl p-8 mt-10 shadow-lg shadow-indigo-500/10">
           <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
             <h2 className="text-2xl font-semibold text-[#80FFF9]">
               {invoice.invoice_number}
@@ -461,23 +438,20 @@ const AIGenerator = () => {
             </div>
           )}
 
+          {/* buttons */}
           <div className="flex justify-center gap-4 mt-8">
-            <button
-              onClick={handleDownloadPDF}
-              className="flex items-center gap-2 px-5 py-2 border border-white/20 text-gray-300 hover:text-[#80FFF9] hover:bg-white/10 rounded-md transition"
-            >
+            <button onClick={handleDownloadPDF} className="flex items-center gap-2 px-5 py-2 border border-white/20 text-gray-300 hover:text-[#80FFF9] hover:bg-white/10 rounded-md transition">
               <Download size={16} /> Download PDF
             </button>
 
-            <button
-              onClick={() => toast.success("Invoice saved successfully!")}
-              className="flex items-center gap-2 px-5 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition"
-            >
+            <button onClick={() => toast.success("Invoice saved successfully!")} className="flex items-center gap-2 px-5 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition">
               <Save size={16} /> Save
             </button>
           </div>
+
         </div>
       )}
+
     </div>
   );
 };

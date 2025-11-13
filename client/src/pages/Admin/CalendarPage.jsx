@@ -1,192 +1,305 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import {
-  CalendarDays,
-  Clock,
-  Plus,
-  Trash2,
-  StickyNote,
-  Save,
-  XCircle,
-} from "lucide-react";
-import { format } from "date-fns";
+import { CalendarDays, Plus, X, Trash2 } from "lucide-react";
+import { format, isSameDay } from "date-fns";
 import { toast } from "sonner";
-import API from "../../utils/api"; // pentru integrare ulterioară
 
 const CalendarPage = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [notes, setNotes] = useState([
-    {
-      id: 1,
-      date: "2025-11-11",
-      time: "10:00",
-      title: "Send invoice #INV-1023",
-    },
-    {
-      id: 2,
-      date: "2025-11-12",
-      time: "15:30",
-      title: "Meeting with client Alex",
-    },
-  ]);
+  const [openPopup, setOpenPopup] = useState(false);
   const [newNote, setNewNote] = useState({ time: "", title: "" });
+  const [editingEventId, setEditingEventId] = useState(null);
 
-  const dateKey = format(selectedDate, "yyyy-MM-dd");
-  const dayNotes = notes.filter((n) => n.date === dateKey);
+
+  // dummy data
+  const [notes, setNotes] = useState([
+    { id: 1, date: "2025-11-11", time: "10:00", title: "Send invoice #INV-1023" },
+    { id: 2, date: "2025-11-12", time: "15:30", title: "Meeting with Alex" },
+    { id: 3, date: "2025-11-12", time: "08:00", title: "Daily standup" },
+  ]);
+
+  const formattedDate = format(selectedDate, "yyyy-MM-dd");
+
+  // Events for selected day
+  const dayEvents = notes.filter((n) => n.date === formattedDate);
+
+  // Events for current month
+  const monthEvents = useMemo(() => {
+    const month = selectedDate.getMonth();
+    const year = selectedDate.getFullYear();
+    return notes.filter((n) => {
+      const d = new Date(n.date);
+      return d.getMonth() === month && d.getFullYear() === year;
+    });
+  }, [notes, selectedDate]);
 
   const addNote = () => {
-    if (!newNote.title || !newNote.time) {
-      toast.error("Please fill both time and title!");
+    if (!newNote.time || !newNote.title)
+      return toast.error("Please complete all fields!");
+
+    // --- EDIT MODE ---
+    if (editingEventId) {
+      setNotes((prev) =>
+        prev.map((ev) =>
+          ev.id === editingEventId
+            ? { ...ev, date: formattedDate, time: newNote.time, title: newNote.title }
+            : ev
+        )
+      );
+
+      toast.success("Event updated!");
+
+      // reset to ADD mode
+      setEditingEventId(null);
+      setNewNote({ time: "", title: "" });
+      setOpenPopup(false);
       return;
     }
+
+    // --- ADD MODE ---
     const newEvent = {
       id: Date.now(),
-      date: dateKey,
-      ...newNote,
+      date: formattedDate,
+      time: newNote.time,
+      title: newNote.title,
     };
-    setNotes([...notes, newEvent]);
+
+    setNotes((prev) => [...prev, newEvent]);
     setNewNote({ time: "", title: "" });
-    toast.success("Note added!");
+    toast.success("Event added!");
+    setOpenPopup(false);
   };
+
 
   const deleteNote = (id) => {
     setNotes(notes.filter((n) => n.id !== id));
-    toast.info("Note deleted");
-  };
-
-  const saveNotes = async () => {
-    try {
-      // exemplu de salvare în backend (opțional)
-      await API.post("/calendar/save", { notes });
-      toast.success("Notes saved to your account!");
-    } catch (err) {
-      toast.error("Failed to save notes");
-    }
+    toast.success("Event removed");
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white px-8 py-10">
-      {/* ===== HEADER ===== */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
+    <div className="min-h-screen bg-[#0e0e0e] text-white p-10">
+
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-semibold flex items-center gap-2">
             <CalendarDays className="text-[#80FFF9]" size={26} />
-            Calendar & Notes
+            Calendar
           </h1>
           <p className="text-gray-400 text-sm">
-            Track invoices, meetings, and daily reminders
+            Track meetings, reminders and invoice-related events.
           </p>
         </div>
-        <button
-          onClick={saveNotes}
-          className="flex items-center gap-2 bg-linear-to-r from-indigo-600 to-purple-600 px-5 py-2 rounded-md hover:opacity-90 transition"
-        >
-          <Save size={16} /> Save Notes
+
+        {/* NEW EVENT BUTTON (INDIGO VARIANT) */}
+        <button onClick={() => setOpenPopup(true)} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2">
+          <Plus size={16} className="text-indigo-400" />
+          New Event
         </button>
       </div>
 
-      {/* ===== MAIN SECTION ===== */}
-      <div className="grid md:grid-cols-3 gap-6">
-        {/* ==== LEFT SIDE: Calendar ==== */}
-        <div className="md:col-span-2 bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg shadow-indigo-900/10">
+      {/* GRID LAYOUT */}
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-10">
+
+        {/* === MAIN CALENDAR (FULL WIDTH, NO BOX) === */}
+        <div className="w-full">
           <Calendar
             onChange={setSelectedDate}
             value={selectedDate}
-            tileClassName={({ date, view }) => {
-              const formatted = format(date, "yyyy-MM-dd");
-              if (notes.find((n) => n.date === formatted)) {
-                return "react-calendar__tile--hasEvent";
-              }
+            className="full-calendar"
+            tileClassName={({ date }) => {
+              const key = format(date, "yyyy-MM-dd");
+              if (notes.some((n) => n.date === key)) return "has-event";
+              if (isSameDay(date, new Date())) return "today-highlight";
               return null;
             }}
-            className="rounded-xl overflow-hidden text-black"
           />
+
+          {/* CUSTOM CALENDAR STYLING */}
           <style>{`
-            .react-calendar {
-              background: #1a1a1a;
-              border: none;
-              color: #f3f3f3;
+            .full-calendar {
               width: 100%;
-              border-radius: 0.75rem;
+              background: transparent;
+              border: none;
+              padding: 10px;
+              color: #e8e8e8;
             }
-            .react-calendar__tile--hasEvent {
-              background: linear-gradient(90deg, #80FFF9 0%, #CB52D4 100%);
-              color: black !important;
-              border-radius: 6px;
+
+            /* FIX GRID 7 COLUMNS */
+            .full-calendar .react-calendar__month-view__days {
+              display: grid !important;
+              grid-template-columns: repeat(7, 1fr) !important;
+              gap: 6px !important;
             }
+
+            .full-calendar .react-calendar__tile {
+              height: 120px;
+              border-radius: 18px;
+              background: #131313;
+              border: 1px solid #1f1f1f;
+              transition: 0.2s;
+              padding: 12px;
+              font-size: 1rem;
+            }
+
+            .full-calendar .react-calendar__tile:hover {
+              background: #1b1b1b;
+              cursor: pointer;
+            }
+
+            /* Navigation (remove white hover) */
             .react-calendar__navigation button {
               color: #80FFF9;
+              background: transparent !important;
+            }
+            .react-calendar__navigation button:hover {
+              background: #1b1b1b !important;
+            }
+
+            /* EVENTS */
+            .has-event {
+              background: rgba(79, 70, 229, 0.25) !important; /* indigo-600/25 */
+              border: 1px solid rgba(79, 70, 229, 0.4) !important; /* indigo-600/40 */
+              color: rgb(129, 140, 248) !important; /* text-indigo-300 */
               font-weight: 600;
             }
-            .react-calendar__month-view__days__day--weekend {
-              color: #CB52D4;
+
+
+            .today-highlight {
+              outline: 2px solid #80FFF9;
+              outline-offset: -3px;
             }
           `}</style>
         </div>
 
-        {/* ==== RIGHT SIDE: Notes ==== */}
-        <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg shadow-indigo-900/10 flex flex-col">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <StickyNote className="text-[#CB52D4]" size={20} />
-            Notes for {format(selectedDate, "MMM d, yyyy")}
-          </h2>
+        {/* === RIGHT SIDEBAR === */}
+        <div className="flex flex-col gap-6">
 
-          {/* Add new note */}
-          <div className="flex flex-col gap-3 mb-4">
-            <input
-              type="time"
-              value={newNote.time}
-              onChange={(e) =>
-                setNewNote({ ...newNote, time: e.target.value })
+          {/* MINI CALENDAR (NO NAVIGATION) */}
+          <div className="bg-[#111]/60 border border-white/10 rounded-2xl p-5 shadow-lg">
+            <Calendar value={selectedDate} className="mini-calendar" tileDisabled={() => true} navigationLabel={({ date }) => format(date, "MMMM yyyy")} next2Label={null} nextLabel={null} prevLabel={null} prev2Label={null}/>
+
+            <style>{`
+              .mini-calendar {
+                background: transparent !important;
+                border: none !important;
+                color: white !important;
               }
-              className="bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 text-gray-200 focus:border-[#80FFF9] outline-none"
-            />
-            <input
-              type="text"
-              placeholder="Write a short note..."
-              value={newNote.title}
-              onChange={(e) =>
-                setNewNote({ ...newNote, title: e.target.value })
+              .mini-calendar .react-calendar__tile {
+                background: transparent !important;
+                color: white !important;
+                border-radius: 10px;
+                padding: 10px;
+                transition: 0.15s;
               }
-              className="bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 text-gray-200 placeholder-gray-500 focus:border-[#80FFF9] outline-none"
-            />
-            <button
-              onClick={addNote}
-              className="flex items-center justify-center gap-2 bg-linear-to-r from-indigo-600 to-purple-600 px-4 py-2 rounded-md hover:opacity-90 transition"
-            >
-              <Plus size={16} /> Add Note
-            </button>
+              .mini-calendar .react-calendar__tile:hover {
+                background: rgba(255,255,255,0.05) !important;
+              }
+              .mini-calendar .react-calendar__tile--now {
+                background: rgba(79, 70, 229, 0.25) !important;
+                border: 1px solid rgba(79, 70, 229, 0.40) !important;
+                color: white !important;
+              }
+              .mini-calendar .react-calendar__month-view__days__day--neighboringMonth {
+                color: #555 !important;
+              }
+              .mini-calendar .react-calendar__navigation button {
+                background: transparent !important;
+                color: #CB52D4 !important;
+                font-weight: 600;
+                font-size: 1.1rem;
+              }
+              .mini-calendar button:focus {
+                outline: none !important;
+                background: transparent !important;
+              }
+            `}</style>
           </div>
 
-          {/* Notes list */}
-          <div className="space-y-3 overflow-y-auto max-h-[350px]">
-            {dayNotes.length === 0 ? (
-              <div className="text-gray-500 flex items-center gap-2">
-                <XCircle size={16} /> No notes for this date
-              </div>
+          {/* MONTH EVENTS */}
+          <div className="bg-[#111]/60 border border-white/10 rounded-2xl p-6 shadow-lg flex flex-col">
+            <h2 className="text-lg font-semibold mb-3"> Events this month</h2>
+
+            {monthEvents.length === 0 ? (
+              <p className="text-gray-500 text-sm">No events this month.</p>
             ) : (
-              dayNotes.map((note) => (
-                <div
-                  key={note.id}
-                  className="flex justify-between items-center bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-3 hover:bg-[#1a1a1a]/90 transition"
-                >
-                  <div>
-                    <p className="font-medium text-[#80FFF9]">{note.time}</p>
-                    <p className="text-gray-300 text-sm">{note.title}</p>
-                  </div>
-                  <button
-                    onClick={() => deleteNote(note.id)}
-                    className="text-gray-500 hover:text-red-400 transition"
+              <div className="flex flex-col gap-3 max-h-[250px] overflow-y-auto pr-2">
+                {monthEvents.map((ev) => (
+                  <div key={ev.id} className="bg-[#1a1a1a] border border-white/10 rounded-xl p-3 hover:bg-[#222] transition flex justify-between items-center"
                   >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              ))
+                    <div>
+                      <p className="text-indigo-400 text-sm font-semibold">
+                        {format(new Date(ev.date), "MMM d")} — {ev.time}
+                      </p>
+                      <p className="text-gray-300 text-sm">{ev.title}</p>
+                    </div>
+
+                    {/* ACTION BUTTONS */}
+                    <div className="flex items-center gap-3">
+
+                      {/* EDIT */}
+                      <button onClick={() => { setNewNote({ time: ev.time, title: ev.title }); setSelectedDate(new Date(ev.date)); setEditingEventId(ev.id); setOpenPopup(true);}}
+                        className="text-indigo-400 hover:text-indigo-300 transition">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-edit" width="18" height="18" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                          <path stroke="none" d="M0 0h24v24H0z" />
+                          <path d="M7 7h-.01" />
+                          <path d="M4 20h4l10 -10l-4 -4l-10 10v4" />
+                          <path d="M14 6l4 4" />
+                        </svg>
+                      </button>
+
+
+                      {/* DELETE */}
+                      <button onClick={() => deleteNote(ev.id)} className="text-red-500 hover:text-red-400 transition">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
+
+
         </div>
       </div>
+
+      {/* === POPUP ADD EVENT === */}
+      {openPopup && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center">
+          <div className="bg-[#111] p-6 rounded-2xl w-[350px] border border-white/10 shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">
+                {editingEventId ? "Edit Event" : "New Event"}
+              </h3>
+              <X className="cursor-pointer hover:text-red-400" onClick={() => setOpenPopup(false)}
+              />
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <input type="time" value={newNote.time} onChange={(e) => setNewNote({ ...newNote, time: e.target.value })}
+                className="bg-[#0d0d0d] border border-white/10 px-4 py-2 rounded-xl outline-none"
+              />
+
+              <input type="text" placeholder="Event title..." value={newNote.title} onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
+                 className="bg-[#0d0d0d] border border-white/10 px-4 py-2 rounded-xl outline-none"
+              />
+
+              <button onClick={addNote} className="bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 py-2 rounded-xl flex justify-center items-center gap-2 transition text-indigo-300">
+                <Plus size={16} /> 
+                {editingEventId ? 
+                "Save Changes" 
+                : 
+                "Add Event"}
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

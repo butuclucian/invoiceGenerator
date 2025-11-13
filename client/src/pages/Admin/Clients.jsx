@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  UserPlus,
-  Edit,
-  Trash2,
-  Mail,
-  Phone,
-  Building2,
-  MapPin,
-  Users,
-} from "lucide-react";
+import { UserPlus, Edit, Trash2, Mail, Phone, Building2, MapPin, Users,} from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import API from "../../utils/api";
@@ -18,7 +9,7 @@ const Clients = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // ✅ Fetch clients
+  // Fetch clients
   const fetchClients = async () => {
     try {
       setLoading(true);
@@ -35,7 +26,7 @@ const Clients = () => {
     fetchClients();
   }, []);
 
-  // ✅ Delete client
+  //  Delete client
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this client?")) return;
 
@@ -86,31 +77,23 @@ const Clients = () => {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {clients.map((client) => (
-            <div
-              key={client._id}
-              className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-6 hover:border-[#80FFF9]/40 transition-all shadow-md shadow-indigo-500/5"
-            >
+            <div key={client._id} className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-6 hover:border-[#80FFF9]/40 transition-all shadow-md shadow-indigo-500/5">
               {/* Header */}
               <div className="flex items-center justify-between mb-3">
+                
                 <h2 className="text-lg font-semibold text-white">
                   {client.name}
                 </h2>
+
+                {/* buttons */}
                 <div className="flex items-center gap-2">
-                  {/* ✏️ Edit Button - navigates to edit page */}
-                  <button
-                    onClick={() => navigate(`/dashboard/clients/${client._id}/edit`)}
-                    className="p-2 text-gray-400 hover:text-indigo-400 transition"
-                    title="Edit"
-                  >
+                  {/*  Edit Button  */}
+                  <button onClick={() => navigate(`/dashboard/clients/${client._id}/edit`)} className="p-2 text-gray-400 hover:text-indigo-400 transition" title="Edit">
                     <Edit size={18} />
                   </button>
 
-                  {/* 🗑 Delete Button */}
-                  <button
-                    onClick={() => handleDelete(client._id)}
-                    className="p-2 text-gray-400 hover:text-red-400 transition"
-                    title="Delete"
-                  >
+                  {/* Delete Button */}
+                  <button onClick={() => handleDelete(client._id)} className="p-2 text-gray-400 hover:text-red-400 transition" title="Delete">
                     <Trash2 size={18} />
                   </button>
                 </div>
@@ -141,6 +124,7 @@ const Clients = () => {
                   </div>
                 )}
               </div>
+
             </div>
           ))}
         </div>

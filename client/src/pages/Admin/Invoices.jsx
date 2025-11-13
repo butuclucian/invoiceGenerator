@@ -14,7 +14,7 @@ const Invoices = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // ✅ Fetch invoices
+  //  Fetch invoices
   const fetchInvoices = async () => {
     try {
       setLoading(true);
@@ -43,7 +43,7 @@ const Invoices = () => {
     fetchInvoices();
   }, []);
 
-  // ✅ Filter logic
+  // Filter logic
   useEffect(() => {
     if (filterStatus === "all") setFilteredInvoices(invoices);
     else setFilteredInvoices(invoices.filter((i) => i.status === filterStatus));
@@ -172,19 +172,19 @@ const Invoices = () => {
   body: items,
   theme: "grid",
   headStyles: {
-    fillColor: accent,       // 🔵 folosește noul accent albastru
-    textColor: [255, 255, 255], // alb pentru contrast
+    fillColor: accent,       
+    textColor: [255, 255, 255],
     fontStyle: "bold",
   },
   styles: {
     halign: "center",
     textColor: [50, 50, 50],
-    lineColor: [180, 180, 180], // mai închis decât griul default
+    lineColor: [180, 180, 180], 
     fontSize: 10,
-    fillColor: [245, 247, 250], // 🔹 un fundal gri-albastru foarte subtil pentru rânduri
+    fillColor: [245, 247, 250], 
   },
   alternateRowStyles: {
-    fillColor: [250, 250, 250], // alb pentru contrast alternativ
+    fillColor: [250, 250, 250], 
   },
   margin: { left: 15, right: 15 },
 });
@@ -251,6 +251,7 @@ const Invoices = () => {
     <div className="relative p-8 text-white min-h-screen bg-[#0e0e0e]">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+        {/* title + subtitle */}
         <div>
           <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
             <FileText className="text-[#80FFF9]" size={26} />
@@ -261,14 +262,12 @@ const Invoices = () => {
           </p>
         </div>
 
-        {/* 🧾 Create Invoice button */}
-        <button
-          onClick={() => navigate("/dashboard/invoices/create")}
-          className="flex items-center gap-2 bg-linear-to-r from-indigo-600 to-purple-600 px-5 py-2 rounded-md hover:opacity-90 transition"
-        >
+        {/* create Invoice button */}
+        <button onClick={() => navigate("/dashboard/invoices/create")} className="flex items-center gap-2 bg-linear-to-r from-indigo-600 to-purple-600 px-5 py-2 rounded-md hover:opacity-90 transition">
           <Plus size={18} />
           Create Invoice
         </button>
+
       </div>
 
       {/* Filter */}
@@ -277,20 +276,19 @@ const Invoices = () => {
           <Filter size={18} className="text-[#80FFF9]" />
           <span className="text-gray-300">Filter by status:</span>
         </div>
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="bg-[#0e0e0e]/80 border border-white/10 text-gray-200 px-4 py-2 rounded-md outline-none focus:border-[#80FFF9] cursor-pointer"
-        >
+
+        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="bg-[#0e0e0e]/80 border border-white/10 text-gray-200 px-4 py-2 rounded-md outline-none focus:border-[#80FFF9] cursor-pointer">
           <option value="all">All</option>
           <option value="draft">Draft</option>
           <option value="sent">Sent</option>
           <option value="paid">Paid</option>
           <option value="overdue">Overdue</option>
+        
         </select>
         <span className="text-gray-400 text-sm">
           Showing {filteredInvoices.length} of {invoices.length}
         </span>
+      
       </div>
 
       {/* Loading / Empty / List */}
@@ -307,10 +305,7 @@ const Invoices = () => {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredInvoices.map((inv) => (
-            <div
-              key={inv._id}
-              className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-6 hover:border-[#80FFF9]/40 transition-all"
-            >
+            <div key={inv._id} className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-6 hover:border-[#80FFF9]/40 transition-all">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-semibold">{inv.invoice_number}</h2>
                 <span
@@ -322,8 +317,7 @@ const Invoices = () => {
                       : inv.status === "draft"
                       ? "bg-gray-500/20 text-gray-400"
                       : "bg-red-500/20 text-red-400"
-                  }`}
-                >
+                  }`}>
                   {inv.status}
                 </span>
               </div>
@@ -342,6 +336,7 @@ const Invoices = () => {
                 </p>
               </div>
 
+              {/* buttons */}
               <div className="flex justify-between mt-4">
 
                 <button onClick={() => navigate(`/dashboard/invoices/${inv._id}/edit`)} className="p-2 text-gray-400 hover:text-indigo-400 transition">

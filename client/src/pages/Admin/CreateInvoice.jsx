@@ -1,17 +1,11 @@
 import React, { useState, useEffect } from "react";
-import {
-  Save,
-  X,
-  Plus,
-  Trash2,
-  RotateCcw,
-  FilePlus2,
-} from "lucide-react";
+import { Save, X, Plus, Trash2, RotateCcw, FilePlus2,} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import API from "../../utils/api"; // ✅ axios global cu token interceptor
+import API from "../../utils/api";
 
 const CreateInvoice = () => {
+  
   const navigate = useNavigate();
   const [clients, setClients] = useState([]);
 
@@ -30,13 +24,13 @@ const CreateInvoice = () => {
   total: 0,
   payment_terms: "",
   notes: "",
-  recurring: false,       // ✅ nou
-  frequency: "monthly",   // ✅ nou
-  next_billing: "",       // ✅ nou
+  recurring: false,     
+  frequency: "monthly", 
+  next_billing: "",     
 });
 
 
-  // ✅ Fetch clients from backend
+  //  Fetch clients from backend
   useEffect(() => {
     const fetchClients = async () => {
       try {
@@ -159,57 +153,45 @@ const CreateInvoice = () => {
       <form onSubmit={handleSubmit} className="max-w-6xl mx-auto space-y-12">
         {/* --- SECTION 1: Invoice Details --- */}
         <section>
+          {/* title */}
           <h2 className="text-xl font-semibold mb-4 text-[#80FFF9] border-b border-white/10 pb-2">
             Invoice Details
           </h2>
+          {/* inv nr, date, due date */}
           <div className="grid md:grid-cols-3 gap-6">
+            {/* inv nr */}
             <div>
               <label className="text-gray-300 block mb-1">
                 Invoice Number <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                name="invoice_number"
-                value={formData.invoice_number}
-                onChange={handleChange}
-                className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
-              />
+              <input type="text" name="invoice_number" value={formData.invoice_number} onChange={handleChange} className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"/>
             </div>
+
+            {/* inv date */}
             <div>
               <label className="text-gray-300 block mb-1">
                 Date <span className="text-red-500">*</span>
               </label>
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleChange}
-                className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
-              />
+              <input type="date" name="date" value={formData.date} onChange={handleChange} className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"/>
             </div>
+
+            {/* due date */}
             <div>
               <label className="text-gray-300 block mb-1">Due Date</label>
-              <input
-                type="date"
-                name="due_date"
-                value={formData.due_date}
-                onChange={handleChange}
-                className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
-              />
+              <input type="date" name="due_date" value={formData.due_date} onChange={handleChange} className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"/>
             </div>
+
           </div>
 
+          {/* select client and set inv status */}
           <div className="grid md:grid-cols-2 gap-10 mt-6">
+            {/* client */}
             <div>
               <label className="text-gray-300 block mb-1">
                 Client <span className="text-red-500">*</span>
               </label>
-              <select
-                name="client"
-                value={formData.client}
-                onChange={handleChange}
-                className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
-              >
+
+              <select name="client" value={formData.client} onChange={handleChange} className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]" >
                 <option value="">Select a client</option>
                 {clients.map((c) => (
                   <option key={c._id} value={c._id}>
@@ -219,117 +201,94 @@ const CreateInvoice = () => {
               </select>
             </div>
 
+            {/* inv status */}
             <div>
               <label className="text-gray-300 block mb-1">
                 Status <span className="text-red-500">*</span>
               </label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
-              >
+              <select name="status" value={formData.status} onChange={handleChange} className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]">
                 <option value="draft">Draft</option>
                 <option value="sent">Sent</option>
                 <option value="paid">Paid</option>
                 <option value="overdue">Overdue</option>
               </select>
             </div>
+
           </div>
+
         </section>
 
         {/* --- SECTION 2: Items --- */}
         <section>
+          {/* title and add item button */}
           <h2 className="text-xl font-semibold mb-4 text-[#80FFF9] border-b border-white/10 pb-2 flex justify-between items-center">
             Items
-            <button
-              type="button"
-              onClick={addItem}
-              className="flex items-center gap-2 text-[#80FFF9] hover:text-white transition"
-            >
+            <button type="button" onClick={addItem} className="flex items-center gap-2 text-[#80FFF9] hover:text-white transition">
               <Plus size={18} /> Add Item
             </button>
           </h2>
 
+          {/* desc, wuantity, unit price, total, remove button */}
           {formData.items.map((item, index) => (
-            <div
-              key={index}
-              className="grid md:grid-cols-12 gap-4 items-end p-4 bg-[#1a1a1a]/70 border border-white/10 rounded-lg mb-3"
-            >
+            <div key={index} className="grid md:grid-cols-12 gap-4 items-end p-4 bg-[#1a1a1a]/70 border border-white/10 rounded-lg mb-3">
+              
+              {/* desc */}
               <div className="md:col-span-5">
                 <label className="text-gray-300 block mb-1">
                   Description <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={item.description}
-                  onChange={(e) =>
-                    handleItemChange(index, "description", e.target.value)
-                  }
-                  className="w-full bg-transparent border border-white/10 rounded-md px-3 py-2 text-white focus:border-[#80FFF9]"
-                  required
-                />
+                <input type="text" value={item.description} onChange={(e) =>  handleItemChange(index, "description", e.target.value)} className="w-full bg-transparent border border-white/10 rounded-md px-3 py-2 text-white focus:border-[#80FFF9]" required/>
               </div>
+
+              {/* quantity */}
               <div className="md:col-span-2">
                 <label className="text-gray-300 block mb-1">
                   Quantity <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="number"
-                  value={item.quantity}
-                  onChange={(e) =>
-                    handleItemChange(index, "quantity", e.target.value)
-                  }
-                  className="w-full bg-transparent border border-white/10 rounded-md px-3 py-2 text-white focus:border-[#80FFF9]"
-                />
+                <input type="number" value={item.quantity} onChange={(e) => handleItemChange(index, "quantity", e.target.value)} className="w-full bg-transparent border border-white/10 rounded-md px-3 py-2 text-white focus:border-[#80FFF9]"/>
               </div>
+
+              {/* unit price */}
               <div className="md:col-span-2">
+
                 <label className="text-gray-300 block mb-1">
                   Unit Price <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="number"
-                  value={item.unit_price}
-                  onChange={(e) =>
-                    handleItemChange(index, "unit_price", e.target.value)
-                  }
-                  className="w-full bg-transparent border border-white/10 rounded-md px-3 py-2 text-white focus:border-[#80FFF9]"
-                />
+
+                <input type="number" value={item.unit_price} onChange={(e) => handleItemChange(index, "unit_price", e.target.value)} className="w-full bg-transparent border border-white/10 rounded-md px-3 py-2 text-white focus:border-[#80FFF9]"/>
               </div>
+
+              {/* total */}
               <div className="md:col-span-2">
                 <label className="text-gray-300 block mb-1">Total</label>
-                <input
-                  readOnly
-                  value={`$${item.total.toFixed(2)}`}
-                  className="w-full bg-transparent border border-white/10 rounded-md px-3 py-2 text-gray-400"
-                />
+                <input readOnly value={`$${item.total.toFixed(2)}`} className="w-full bg-transparent border border-white/10 rounded-md px-3 py-2 text-gray-400"/>
               </div>
+
+              {/* remove button */}
               <div className="md:col-span-1 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => removeItem(index)}
-                  className="p-2 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-md transition"
-                >
+                <button type="button" onClick={() => removeItem(index)} className="p-2 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-md transition">
                   <Trash2 size={16} />
                 </button>
               </div>
+
             </div>
           ))}
         </section>
 
         {/* --- SECTION 3: Additional Info --- */}
         <section>
+
+          {/* title */}
           <h2 className="text-xl font-semibold mb-4 text-[#80FFF9] border-b border-white/10 pb-2">
             Additional Information
           </h2>
 
+          {/* details */}
           <div className="grid md:grid-cols-2 gap-6">
+            
             <div>
               <label className="text-gray-300 block mb-1">Tax Rate (%)</label>
-              <input
-                type="number"
-                value={formData.tax_rate}
-                onChange={(e) =>
+              <input type="number" value={formData.tax_rate} onChange={(e) =>
                   setFormData({
                     ...formData,
                     tax_rate: parseFloat(e.target.value) || 0,
@@ -343,11 +302,10 @@ const CreateInvoice = () => {
                 className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
               />
             </div>
+            
             <div>
               <label className="text-gray-300 block mb-1">Discount Rate (%)</label>
-              <input
-                type="number"
-                value={formData.discount_rate}
+              <input type="number" value={formData.discount_rate}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -362,8 +320,10 @@ const CreateInvoice = () => {
                 className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
               />
             </div>
+
           </div>
 
+          {/* subtotal, discount, tax, total */}
           <div className="mt-4 space-y-2 text-gray-300 border-t border-white/10 pt-4">
             <div className="flex justify-between">
               <span>Subtotal:</span>
@@ -390,56 +350,38 @@ const CreateInvoice = () => {
             </div>
           </div>
 
+          {/* additional info */}
           <div className="grid md:grid-cols-2 gap-6 mt-6">
+            
+            {/* payment terms */}
             <div>
               <label className="text-gray-300 block mb-1">Payment Terms</label>
-              <input
-                type="text"
-                name="payment_terms"
-                placeholder="e.g. Net 30"
-                value={formData.payment_terms}
-                onChange={handleChange}
-                className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
-              />
+              <input type="text" name="payment_terms" placeholder="e.g. Net 30" value={formData.payment_terms} onChange={handleChange} className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"/>
             </div>
+
+            {/* notes */}
             <div>
               <label className="text-gray-300 block mb-1">Notes</label>
-              <textarea
-                name="notes"
-                placeholder="Additional information..."
-                value={formData.notes}
-                onChange={handleChange}
-                rows="3"
-                className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9] resize-none"
-              />
+              <textarea name="notes" placeholder="Additional information..." value={formData.notes} onChange={handleChange} rows="3" className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9] resize-none"/>
             </div>
+
           </div>
+
         </section>
 
-        {/* --- SECTION 4: Recurring Settings --- */}
+        {/* Recurring Settings  */}
         <section>
+          {/* title */}
           <h2 className="text-xl font-semibold mb-4 text-[#80FFF9] border-b border-white/10 pb-2">
             Recurring Invoice
           </h2>
 
+          {/* details */}
           <div className="space-y-4">
+
             <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="recurring"
-                checked={formData.recurring}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    recurring: e.target.checked,
-                  })
-                }
-                className="w-5 h-5 accent-[#80FFF9] cursor-pointer"
-              />
-              <label
-                htmlFor="recurring"
-                className="text-gray-300 text-sm select-none cursor-pointer"
-              >
+              <input type="checkbox" id="recurring" checked={formData.recurring} onChange={(e) => setFormData({...formData, recurring: e.target.checked})} className="w-5 h-5 accent-[#80FFF9] cursor-pointer"/>
+              <label htmlFor="recurring" className="text-gray-300 text-sm select-none cursor-pointer">
                 Mark this invoice as recurring (auto-generated periodically)
               </label>
             </div>
@@ -450,12 +392,7 @@ const CreateInvoice = () => {
                   <label className="text-gray-300 block mb-1">
                     Frequency <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    name="frequency"
-                    value={formData.frequency}
-                    onChange={handleChange}
-                    className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
-                  >
+                  <select name="frequency" value={formData.frequency} onChange={handleChange} className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]">
                     <option value="weekly">Weekly</option>
                     <option value="monthly">Monthly</option>
                     <option value="quarterly">Quarterly</option>
@@ -467,48 +404,37 @@ const CreateInvoice = () => {
                   <label className="text-gray-300 block mb-1">
                     Next Billing Date <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="date"
-                    name="next_billing"
-                    value={formData.next_billing}
-                    onChange={handleChange}
-                    className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"
-                  />
+                  <input type="date" name="next_billing" value={formData.next_billing} onChange={handleChange} className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9]"/>
                 </div>
               </div>
             )}
           </div>
+
         </section>
 
 
         {/* Sticky Footer */}
         <div className="fixed bottom-0 right-0 left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-4 z-40">
           <div className="flex justify-center gap-4 pr-8">
-            <button
-              type="button"
-              onClick={handleReset}
-              className="flex items-center gap-2 px-5 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition"
-            >
+            
+            <button type="button" onClick={handleReset} className="flex items-center gap-2 px-5 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition">
               <RotateCcw size={16} />
               Reset
             </button>
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-2 px-5 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition"
-            >
+            
+            <button type="button" onClick={() => navigate(-1)} className="flex items-center gap-2 px-5 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition">
               <X size={16} />
               Cancel
             </button>
-            <button
-              type="submit"
-              className="flex items-center gap-2 px-5 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition"
-            >
+            
+            <button type="submit" className="flex items-center gap-2 px-5 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition">
               <Save size={16} />
               Save Invoice
             </button>
+          
           </div>
         </div>
+
       </form>
     </div>
   );

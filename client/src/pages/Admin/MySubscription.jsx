@@ -1,16 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  CheckCircle,
-  AlertTriangle,
-  Sparkles,
-  Clock,
-  Zap,
-  ArrowUpRight,
-  Crown,
-  CreditCard,
-  Rocket,
-  ShieldCheck,
-} from "lucide-react";
+import { CheckCircle, AlertTriangle, Sparkles, Clock, Zap, ArrowUpRight, Crown, CreditCard, Rocket, ShieldCheck,} from "lucide-react";
 import { toast } from "sonner";
 import API from "../../utils/api";
 
@@ -57,7 +46,7 @@ const MySubscription = () => {
         return;
       }
 
-      // ✅ Trimite cererea la backend pentru a crea o sesiune Stripe
+      //  Trimite cererea la backend pentru a crea o sesiune Stripe
       const { data } = await API.post(
         "/subscription/create-checkout-session",
         { plan: target.toLowerCase() },
@@ -66,7 +55,7 @@ const MySubscription = () => {
 
       if (data?.url) {
         toast.success(`Redirecting to Stripe Checkout (${target})...`);
-        window.location.href = data.url; // Stripe Checkout Page
+        window.location.href = data.url; 
       } else {
         toast.error("Failed to start checkout.");
       }
@@ -106,6 +95,7 @@ const MySubscription = () => {
     <div className="min-h-screen bg-[#0e0e0e] text-white px-8 py-12">
       {/* ===== HEADER ===== */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-4">
+        {/* title + subtitle */}
         <div>
           <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
             <Crown className="text-[#80FFF9]" size={26} />
@@ -124,8 +114,7 @@ const MySubscription = () => {
                 : plan === "Enterprise"
                 ? "text-[#CB52D4] border-[#CB52D4]/30 bg-[#CB52D4]/10"
                 : "text-gray-400 border-white/10 bg-white/5"
-            }`}
-          >
+            }`}>
             <Sparkles size={16} />
             You’re {plan === "Enterprise" ? "Enterprise" : plan}!
           </div>
@@ -133,9 +122,7 @@ const MySubscription = () => {
       </div>
 
       {/* ===== MAIN CARD ===== */}
-      <div
-        className={`max-w-4xl mx-auto bg-linear-to-br ${planColors[plan]} border rounded-2xl p-10 shadow-lg shadow-indigo-900/10 relative overflow-hidden transition-all`}
-      >
+      <div className={`max-w-4xl mx-auto bg-linear-to-br ${planColors[plan]} border rounded-2xl p-10 shadow-lg shadow-indigo-900/10 relative overflow-hidden transition-all`}>
         <div className="absolute inset-0 bg-linear-to-r from-[#80FFF9]/5 to-[#CB52D4]/10 blur-3xl -z-10" />
 
         {/* HEADER INFO */}
@@ -196,30 +183,21 @@ const MySubscription = () => {
         {/* ACTIONS */}
         <div className="flex justify-end gap-4">
           {plan === "Free" && (
-            <button
-              onClick={() => handleUpgrade("Pro")}
-              className="flex items-center gap-2 px-6 py-3 rounded-md bg-linear-to-r from-indigo-600 to-purple-600 text-white hover:opacity-90 transition-all shadow-lg shadow-indigo-800/20"
-            >
+            <button onClick={() => handleUpgrade("Pro")} className="flex items-center gap-2 px-6 py-3 rounded-md bg-linear-to-r from-indigo-600 to-purple-600 text-white hover:opacity-90 transition-all shadow-lg shadow-indigo-800/20">
               <Zap size={18} />
               Upgrade to Pro
             </button>
           )}
 
           {plan === "Pro" && isActive && (
-            <button
-              onClick={handleManageBilling}
-              className="flex items-center gap-2 px-6 py-3 border border-white/10 rounded-md text-gray-300 hover:bg-white/10 hover:text-white transition"
-            >
+            <button onClick={handleManageBilling} className="flex items-center gap-2 px-6 py-3 border border-white/10 rounded-md text-gray-300 hover:bg-white/10 hover:text-white transition" >
               <CreditCard size={16} />
               Manage Billing
             </button>
           )}
 
           {plan === "Enterprise" && isActive && (
-            <button
-              onClick={() => toast.success("You're at the top tier!")}
-              className="flex items-center gap-2 px-6 py-3 border border-white/10 rounded-md text-gray-300 hover:bg-white/10 hover:text-white transition"
-            >
+            <button onClick={() => toast.success("You're at the top tier!")} className="flex items-center gap-2 px-6 py-3 border border-white/10 rounded-md text-gray-300 hover:bg-white/10 hover:text-white transition">
               <ShieldCheck size={16} />
               Manage Account
             </button>
@@ -264,37 +242,32 @@ const MySubscription = () => {
   );
 };
 
-/* 🔹 Reusable Feature */
-const Feature = ({ text, muted }) => (
-  <div className={`flex items-center gap-2 ${
-      muted ? "opacity-50 text-gray-500" : "text-gray-200"
-    }`}
-  >
-    <CheckCircle
-      size={16}
-      className={muted ? "text-gray-600" : "text-[#80FFF9]"}
-    />
-    {text}
-  </div>
-);
 
-/* 🔹 Upgrade Suggestion Card */
-const UpgradeCard = ({ title, desc, gradient, button, icon: Icon, onClick, disabled,}) => (
-  <div className={`max-w-4xl mx-auto mt-12 bg-linear-to-r ${gradient} border border-white/10 rounded-2xl p-8 text-center relative overflow-hidden`}>
-    <div className="absolute inset-0 bg-linear-to-r from-[#80FFF9]/10 to-[#CB52D4]/10 blur-2xl -z-10" />
-    <Icon className="mx-auto mb-4 text-[#80FFF9]" size={40} />
-    <h3 className="text-2xl font-semibold mb-3">{title}</h3>
-    <p className="text-gray-400 max-w-md mx-auto mb-6">{desc}</p>
-    <button onClick={!disabled ? onClick : null} disabled={disabled}
-      className={`px-8 py-3 rounded-full text-white font-medium transition flex items-center justify-center gap-2 mx-auto ${
-        disabled
-          ? "bg-white/10 text-gray-400 cursor-not-allowed"
-          : "bg-linear-to-r from-indigo-600 to-purple-600 hover:opacity-90"
+  const Feature = ({ text, muted }) => (
+    <div className={`flex items-center gap-2 ${
+        muted ? "opacity-50 text-gray-500" : "text-gray-200"
       }`}>
-      <ArrowUpRight size={18} />
-      {button}
-    </button>
-  </div>
+      <CheckCircle size={16} className={muted ? "text-gray-600" : "text-[#80FFF9]"}/>
+      {text}
+    </div>
+  );
+
+  const UpgradeCard = ({ title, desc, gradient, button, icon: Icon, onClick, disabled,}) => (
+    <div className={`max-w-4xl mx-auto mt-12 bg-linear-to-r ${gradient} border border-white/10 rounded-2xl p-8 text-center relative overflow-hidden`}>
+      <div className="absolute inset-0 bg-linear-to-r from-[#80FFF9]/10 to-[#CB52D4]/10 blur-2xl -z-10" />
+      <Icon className="mx-auto mb-4 text-[#80FFF9]" size={40} />
+      <h3 className="text-2xl font-semibold mb-3">{title}</h3>
+      <p className="text-gray-400 max-w-md mx-auto mb-6">{desc}</p>
+      <button onClick={!disabled ? onClick : null} disabled={disabled}
+        className={`px-8 py-3 rounded-full text-white font-medium transition flex items-center justify-center gap-2 mx-auto ${
+          disabled
+            ? "bg-white/10 text-gray-400 cursor-not-allowed"
+            : "bg-linear-to-r from-indigo-600 to-purple-600 hover:opacity-90"
+        }`}>
+        <ArrowUpRight size={18} />
+        {button}
+      </button>
+    </div>
 );
 
 export default MySubscription;

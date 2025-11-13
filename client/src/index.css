@@ -29,15 +29,6 @@ body{
     }
 }
 
-/* @layer base {
-  input:not([type="checkbox"]) {
-    @apply outline-none bg-[#0e0e0e] text-white focus:border-[#80FFF9] focus:ring-0 rounded-lg transition;
-  }
-
-  textarea {
-    @apply outline-none bg-[#0e0e0e] text-white focus:border-[#80FFF9] focus:ring-0 rounded-lg resize-none transition;
-  }
-} */
 
 
 /* ✅ Stil pentru input[type=date] ca să fie vizibil pe dark theme */
@@ -51,6 +42,11 @@ input[type="date"]:hover::-webkit-calendar-picker-indicator {
   opacity: 1;
   filter: invert(0.9) sepia(1) saturate(5) hue-rotate(150deg); /* mic accent cyan */
 }
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 
 /* ✅ Corectează spacing-ul iconiței default din <select> */
 select {

@@ -1,18 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import API from "../../utils/api";
-import {
-  CreditCard,
-  Calendar,
-  ShieldCheck,
-  Sparkles,
-  Loader2,
-  Wallet,
-  Crown,
-  FileText,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
+import { CreditCard, Calendar, ShieldCheck, Sparkles, Loader2, Wallet, Crown, FileText, CheckCircle, XCircle,} from "lucide-react";
 
 const Billing = () => {
   const [subscription, setSubscription] = useState(null);
@@ -20,7 +9,7 @@ const Billing = () => {
   const [loading, setLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
 
-  // 🔹 Fetch subscription + invoices
+  //  Fetch subscription + invoices
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -51,7 +40,7 @@ const Billing = () => {
     fetchData();
   }, []);
 
-  // 🔹 Open Stripe Billing Portal
+  // Open Stripe Billing Portal
   const handleOpenBillingPortal = async () => {
     try {
       setPortalLoading(true);
@@ -248,22 +237,21 @@ const Billing = () => {
                       )}
                     </td>
                     <td className="py-3 px-3">
-                      <a
-                        href={inv.hosted_invoice_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#80FFF9] hover:underline"
-                      >
+                      <a href={inv.hosted_invoice_url} target="_blank" rel="noopener noreferrer" className="text-[#80FFF9] hover:underline">
                         View Invoice
                       </a>
                     </td>
+
                   </tr>
                 ))}
               </tbody>
+
             </table>
           </div>
+
         )}
       </section>
+      
     </div>
   );
 };

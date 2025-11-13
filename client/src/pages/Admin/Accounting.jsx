@@ -160,13 +160,7 @@ const Accounting = () => {
           <LineChart data={cashFlowData}>
             <XAxis dataKey="month" stroke="#888" />
             <YAxis stroke="#888" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#111",
-                border: "1px solid #333",
-                borderRadius: "8px",
-              }}
-            />
+            <Tooltip contentStyle={{ backgroundColor: "#111", border: "1px solid #333", borderRadius: "8px"}}/>
             <Legend />
             <Line type="monotone" dataKey="income" stroke="#80FFF9" strokeWidth={2} />
             <Line type="monotone" dataKey="expenses" stroke="#ff6b6b" strokeWidth={2} />
@@ -179,8 +173,11 @@ const Accounting = () => {
         <h2 className="text-xl font-semibold text-[#80FFF9] mb-4">
           Recent Transactions
         </h2>
+        
         <div className="overflow-x-auto">
+          
           <table className="w-full text-sm">
+            
             <thead>
               <tr className="border-b border-white/10 text-gray-400">
                 <th className="text-left py-3 px-4">Type</th>
@@ -189,12 +186,10 @@ const Accounting = () => {
                 <th className="text-left py-3 px-4">Date</th>
               </tr>
             </thead>
+            
             <tbody>
               {recentTransactions.map((t) => (
-                <tr
-                  key={t.id}
-                  className="border-b border-white/5 hover:bg-white/5 transition"
-                >
+                <tr key={t.id} className="border-b border-white/5 hover:bg-white/5 transition">
                   <td className="py-3 px-4">{t.type}</td>
                   <td className="py-3 px-4 text-[#80FFF9] font-semibold">
                     {t.amount}
@@ -209,18 +204,22 @@ const Accounting = () => {
                           : t.status === "overdue"
                           ? "bg-red-500/10 text-red-400"
                           : "bg-gray-500/10 text-gray-400"
-                      }`}
-                    >
+                      }`}>
                       {t.status}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-gray-400">{t.date}</td>
                 </tr>
               ))}
+            
             </tbody>
+          
           </table>
+        
         </div>
+
       </div>
+
     </div>
   );
 };
