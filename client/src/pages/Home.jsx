@@ -17,39 +17,86 @@ const Home = () => {
       <Navbar />
 
       {/* ===== HERO ===== */}
-      <section className="pt-40 pb-28 text-center relative">
-        <BlurCircle top="0" right="0" />
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full mb-8 border border-white/20">
+      <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden">
+
+        {/* VIDEO BACKGROUND */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-40"
+        >
+          <source src="/hero-video.mp4" type="video/mp4" />
+        </video>
+
+        {/* GRADIENT OVERLAY */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/70 to-[#0e0e0e]" />
+
+        {/* BLUR CIRCLES */}
+        <BlurCircle top="-100px" left="20%" size="450px" color="#80FFF950" />
+        <BlurCircle bottom="-80px" right="15%" size="380px" color="#CB52D460" />
+
+        {/* CONTENT */}
+        <div className="relative z-10 text-center max-w-6xl mx-auto px-6 pt-40 pb-20">
+
+          {/* BADGE */}
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full mb-8 border border-white/20">
             <span className="text-sm text-[#80FFF9]">Powered by AI</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold leading-tight bg-linear-to-r from-[#80FFF9] to-[#CB52D4] bg-clip-text text-transparent mb-6">
-            Automate Invoicing with <br /> <span>Smart AI Precision</span>
+          {/* TITLE */}
+          <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">
+            <span className="bg-gradient-to-r from-[#80FFF9] to-[#CB52D4] bg-clip-text text-transparent">
+              Automate Your Invoicing
+            </span>
+            <br />
+            <span className="text-white">With AI-Driven Precision</span>
           </h1>
-          <p className="text-white/70 max-w-2xl mx-auto mb-10">
-            BillForgeAI helps freelancers and small businesses generate, track,
-            and send invoices instantly — no templates, no spreadsheets, no
-            stress.
+
+          {/* SUBTITLE */}
+          <p className="text-white/70 max-w-2xl mx-auto text-lg md:text-xl mb-14">
+            Generate invoices, extract details with AI, track payments and scale your
+            business — everything becomes effortless with BillForgeAI.
           </p>
 
-          <div className="flex justify-center gap-4">
-            <button onClick={()=> navigate('/register')} className="bg-linear-to-r from-indigo-600 to-purple-600 px-8 py-4 rounded-full text-lg font-medium hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all flex items-center gap-2">
-              Get Started Free
-              <ArrowRight className="w-5 h-5" />
+          {/* === CLEAN MINIMAL CTA SECTION === */}
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+
+            {/* PRIMARY CTA */}
+            <button
+              onClick={() => navigate("/register")}
+              className="
+                px-9 py-3 rounded-full
+                bg-white text-black
+                text-base font-medium
+                hover:bg-white/90 transition
+              "
+            >
+              Get Started
             </button>
-            <button className="border border-white/20 px-8 py-4 rounded-full hover:bg-white/10 transition-all text-lg font-light">
+
+            {/* SECONDARY CTA */}
+            <button
+              className="
+                px-9 py-3 rounded-full
+                border border-white/20
+                text-white font-light
+                hover:bg-white/10
+                transition
+              "
+            >
               Learn More
             </button>
+
           </div>
+
         </div>
       </section>
 
+
       {/* ===== FEATURES ===== */}
-      <section
-        id="features"
-        className="py-28 relative bg-gradient-to-b from-[#0e0e0e] to-[#141414]"
-      >
+      <section id="features" className="py-28 relative bg-linear-to-b from-[#0e0e0e] to-[#141414]">
         <BlurCircle bottom="0" right="0" />
         <div className="max-w-6xl mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-semibold mb-6">
@@ -91,10 +138,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section
-        id="stories"
-        className="py-28 bg-gradient-to-t from-[#0e0e0e] to-[#141414] relative"
-      >
+      <section id="stories" className="py-28 bg-linear-to-t from-[#0e0e0e] to-[#141414] relative">
         <div className="max-w-6xl mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-semibold mb-6">
             Trusted by Professionals Worldwide
@@ -185,8 +229,8 @@ const Home = () => {
             </div>
 
             {/* PRO PLAN */}
-            <div className="p-8 bg-gradient-to-b from-indigo-600/20 to-purple-600/10 border border-[#80FFF9]/30 rounded-2xl relative hover:border-[#80FFF9]/50 transition shadow-lg shadow-indigo-900/20">
-              <div className="absolute -top-3 right-4 bg-gradient-to-r from-[#80FFF9] to-[#CB52D4] text-xs font-medium px-3 py-1 rounded-full">
+            <div className="p-8 bg-linear-to-b from-indigo-600/20 to-purple-600/10 border border-[#80FFF9]/30 rounded-2xl relative hover:border-[#80FFF9]/50 transition shadow-lg shadow-indigo-900/20">
+              <div className="absolute -top-3 right-4 bg-linear-to-r from-[#80FFF9] to-[#CB52D4] text-xs font-medium px-3 py-1 rounded-full">
                 MOST POPULAR
               </div>
               <h3 className="text-2xl font-semibold mb-2 text-white">Pro</h3>
@@ -224,7 +268,7 @@ const Home = () => {
                     );
 
                     if (data?.url) {
-                      window.location.href = data.url; // redirect către Stripe
+                      window.location.href = data.url;
                     } else {
                       toast.error("Something went wrong starting checkout.");
                     }
@@ -292,7 +336,9 @@ const Home = () => {
             </button>
 
             </div>
+
           </div>
+
         </div>
       </section>
 
