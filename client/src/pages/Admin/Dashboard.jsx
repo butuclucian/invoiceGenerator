@@ -2,6 +2,7 @@ import React from 'react'
 import { Outlet } from 'react-router-dom'
 import Sidebar from '../../components/Admin/Sidebar'
 import Navbar from '../../components/Admin/Navbar'
+import AIChatPanel from '../../components/Admin/AIChatPanel'
 
 const Dashboard = () => {
   return (
@@ -12,6 +13,8 @@ const Dashboard = () => {
         <main className="flex-1 p-6 overflow-y-auto">
           <Outlet />
         </main>
+
+        <AIChatPanel />
       </div>
     </div>
   )

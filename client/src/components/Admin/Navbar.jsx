@@ -9,10 +9,12 @@ import {
   Search,
   User2,
   Crown,
+  MessageSquare,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import API from "../../utils/api";
+import { useAIChatStore } from "../../store/useAIChatStore";
 
 const Navbar = () => {
   const [notifications, setNotifications] = useState([]);
@@ -165,6 +167,14 @@ const Navbar = () => {
           <ArrowLeft size={18} className="text-[#80FFF9]" />
           <span className="text-sm font-medium">Home</span>
         </button>
+        {/* AI Assistant Button */}
+          <button
+            onClick={() => useAIChatStore.getState().toggleChat()}
+            className="relative bg-white/5 hover:bg-white/10 p-2 rounded-full border border-white/10 transition"
+          >
+            <MessageSquare size={20} className="text-[#80FFF9]" />
+          </button>
+
       </div>
 
       {/* CENTER SEARCH */}

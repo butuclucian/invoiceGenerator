@@ -194,3 +194,95 @@ ${text}
     res.status(500).json({ message: error.message });
   }
 };
+
+export const invoiceChatAI = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { message } = req.body;
+
+    if (!message) {
+      return res.status(400).json({ message: "Missing user message" });
+    }
+
+    // Fetch invoices + clients of logged user
+    const invoices = await Invoice.find({ user: userId })
+      .populate("client")
+      .lean();
+
+    const clients = await Client.find({ createdBy: userId }).lean();
+
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    const prompt = `
+    You are BillForge AI — an expert finance assistant.
+
+    You have access to the user's invoices and clients.
+
+    Here is ALL the data in JSON format:
+
+    INVOICES:
+    ${JSON.stringify(invoices, null, 2)}
+
+    CLIENTS:
+    ${JSON.stringify(clients, null, 2)}
+
+    USER QUESTION:
+    "${message}"
+
+    TASK:
+    - Analyze the user's financial data.
+    - Answer clearly and concisely.
+    - Include totals, insights, trends.
+    - If asked for predictions, estimate logically.
+    - If asked for overdue invoices, list them.
+    - If asked about a client, analyze their invoices.
+    - If asked for a summary, generate a financial report.
+    - NEVER invent invoices or clients not present.
+    - Return plain text (not JSON).
+    `;
+
+    const result = await model.generateContent(prompt);
+    const output =
+      result?.response?.text?.() ||
+      result?.response?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    res.json({ success: true, reply: output });
+  } catch (err) {
+    console.error("AI Chat Error:", err);
+    res.status(500).json({ message: "AI chat failed", error: err.message });
+  }
+};
+
+export const aiChat = async (req, res) => {
+  try {
+    const { messages } = req.body;
+
+    if (!messages) return res.status(400).json({ message: "Missing messages" });
+
+    const historyText = messages
+      .map((m) => `${m.sender === "user" ? "User" : "Assistant"}: ${m.text}`)
+      .join("\n");
+
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    const prompt = `
+You are BillForge AI — an invoice assistant.
+You help users understand invoices, clients, payments, taxes, and financial info.
+
+Conversation so far:
+${historyText}
+
+Respond clearly, friendly, and professionally.
+`;
+
+    const result = await model.generateContent(prompt);
+    const reply =
+      result?.response?.text?.() ||
+      result?.response?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    res.json({ reply });
+  } catch (error) {
+    console.error("AI Chat error:", error);
+    res.status(500).json({ message: "AI chat failed" });
+  }
+};

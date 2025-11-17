@@ -13,6 +13,8 @@ import userRoutes from "./routes/userRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import subscriptionRoutes from "./routes/subscriptionRoutes.js";
+import aiChatRoutes from "./routes/aiChatRoutes.js";
+
 
 import { generateNearDueNotifications } from "./controllers/notificationController.js";
 import User from "./models/User.js";
@@ -57,6 +59,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/subscription", subscriptionRoutes);
+app.use("/api/ai", aiChatRoutes);
+
 
 /* -------------------------- 🚀 SERVER --------------------------------- */
 const PORT = process.env.PORT || 8000;
