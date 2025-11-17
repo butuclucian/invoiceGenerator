@@ -33,8 +33,15 @@ const Sidebar = () => {
   return (
     <aside
       className="fixed top-0 left-0 h-screen w-64 bg-[#111111]/95 border-r border-white/10 text-white flex flex-col justify-between shadow-xl shadow-indigo-500/10 z-40">
+
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-10 -left-10 w-40 h-40 bg-indigo-600/10 blur-3xl rounded-full" />
+          <div className="absolute top-1/3 -right-16 w-52 h-52 bg-indigo-600/10 blur-3xl rounded-full" />
+          <div className="absolute bottom-10 -left-16 w-48 h-48 bg-indigo-600/10 blur-3xl rounded-full" />
+        </div>
       {/* Scrollable content */}
       <div className="flex flex-col flex-1 overflow-y-auto py-7 px-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+      
 
         {/* Logo */}
         <div className="flex flex-col mb-10">
@@ -187,6 +194,7 @@ const Sidebar = () => {
         >
           <Calculator size={18} /> Accounting
         </NavLink>
+        
 
         <NavLink
           to="/dashboard/reports"
