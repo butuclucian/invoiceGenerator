@@ -9,7 +9,6 @@ const router = express.Router();
 // router.post("/generate-invoice", protect, checkSubscription, generateInvoiceFromText);
 router.post("/generate-invoice", protect, generateInvoiceFromText);
 router.post("/invoice-chat", protect, invoiceChatAI);
-router.post("/chat", protect, aiChat);
 
 
 export default router;
