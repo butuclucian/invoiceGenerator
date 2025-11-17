@@ -1,46 +1,27 @@
-import { useAuth, useUser } from "@clerk/clerk-react";
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-  const { user, isLoaded } = useUser();
-  const { getToken } = useAuth();
   const navigate = useNavigate();
-  const [authToken, setAuthToken] = useState(null);
 
-
+  // Backend URL from .env
   const API_BASE_URL = import.meta.env.VITE_API_URL;
-  axios.defaults.baseURL = API_BASE_URL;
-  // console.log(" Backend URL:", API_BASE_URL);
 
-  const fetchAuthToken = useCallback(async () => {
-    try {
-      const token = await getToken();
-      if (token) setAuthToken(token);
-    } catch (error) {
-      console.error("Error fetching Clerk token:", error);
-      toast.error("Authentication error");
-    }
-  }, [getToken]);
+  // Axios instance secured with JWT from localStorage
+  const secureAxios = axios.create({
+    baseURL: API_BASE_URL,
+  });
 
-  useEffect(() => {
-    if (isLoaded && user) fetchAuthToken();
-    else setAuthToken(null);
-  }, [isLoaded, user, fetchAuthToken]);
-
-  const secureAxios = axios.create({ baseURL: API_BASE_URL });
-
-  secureAxios.interceptors.request.use(async (config) => {
-    const token = await getToken();
+  secureAxios.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   });
 
-  const value = { user, getToken, authToken, navigate, secureAxios };
+  const value = { navigate, secureAxios };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
