@@ -92,7 +92,7 @@ const CalendarPage = () => {
           </p>
         </div>
 
-        {/* NEW EVENT BUTTON (INDIGO VARIANT) */}
+        {/* NEW EVENT BUTTON */}
         <button onClick={() => setOpenPopup(true)} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2">
           <Plus size={16} className="text-indigo-400" />
           New Event

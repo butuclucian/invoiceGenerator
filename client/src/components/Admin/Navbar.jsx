@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Bell, X, Check, LogOut } from "lucide-react";
+import { Bell, X, Check, LogOut, ArrowLeft } from "lucide-react";
 import { UserButton, useUser } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import API from "../../utils/api";
@@ -181,6 +181,22 @@ const Navbar = () => {
             </div>
           )}
         </div>
+
+        {/* 🌐 Back to Home */}
+        <button
+          onClick={() => (window.location.href = "/")}
+          className="flex items-center gap-2 px-4 py-2 rounded-full 
+                    bg-linear-to-r from-[#1f2937] to-[#111827] 
+                    border border-white/10 
+                    text-gray-300 hover:text-white 
+                    hover:from-[#80FFF9]/20 hover:to-[#80FFF9]/10 
+                    hover:border-[#80FFF9]/40
+                    transition-all duration-200 shadow-sm"
+        >
+          <ArrowLeft size={16} className="text-[#80FFF9]" />
+          <span className="text-sm font-medium">Home</span>
+        </button>
+
 
         {/* Logout — Elegant button */}
         <button

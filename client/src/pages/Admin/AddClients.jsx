@@ -126,7 +126,7 @@ const AddClients = () => {
               Cancel
             </button>
             
-            <button type="submit" className="flex items-center gap-2 px-5 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition" >
+            <button type="submit" className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2" >
               <Save size={16} />
               Save Client
             </button>

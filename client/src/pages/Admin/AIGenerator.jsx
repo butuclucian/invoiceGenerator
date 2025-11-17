@@ -351,7 +351,7 @@ const AIGenerator = () => {
             Reset
           </button>
 
-          <button onClick={handleExtract} disabled={loading} className="flex items-center gap-2 px-6 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition disabled:opacity-50">
+          <button onClick={handleExtract} disabled={loading} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2">
             {loading ? (
               <>
                 <Loader2 className="animate-spin" size={16} />

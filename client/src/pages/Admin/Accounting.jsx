@@ -54,8 +54,10 @@ const Accounting = () => {
     (inv) => inv.status === "sent" || inv.status === "overdue"
   ).length;
 
-  const expenses = 4800; // (dacă adaugi o colecție Expense, îl facem real)
-  const profit = totalIncome - expenses;
+  const expenses = 0; // (dacă adaugi o colecție Expense, îl facem real)
+  // const profit = totalIncome - expenses;
+  const profit = Math.max(0, totalIncome - expenses);
+
 
   // 🧾 Grupare venituri pe lună (cash flow)
   const monthlyData = {};
