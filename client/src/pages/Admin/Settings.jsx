@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   User,
   Mail,
@@ -7,26 +7,113 @@ import {
   Trash2,
   Save,
   ShieldCheck,
+  Loader2,
 } from "lucide-react";
+import API from "../../utils/api";
 import { toast } from "sonner";
 
 const Settings = () => {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
   const [form, setForm] = useState({
-    name: "Lucian Butuc",
-    email: "lucian@example.com",
+    name: "",
+    email: "",
     notifications: true,
     darkMode: true,
   });
 
-  const handleChange = (field, value) => setForm({ ...form, [field]: value });
+  // ==========================
+  // FETCH USER SETTINGS
+  // ==========================
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const { data } = await API.get("/auth/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-  const handleSave = () => {
-    toast.success("Settings saved successfully!");
+        setForm({
+          name: data.name,
+          email: data.email,
+          notifications: true, // dacă vrei să implementezi în DB, îți fac schema
+          darkMode: true,
+        });
+
+      } catch (err) {
+        console.error("User fetch error:", err);
+        toast.error("Failed to load user settings.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // UPDATE STATE
+  const handleChange = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleDelete = () => {
-    toast.error("Account deletion not implemented yet!");
+  // ==========================
+  // SAVE SETTINGS (UPDATE USER)
+  // ==========================
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      const token = localStorage.getItem("token");
+
+      await API.put(
+        "/auth/update",
+        {
+          name: form.name,
+          email: form.email,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      toast.success("Settings saved successfully!");
+    } catch (err) {
+      console.error("Update error:", err);
+      toast.error(err.response?.data?.message || "Failed to update settings.");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  // ==========================
+  // DELETE ACCOUNT
+  // ==========================
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete your account?")) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await API.delete("/auth/delete", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      toast.success("Your account has been deleted.");
+      localStorage.removeItem("token");
+      window.location.href = "/register";
+    } catch (err) {
+      console.error("Delete error:", err);
+      toast.error("Failed to delete account.");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0e0e0e] text-white">
+        <Loader2 size={30} className="animate-spin text-[#80FFF9]" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white px-8 py-10">
@@ -44,11 +131,12 @@ const Settings = () => {
       </div>
 
       <div className="max-w-4xl mx-auto space-y-8">
-        {/* ===== PROFILE ===== */}
+        {/* ===== PROFILE CARD ===== */}
         <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg shadow-indigo-900/10">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             <User size={18} className="text-[#80FFF9]" /> Profile
           </h2>
+
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="text-gray-400 text-sm">Full Name</label>
@@ -59,6 +147,7 @@ const Settings = () => {
                 className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 text-gray-200 focus:border-[#80FFF9] outline-none mt-1"
               />
             </div>
+
             <div>
               <label className="text-gray-400 text-sm">Email Address</label>
               <input
@@ -102,14 +191,21 @@ const Settings = () => {
           </div>
         </div>
 
-        {/* ===== ACTIONS ===== */}
+        {/* ===== ACTION BUTTONS ===== */}
         <div className="flex justify-end gap-4">
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-2 rounded-md hover:opacity-90 transition"
+            disabled={saving}
+            className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-2 rounded-md hover:opacity-90 transition disabled:opacity-50"
           >
-            <Save size={18} /> Save Changes
+            {saving ? (
+              <Loader2 className="animate-spin" size={18} />
+            ) : (
+              <Save size={18} />
+            )}
+            Save Changes
           </button>
+
           <button
             onClick={handleDelete}
             className="flex items-center gap-2 border border-red-500/30 text-red-400 px-6 py-2 rounded-md hover:bg-red-500/10 transition"
