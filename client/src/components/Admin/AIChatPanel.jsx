@@ -33,9 +33,16 @@ const AIChatPanel = () => {
       const token = localStorage.getItem("token");
       const { data } = await API.post(
         "/ai/chat",
-        { messages: [...messages, userMessage] },
+        {
+            message: userMessage.text,
+            history: messages.map((m) => ({
+            role: m.sender === "user" ? "user" : "assistant",
+            content: m.text,
+            })),
+        },
         { headers: { Authorization: `Bearer ${token}` } }
-      );
+        );
+
 
       setMessages((p) => [...p, { sender: "ai", text: data.reply }]);
     } catch (err) {
