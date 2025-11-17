@@ -8,11 +8,17 @@ const Dashboard = () => {
   return (
     <div className="flex bg-[#0e0e0e] min-h-screen text-white">
       <Sidebar />
-      <div className="flex-1 ml-64 flex flex-col">
-        <Navbar />
-        <main className="flex-1 p-6 overflow-y-auto">
-          <Outlet />
-        </main>
+
+      <div className="flex-1 ml-64 flex flex-col relative">
+
+        {/* Fix: da spațiu sub navbar */}
+        <div className="pt-20"> 
+          <Navbar />
+
+          <main className="p-6 overflow-y-auto">
+            <Outlet />
+          </main>
+        </div>
 
         <AIChatPanel />
       </div>

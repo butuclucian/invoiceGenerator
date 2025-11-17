@@ -1,22 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
-import {
-  Bell,
-  X,
-  Check,
-  LogOut,
-  ArrowLeft,
-  Settings,
-  Search,
-  User2,
-  Crown,
-  MessageSquare,
-} from "lucide-react";
+import { Bell, X, Check, LogOut, ArrowLeft, Settings, Search, User2, MessageSquare,} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import API from "../../utils/api";
 import { useAIChatStore } from "../../store/useAIChatStore";
 
 const Navbar = () => {
+  const { isOpen: aiOpen, toggleChat } = useAIChatStore();
+
   const [notifications, setNotifications] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
@@ -29,7 +20,7 @@ const Navbar = () => {
   const userMenuRef = useRef(null);
 
   // ===============================
-  // FETCH USER DATA
+  // FETCH USER
   // ===============================
   useEffect(() => {
     const fetchUser = async () => {
@@ -38,13 +29,11 @@ const Navbar = () => {
         const { data } = await API.get("/auth/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         setUserData(data);
       } catch (err) {
         console.error("User fetch error:", err);
       }
     };
-
     fetchUser();
   }, []);
 
@@ -52,20 +41,18 @@ const Navbar = () => {
   // FETCH SUBSCRIPTION
   // ===============================
   useEffect(() => {
-    const fetchSubscription = async () => {
+    const fetchSub = async () => {
       try {
         const token = localStorage.getItem("token");
         const { data } = await API.get("/subscription/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         setSubscription(data);
       } catch (err) {
         console.error("Subscription fetch error:", err);
       }
     };
-
-    fetchSubscription();
+    fetchSub();
   }, []);
 
   const currentPlan = subscription?.plan || "Free";
@@ -73,7 +60,7 @@ const Navbar = () => {
   // ===============================
   // FETCH NOTIFICATIONS
   // ===============================
-  const fetchNotifications = async () => {
+    const fetchNotifications = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -140,60 +127,74 @@ const Navbar = () => {
     }
   };
 
-  // Logout
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  // ===============================
+  // CLICK OUTSIDE
+  // ===============================
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (popupRef.current && !popupRef.current.contains(e.target))
+        setShowPopup(false);
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target))
+        setUserMenuOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // ===============================
+  // LOGOUT
+  // ===============================
   const handleLogout = () => {
     localStorage.removeItem("token");
     window.location.href = "/login";
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full h-20  backdrop-blur-2xl bg-[#0d0d0d]/70  border-b border-white/10 shadow-xl shadow-black/30  flex items-center justify-between px-8 relative">
+    <>
+      {/* Blur overlay when AI chat is open */}
+      <AnimatePresence>
+        {aiOpen && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} exit={{ opacity: 0 }} className="pointer-events-none fixed inset-0 bg-black/60 backdrop-blur-[2px] z-40"/>
+        )}
+      </AnimatePresence>
 
-      {/* Glow */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-[600px] h-48 bg-indigo-600/20 blur-3xl rounded-full"></div>
-      </div>
+      {/* NAVBAR */}
+      <motion.nav initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: "easeOut" }} className={`fixed top-0 left-0 w-full h-20 z-30 pl-74 flex items-center justify-between  px-8 border-b border-white/10 shadow-xl bg-[#0d0d0d]/80 backdrop-blur-xl`}>
+        {/* Glow */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-[600px] h-48 bg-indigo-600/20 blur-3xl rounded-full" />
+        </div>
 
-      {/* LEFT SIDE */}
-      <div className="flex items-center gap-4 relative z-10">
-        <button
-          onClick={() => (window.location.href = "/")}
-          className="flex items-center gap-2 px-4 py-2 rounded-full 
-            bg-white/5 backdrop-blur-md border border-white/10 shadow-sm 
-            text-gray-300 hover:text-white 
-            hover:bg-[#80FFF9]/20 hover:border-[#80FFF9]/30 
-            transition-all duration-200"
-        >
-          <ArrowLeft size={18} className="text-[#80FFF9]" />
-          <span className="text-sm font-medium">Home</span>
-        </button>
-        {/* AI Assistant Button */}
-          <button
-            onClick={() => useAIChatStore.getState().toggleChat()}
-            className="relative bg-white/5 hover:bg-white/10 p-2 rounded-full border border-white/10 transition"
-          >
-            <MessageSquare size={20} className="text-[#80FFF9]" />
+        {/* LEFT */}
+        <div className="flex items-center gap-4 relative z-10">
+          <button onClick={() => (window.location.href = "/")} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition">
+            <ArrowLeft size={18} className="text-[#80FFF9]" />
+            <span className="text-sm text-gray-200">Home</span>
           </button>
 
-      </div>
-
-      {/* CENTER SEARCH */}
-      <div className="hidden md:flex relative z-10">
-        <div className="flex items-center bg-white/5 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md w-72 hover:bg-white/10 transition">
-          <Search size={18} className="text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search invoices, clients..."
-            className="bg-transparent w-full outline-none ml-3 text-gray-200 text-sm"
-          />
+          {/* AI BUTTON */}
+          <button onClick={toggleChat} className="p-2 bg-white/5 hover:bg-white/10 rounded-full border border-white/10 transition">
+            <MessageSquare className="text-[#80FFF9]" size={20} />
+          </button>
         </div>
-      </div>
 
-      {/* RIGHT SIDE */}
-      <div className="flex items-center gap-6 relative z-10">
+        {/* SEARCH */}
+        <div className="hidden md:flex relative z-10">
+          <div className="flex items-center bg-white/5 px-4 py-2 rounded-full border border-white/10 w-72 hover:bg-white/10">
+            <Search size={18} className="text-gray-400" />
+            <input type="text" placeholder="Search invoices..." className="bg-transparent w-full outline-none ml-3 text-gray-200 text-sm"/>
+          </div>
+        </div>
 
-        {/* ================= NOTIFICATIONS ================= */}
-        <div className="relative" ref={popupRef}>
+        {/* RIGHT */}
+        <div className="flex items-center gap-6 relative z-10">
+          {/* NOTIFICATIONS */}
+          <div className="relative" ref={popupRef}>
           <button
             onClick={() => setShowPopup(!showPopup)}
             className="relative bg-white/5 hover:bg-white/10 p-2 rounded-full border border-white/10 transition"
@@ -276,79 +277,78 @@ const Navbar = () => {
           </AnimatePresence>
         </div>
 
-        {/* ================= USER MENU ================= */}
-        <div className="relative" ref={userMenuRef}>
-          <button
-            onClick={() => setUserMenuOpen(!userMenuOpen)}
-            className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-full border border-white/10 hover:bg-white/10 transition"
-          >
-            <User2 className="text-[#80FFF9]" size={22} />
+          {/* USER MENU */}
+          <div className="relative" ref={userMenuRef}>
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-full border border-white/10 hover:bg-white/10 transition"
+            >
+              <User2 className="text-[#80FFF9]" size={22} />
 
-            <span className={`text-xs px-2 py-1 rounded-full 
-              border 
-              ${
-                currentPlan === "Pro"
-                  ? "text-[#80FFF9] border-[#80FFF9]/40 bg-[#80FFF9]/10"
-                  : currentPlan === "Enterprise"
-                  ? "text-[#CB52D4] border-[#CB52D4]/40 bg-[#CB52D4]/10"
-                  : "text-gray-300 border-white/10 bg-white/5"
-              }
-            `}>
-              {currentPlan}
-            </span>
-          </button>
-
-          <AnimatePresence>
-            {userMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.15 }}
-                className="absolute right-0 mt-3 w-64 bg-[#151515]/95 border border-white/10 rounded-xl shadow-xl backdrop-blur-xl p-5 z-50"
+              <span
+                className={`text-xs px-2 py-1 rounded-full border
+            ${
+              currentPlan === "Pro"
+                ? "text-[#80FFF9] border-[#80FFF9]/40 bg-[#80FFF9]/10"
+                : currentPlan === "Enterprise"
+                ? "text-[#CB52D4] border-[#CB52D4]/40 bg-[#CB52D4]/10"
+                : "text-gray-300 border-white/10 bg-white/5"
+            }
+          `}
               >
-                {/* Header */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="bg-white/10 w-12 h-12 rounded-full flex items-center justify-center">
-                    <User2 size={26} className="text-[#80FFF9]" />
+                {currentPlan}
+              </span>
+            </button>
+
+            <AnimatePresence>
+              {userMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 mt-3 w-64 bg-[#151515]/95 border border-white/10 rounded-xl shadow-xl backdrop-blur-xl p-5 z-50"
+                >
+                  {/* Header */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-white/10 w-12 h-12 rounded-full flex items-center justify-center">
+                      <User2 size={26} className="text-[#80FFF9]" />
+                    </div>
+
+                    <div className="flex flex-col">
+                      <p className="text-white font-medium text-sm">
+                        {userData?.name || "Unnamed User"}
+                      </p>
+                      <p className="text-gray-400 text-xs">
+                        {userData?.email || "no-email@unknown.com"}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="flex flex-col">
-                    <p className="text-white font-medium text-sm">
-                      {userData?.name || "Unnamed User"}
-                    </p>
-                    <p className="text-gray-400 text-xs">
-                      {userData?.email || "no-email@unknown.com"}
-                    </p>
-                  </div>
-                </div>
+                  <div className="border-b border-white/10 mb-3"></div>
 
+                  <button
+                    onClick={() =>
+                      (window.location.href = "/dashboard/settings")
+                    }
+                    className="w-full flex items-center gap-2 px-2 py-2 text-gray-300 hover:bg-white/5 hover:text-white rounded-md transition"
+                  >
+                    <Settings size={16} /> Settings
+                  </button>
 
-                <div className="border-b border-white/10 mb-3"></div>
-
-                <button
-                  onClick={() => (window.location.href = "/dashboard/settings")}
-                  className="w-full flex items-center gap-2 px-2 py-2 
-                    text-gray-300 hover:bg-white/5 hover:text-white 
-                    rounded-md transition"
-                >
-                  <Settings size={16} /> Settings
-                </button>
-
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-2 px-2 py-2 
-                    text-red-400 hover:bg-red-600/20 
-                    rounded-md transition mt-1"
-                >
-                  <LogOut size={16} /> Logout
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-2 py-2 mt-1 text-red-400 hover:bg-red-600/20 rounded-md transition"
+                  >
+                    <LogOut size={16} /> Logout
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
-      </div>
-    </nav>
+      </motion.nav>
+    </>
   );
 };
 
