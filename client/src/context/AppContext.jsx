@@ -12,10 +12,10 @@ export const AppProvider = ({ children }) => {
   const navigate = useNavigate();
   const [authToken, setAuthToken] = useState(null);
 
-  // ✅ Mutat aici — în interiorul componentei
+
   const API_BASE_URL = import.meta.env.VITE_API_URL;
   axios.defaults.baseURL = API_BASE_URL;
-  console.log("🔗 Backend URL:", API_BASE_URL);
+  // console.log(" Backend URL:", API_BASE_URL);
 
   const fetchAuthToken = useCallback(async () => {
     try {
