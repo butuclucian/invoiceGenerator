@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import API from "../../utils/api";
 import { useAIChatStore } from "../../store/useAIChatStore";
+import { useSearchStore } from "../../store/useSearchStore";
 
 const Navbar = () => {
   const { isOpen: aiOpen, toggleChat } = useAIChatStore();
@@ -18,6 +19,8 @@ const Navbar = () => {
 
   const popupRef = useRef(null);
   const userMenuRef = useRef(null);
+
+  const { query, setQuery } = useSearchStore();
 
   // ===============================
   // FETCH USER
@@ -187,7 +190,7 @@ const Navbar = () => {
         <div className="hidden md:flex relative z-10">
           <div className="flex items-center bg-white/5 px-4 py-2 rounded-full border border-white/10 w-72 hover:bg-white/10">
             <Search size={18} className="text-gray-400" />
-            <input type="text" placeholder="Search invoices..." className="bg-transparent w-full outline-none ml-3 text-gray-200 text-sm"/>
+            <input type="text" placeholder="Search invoices, clients..." value={query} onChange={(e) => setQuery(e.target.value)} className="bg-transparent w-full outline-none ml-3 text-gray-200 text-sm"/>
           </div>
         </div>
 

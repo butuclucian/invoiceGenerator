@@ -138,19 +138,19 @@ const InvoicePreview = () => {
         {/* button */}
         <div className="flex gap-3">
           {/* back */}
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 px-4 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 px-4 py-2 border border-white/20 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition">
             <ArrowLeft size={16} />
             Back
           </button>
 
           {/* edit */}
-          <button onClick={() => navigate(`/dashboard/invoices/${invoice._id}/edit`)} className="flex items-center gap-2 px-4 py-2 border border-white/20 rounded-md text-indigo-400 hover:text-white hover:bg-indigo-500/10 transition">
+          <button onClick={() => navigate(`/dashboard/invoices/${invoice._id}/edit`)} className="flex items-center gap-2 px-4 py-2 border border-white/20 rounded-xl text-indigo-400 hover:text-white hover:bg-indigo-500/10 transition">
             <Edit size={16} />
             Edit
           </button>
 
           {/* download */}
-          <button onClick={handleDownload} className="flex items-center gap-2 px-4 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition">
+          <button onClick={handleDownload} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2">
             <Download size={16} />
             Download
           </button>
