@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { User, Bell, Moon, Trash2, Save, ShieldCheck, Palette, Loader2, Eye, EyeOff,} from "lucide-react";
+import { User, Bell, Moon, Trash2, Save, ShieldCheck, Palette, Loader2, Eye, EyeOff, ShieldCheckIcon, SaveAllIcon, SaveIcon,} from "lucide-react";
 import API from "../../utils/api";
 import { toast } from "sonner";
 
@@ -237,18 +237,12 @@ const Settings = () => {
             {/* OLD PASSWORD */}
             <div className="relative">
               <label className="text-gray-400 text-sm">Old Password</label>
-              <input
-                type={showPass.old ? "text" : "password"}
-                value={passwordForm.oldPassword}
-                onChange={(e) =>
+              <input type={showPass.old ? "text" : "password"} value={passwordForm.oldPassword} onChange={(e) =>
                   setPasswordForm({ ...passwordForm, oldPassword: e.target.value })
                 }
                 className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
               />
-              <button
-                type="button"
-                onClick={() => setShowPass({ ...showPass, old: !showPass.old })}
-                className="absolute right-3 top-9 text-gray-400 hover:text-white"
+              <button type="button" onClick={() => setShowPass({ ...showPass, old: !showPass.old })} className="absolute right-3 top-9 text-gray-400 hover:text-white"
               >
                 {showPass.old ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -257,19 +251,12 @@ const Settings = () => {
             {/* NEW PASSWORD */}
             <div className="relative">
               <label className="text-gray-400 text-sm">New Password</label>
-              <input
-                type={showPass.new ? "text" : "password"}
-                value={passwordForm.newPassword}
-                onChange={(e) =>
+              <input type={showPass.new ? "text" : "password"} value={passwordForm.newPassword} onChange={(e) =>
                   setPasswordForm({ ...passwordForm, newPassword: e.target.value })
                 }
                 className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
               />
-              <button
-                type="button"
-                onClick={() => setShowPass({ ...showPass, new: !showPass.new })}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
-              >
+              <button type="button" onClick={() => setShowPass({ ...showPass, new: !showPass.new })} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
                 {showPass.new ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
 
@@ -293,10 +280,7 @@ const Settings = () => {
             {/* CONFIRM PASSWORD */}
             <div className="relative">
               <label className="text-gray-400 text-sm">Confirm New Password</label>
-              <input
-                type={showPass.confirm ? "text" : "password"}
-                value={passwordForm.confirmPassword}
-                onChange={(e) =>
+              <input type={showPass.confirm ? "text" : "password"} value={passwordForm.confirmPassword} onChange={(e) =>
                   setPasswordForm({
                     ...passwordForm,
                     confirmPassword: e.target.value,
@@ -304,21 +288,14 @@ const Settings = () => {
                 }
                 className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
               />
-              <button
-                type="button"
-                onClick={() => setShowPass({ ...showPass, confirm: !showPass.confirm })}
-                className="absolute right-3 top-9 text-gray-400 hover:text-white"
-              >
+              <button type="button" onClick={() => setShowPass({ ...showPass, confirm: !showPass.confirm })} className="absolute right-3 top-9 text-gray-400 hover:text-white">
                 {showPass.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
           </div>
 
-          <button
-            onClick={handlePasswordUpdate}
-            className="mt-5 px-4 py-2 rounded-xl bg-[#80FFF9]/20 border border-[#80FFF9]/40 hover:bg-[#80FFF9]/30 transition flex items-center gap-2"
-          >
-            <ShieldCheck size={18} className="text-[#80FFF9]" />
+          <button onClick={handlePasswordUpdate} className="mt-5 px-4 py-2 rounded-xl bg-[#80FFF9]/20 border border-[#80FFF9]/40 hover:bg-[#80FFF9]/30 transition flex items-center gap-2">
+            <SaveIcon size={18} className="text-[#80FFF9]" />
             Update Password
           </button>
         </div>
@@ -334,7 +311,7 @@ const Settings = () => {
 
             <div>
               <label className="text-gray-400 text-sm">Theme</label>
-              <select value={settings.theme} onChange={(e) => setSettings({ ...settings, theme: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200">
+              <select value={settings.theme} onChange={(e) => setSettings({ ...settings, theme: e.target.value })} className="cursor-pointer w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200">
                 <option value="dark">Dark</option>
                 <option value="light">Light</option>
                 <option value="system">System</option>
@@ -348,7 +325,7 @@ const Settings = () => {
 
             <div>
               <label className="text-gray-400 text-sm">Sidebar Behavior</label>
-              <select value={settings.sidebarBehavior} onChange={(e) => setSettings({ ...settings, sidebarBehavior: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200">
+              <select value={settings.sidebarBehavior} onChange={(e) => setSettings({ ...settings, sidebarBehavior: e.target.value })} className=" cursor-pointer w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200">
                 <option value="fixed">Fixed</option>
                 <option value="floating">Floating</option>
                 <option value="auto-hide">Auto Hide</option>
@@ -357,7 +334,7 @@ const Settings = () => {
 
             <div>
               <label className="text-gray-400 text-sm">Information Density</label>
-              <select value={settings.density} onChange={(e) => setSettings({ ...settings, density: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200">
+              <select value={settings.density} onChange={(e) => setSettings({ ...settings, density: e.target.value })} className="cursor-pointer w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200">
                 <option value="compact">Compact</option>
                 <option value="normal">Normal</option>
                 <option value="spacious">Spacious</option>
@@ -401,7 +378,7 @@ const Settings = () => {
                     notificationFrequency: e.target.value,
                   })
                 }
-                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-2 text-gray-200"
+                className=" cursor-pointer w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-2 text-gray-200"
               >
                 <option value="instant">Instant</option>
                 <option value="hourly">Hourly Summary</option>
@@ -421,7 +398,7 @@ const Settings = () => {
 
             <div>
               <label className="text-gray-400 text-sm">AI Tone</label>
-              <select value={settings.aiTone} onChange={(e) => setSettings({ ...settings, aiTone: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200">
+              <select value={settings.aiTone} onChange={(e) => setSettings({ ...settings, aiTone: e.target.value })} className="cursor-pointer w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200">
                 <option value="friendly">Friendly</option>
                 <option value="professional">Professional</option>
                 <option value="brief">Very Brief</option>
@@ -431,7 +408,7 @@ const Settings = () => {
 
             <div>
               <label className="text-gray-400 text-sm">Response Length</label>
-              <select value={settings.aiLength} onChange={(e) => setSettings({ ...settings, aiLength: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200">
+              <select value={settings.aiLength} onChange={(e) => setSettings({ ...settings, aiLength: e.target.value })} className="cursor-pointer w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200">
                 <option value="short">Short</option>
                 <option value="normal">Normal</option>
                 <option value="long">Long</option>
