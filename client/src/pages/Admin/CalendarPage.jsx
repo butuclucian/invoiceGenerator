@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { CalendarDays, Plus, X, Trash2 } from "lucide-react";
+import { CalendarDays, Plus, X, Trash2, PenIcon, Trash, TrashIcon } from "lucide-react";
 import { format, isSameDay } from "date-fns";
 import { toast } from "sonner";
 import API from "../../utils/api";
@@ -223,16 +223,7 @@ const CalendarPage = () => {
 
           {/* MINI CALENDAR */}
           <div className="bg-[#111]/60 border border-white/10 rounded-2xl p-5 shadow-lg">
-            <Calendar
-              value={selectedDate}
-              className="mini-calendar"
-              tileDisabled={() => true}
-              navigationLabel={({ date }) => format(date, "MMMM yyyy")}
-              next2Label={null}
-              nextLabel={null}
-              prevLabel={null}
-              prev2Label={null}
-            />
+            <Calendar value={selectedDate} className="mini-calendar" tileDisabled={() => true} navigationLabel={({ date }) => format(date, "MMMM yyyy")} next2Label={null} nextLabel={null} prevLabel={null} prev2Label={null}/>
 
             <style>{`
               .mini-calendar {
@@ -299,14 +290,11 @@ const CalendarPage = () => {
                         }}
                         className="text-indigo-400 hover:text-indigo-300 transition"
                       >
-                        ✏️
+                        <PenIcon size={18}/>
                       </button>
 
                       {/* DELETE */}
-                      <button
-                        onClick={() => deleteNote(ev._id)}
-                        className="text-red-500 hover:text-red-400 transition"
-                      >
+                      <button onClick={() => deleteNote(ev._id)} className="text-red-500 hover:text-red-400 transition">
                         <Trash2 size={18} />
                       </button>
                     </div>
