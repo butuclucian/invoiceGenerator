@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { User, Bell, Moon, Trash2, Save, ShieldCheck, Palette, Loader2,} from "lucide-react";
+import { User, Bell, Moon, Trash2, Save, ShieldCheck, Palette, Loader2, Eye, EyeOff,} from "lucide-react";
 import API from "../../utils/api";
 import { toast } from "sonner";
 
@@ -154,6 +154,31 @@ const Settings = () => {
     }
   };
 
+
+  // =============================
+  // PASSWORD STRENGTH METER
+  // =============================
+  const calculateStrength = (pwd) => {
+    let score = 0;
+
+    if (!pwd) return 0;
+    if (pwd.length >= 6) score++;
+    if (pwd.length >= 10) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+    return score; // max 5
+  };
+
+  // For show/hide password fields
+  const [showPass, setShowPass] = useState({
+    old: false,
+    new: false,
+    confirm: false,
+  });
+
+
   // =============================
   // LOADING SCREEN
   // =============================
@@ -200,34 +225,78 @@ const Settings = () => {
           </div>
         </div>
 
-        {/* PASSWORD */}
-        <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg">
-          <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
-            <ShieldCheck size={18} className="text-[#80FFF9]" /> Change Password
+        {/* ===== CHANGE PASSWORD ===== */}
+        <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg shadow-indigo-900/10">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <ShieldCheck size={18} className="text-[#80FFF9]" />
+            Change Password
           </h2>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <div>
+
+            {/* OLD PASSWORD */}
+            <div className="relative">
               <label className="text-gray-400 text-sm">Old Password</label>
-              <input type="password" value={passwordForm.oldPassword} onChange={(e) =>
+              <input
+                type={showPass.old ? "text" : "password"}
+                value={passwordForm.oldPassword}
+                onChange={(e) =>
                   setPasswordForm({ ...passwordForm, oldPassword: e.target.value })
                 }
                 className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
               />
+              <button
+                type="button"
+                onClick={() => setShowPass({ ...showPass, old: !showPass.old })}
+                className="absolute right-3 top-9 text-gray-400 hover:text-white"
+              >
+                {showPass.old ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
 
-            <div>
+            {/* NEW PASSWORD */}
+            <div className="relative">
               <label className="text-gray-400 text-sm">New Password</label>
-              <input type="password" value={passwordForm.newPassword} onChange={(e) =>
+              <input
+                type={showPass.new ? "text" : "password"}
+                value={passwordForm.newPassword}
+                onChange={(e) =>
                   setPasswordForm({ ...passwordForm, newPassword: e.target.value })
                 }
                 className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
               />
+              <button
+                type="button"
+                onClick={() => setShowPass({ ...showPass, new: !showPass.new })}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+              >
+                {showPass.new ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+
+              {/* STRENGTH METER */}
+              <div className="mt-2 h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className={`h-full transition-all duration-300 ${
+                    calculateStrength(passwordForm.newPassword) <= 1
+                      ? "bg-red-500"
+                      : calculateStrength(passwordForm.newPassword) <= 3
+                      ? "bg-yellow-400"
+                      : "bg-green-500"
+                  }`}
+                  style={{
+                    width: `${(calculateStrength(passwordForm.newPassword) / 5) * 100}%`,
+                  }}
+                />
+              </div>
             </div>
 
-            <div>
+            {/* CONFIRM PASSWORD */}
+            <div className="relative">
               <label className="text-gray-400 text-sm">Confirm New Password</label>
-              <input type="password" value={passwordForm.confirmPassword} onChange={(e) =>
+              <input
+                type={showPass.confirm ? "text" : "password"}
+                value={passwordForm.confirmPassword}
+                onChange={(e) =>
                   setPasswordForm({
                     ...passwordForm,
                     confirmPassword: e.target.value,
@@ -235,14 +304,25 @@ const Settings = () => {
                 }
                 className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
               />
+              <button
+                type="button"
+                onClick={() => setShowPass({ ...showPass, confirm: !showPass.confirm })}
+                className="absolute right-3 top-9 text-gray-400 hover:text-white"
+              >
+                {showPass.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
 
-          <button onClick={handlePasswordUpdate} className="mt-5 px-4 py-2 rounded-xl bg-[#80FFF9]/20 border border-[#80FFF9]/40 hover:bg-[#80FFF9]/30 transition flex items-center gap-2">
+          <button
+            onClick={handlePasswordUpdate}
+            className="mt-5 px-4 py-2 rounded-xl bg-[#80FFF9]/20 border border-[#80FFF9]/40 hover:bg-[#80FFF9]/30 transition flex items-center gap-2"
+          >
             <ShieldCheck size={18} className="text-[#80FFF9]" />
             Update Password
           </button>
         </div>
+
 
         {/* UI SETTINGS */}
         <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg">
@@ -288,7 +368,6 @@ const Settings = () => {
         </div>
 
         
-
         {/* NOTIFICATIONS */}
         <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg">
           <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
@@ -373,6 +452,7 @@ const Settings = () => {
             <Trash2 size={18} /> Delete Account
           </button>
         </div>
+
       </div>
     </div>
   );
