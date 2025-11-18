@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  User,
-  Bell,
-  Moon,
-  Trash2,
-  Save,
-  ShieldCheck,
-  Palette,
-  Loader2,
-} from "lucide-react";
+import { User, Bell, Moon, Trash2, Save, ShieldCheck, Palette, Loader2,} from "lucide-react";
 import API from "../../utils/api";
 import { toast } from "sonner";
 
@@ -199,83 +190,13 @@ const Settings = () => {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="text-gray-400 text-sm">Full Name</label>
-              <input
-                type="text"
-                value={profile.name}
-                onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
-              />
+              <input type="text" value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"/>
             </div>
 
             <div>
               <label className="text-gray-400 text-sm">Email Address</label>
-              <input
-                type="email"
-                value={profile.email}
-                onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
-              />
+              <input type="email" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"/>
             </div>
-          </div>
-        </div>
-
-        {/* UI SETTINGS */}
-        <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg">
-          <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
-            <Palette size={18} className="text-[#CB52D4]" /> UI Preferences
-          </h2>
-
-          <div className="grid md:grid-cols-2 gap-4">
-
-            <div>
-              <label className="text-gray-400 text-sm">Theme</label>
-              <select
-                value={settings.theme}
-                onChange={(e) => setSettings({ ...settings, theme: e.target.value })}
-                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
-              >
-                <option value="dark">Dark</option>
-                <option value="light">Light</option>
-                <option value="system">System</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="text-gray-400 text-sm">Accent Color</label>
-              <input
-                type="color"
-                value={settings.accentColor}
-                onChange={(e) => setSettings({ ...settings, accentColor: e.target.value })}
-                className="w-full h-10 bg-transparent rounded-md mt-1 cursor-pointer"
-              />
-            </div>
-
-            <div>
-              <label className="text-gray-400 text-sm">Sidebar Behavior</label>
-              <select
-                value={settings.sidebarBehavior}
-                onChange={(e) => setSettings({ ...settings, sidebarBehavior: e.target.value })}
-                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
-              >
-                <option value="fixed">Fixed</option>
-                <option value="floating">Floating</option>
-                <option value="auto-hide">Auto Hide</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="text-gray-400 text-sm">Information Density</label>
-              <select
-                value={settings.density}
-                onChange={(e) => setSettings({ ...settings, density: e.target.value })}
-                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
-              >
-                <option value="compact">Compact</option>
-                <option value="normal">Normal</option>
-                <option value="spacious">Spacious</option>
-              </select>
-            </div>
-
           </div>
         </div>
 
@@ -288,10 +209,7 @@ const Settings = () => {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="text-gray-400 text-sm">Old Password</label>
-              <input
-                type="password"
-                value={passwordForm.oldPassword}
-                onChange={(e) =>
+              <input type="password" value={passwordForm.oldPassword} onChange={(e) =>
                   setPasswordForm({ ...passwordForm, oldPassword: e.target.value })
                 }
                 className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
@@ -300,10 +218,7 @@ const Settings = () => {
 
             <div>
               <label className="text-gray-400 text-sm">New Password</label>
-              <input
-                type="password"
-                value={passwordForm.newPassword}
-                onChange={(e) =>
+              <input type="password" value={passwordForm.newPassword} onChange={(e) =>
                   setPasswordForm({ ...passwordForm, newPassword: e.target.value })
                 }
                 className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
@@ -312,10 +227,7 @@ const Settings = () => {
 
             <div>
               <label className="text-gray-400 text-sm">Confirm New Password</label>
-              <input
-                type="password"
-                value={passwordForm.confirmPassword}
-                onChange={(e) =>
+              <input type="password" value={passwordForm.confirmPassword} onChange={(e) =>
                   setPasswordForm({
                     ...passwordForm,
                     confirmPassword: e.target.value,
@@ -326,14 +238,56 @@ const Settings = () => {
             </div>
           </div>
 
-          <button
-            onClick={handlePasswordUpdate}
-            className="mt-5 px-4 py-2 rounded-xl bg-[#80FFF9]/20 border border-[#80FFF9]/40 hover:bg-[#80FFF9]/30 transition flex items-center gap-2"
-          >
+          <button onClick={handlePasswordUpdate} className="mt-5 px-4 py-2 rounded-xl bg-[#80FFF9]/20 border border-[#80FFF9]/40 hover:bg-[#80FFF9]/30 transition flex items-center gap-2">
             <ShieldCheck size={18} className="text-[#80FFF9]" />
             Update Password
           </button>
         </div>
+
+        {/* UI SETTINGS */}
+        <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg">
+          <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+            <Palette size={18} className="text-[#CB52D4]" /> UI Preferences
+          </h2>
+
+          <div className="grid md:grid-cols-2 gap-4">
+
+            <div>
+              <label className="text-gray-400 text-sm">Theme</label>
+              <select value={settings.theme} onChange={(e) => setSettings({ ...settings, theme: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200">
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+                <option value="system">System</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-gray-400 text-sm">Accent Color</label>
+              <input type="color" value={settings.accentColor} onChange={(e) => setSettings({ ...settings, accentColor: e.target.value })} className="w-full h-10 bg-transparent rounded-md mt-1 cursor-pointer"/>
+            </div>
+
+            <div>
+              <label className="text-gray-400 text-sm">Sidebar Behavior</label>
+              <select value={settings.sidebarBehavior} onChange={(e) => setSettings({ ...settings, sidebarBehavior: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200">
+                <option value="fixed">Fixed</option>
+                <option value="floating">Floating</option>
+                <option value="auto-hide">Auto Hide</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-gray-400 text-sm">Information Density</label>
+              <select value={settings.density} onChange={(e) => setSettings({ ...settings, density: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200">
+                <option value="compact">Compact</option>
+                <option value="normal">Normal</option>
+                <option value="spacious">Spacious</option>
+              </select>
+            </div>
+
+          </div>
+        </div>
+
+        
 
         {/* NOTIFICATIONS */}
         <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg">
@@ -349,10 +303,7 @@ const Settings = () => {
               ["notifyAIInvoice", "Notify when AI generates invoice"],
             ].map(([key, label]) => (
               <label key={key} className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings[key]}
-                  onChange={(e) =>
+                <input type="checkbox" checked={settings[key]} onChange={(e) =>
                     setSettings({ ...settings, [key]: e.target.checked })
                   }
                   className="w-5 h-5 accent-[#80FFF9]"
@@ -391,11 +342,7 @@ const Settings = () => {
 
             <div>
               <label className="text-gray-400 text-sm">AI Tone</label>
-              <select
-                value={settings.aiTone}
-                onChange={(e) => setSettings({ ...settings, aiTone: e.target.value })}
-                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
-              >
+              <select value={settings.aiTone} onChange={(e) => setSettings({ ...settings, aiTone: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200">
                 <option value="friendly">Friendly</option>
                 <option value="professional">Professional</option>
                 <option value="brief">Very Brief</option>
@@ -405,11 +352,7 @@ const Settings = () => {
 
             <div>
               <label className="text-gray-400 text-sm">Response Length</label>
-              <select
-                value={settings.aiLength}
-                onChange={(e) => setSettings({ ...settings, aiLength: e.target.value })}
-                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
-              >
+              <select value={settings.aiLength} onChange={(e) => setSettings({ ...settings, aiLength: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200">
                 <option value="short">Short</option>
                 <option value="normal">Normal</option>
                 <option value="long">Long</option>
@@ -421,19 +364,12 @@ const Settings = () => {
 
         {/* ACTIONS */}
         <div className="flex justify-end gap-4">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2"
-          >
+          <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2">
             {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
             Save Changes
           </button>
 
-          <button
-            onClick={handleDelete}
-            className="flex items-center gap-2 border border-red-500/30 text-red-400 px-4 py-2 rounded-xl hover:bg-red-500/10 transition"
-          >
+          <button onClick={handleDelete} className="flex items-center gap-2 border border-red-500/30 text-red-400 px-4 py-2 rounded-xl hover:bg-red-500/10 transition">
             <Trash2 size={18} /> Delete Account
           </button>
         </div>
