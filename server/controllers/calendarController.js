@@ -1,12 +1,44 @@
-import User from "../models/User.js";
+import CalendarEvent from "../models/CalendarEvent.js";
 
-export const saveCalendarNotes = async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id);
-    user.calendarNotes = req.body.notes;
-    await user.save();
-    res.json({ message: "Notes saved successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Failed to save notes" });
-  }
+// Get all events for logged-in user
+export const getEvents = async (req, res) => {
+  const events = await CalendarEvent.find({ user: req.user._id }).sort("date");
+  res.json(events);
+};
+
+// Create new event
+export const addEvent = async (req, res) => {
+  const { date, time, title } = req.body;
+
+  const event = await CalendarEvent.create({
+    user: req.user._id,
+    date,
+    time,
+    title,
+  });
+
+  res.json(event);
+};
+
+// Update event
+export const updateEvent = async (req, res) => {
+  const { date, time, title } = req.body;
+
+  const updated = await CalendarEvent.findOneAndUpdate(
+    { _id: req.params.id, user: req.user._id },
+    { date, time, title },
+    { new: true }
+  );
+
+  res.json(updated);
+};
+
+// Delete event
+export const deleteEvent = async (req, res) => {
+  await CalendarEvent.findOneAndDelete({
+    _id: req.params.id,
+    user: req.user._id,
+  });
+
+  res.json({ success: true });
 };

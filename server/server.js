@@ -15,6 +15,7 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 import aiChatRoutes from "./routes/aiChatRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
+import calendarRoutes from "./routes/calendarRoutes.js";
 
 
 import { generateNearDueNotifications } from "./controllers/notificationController.js";
@@ -62,6 +63,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/ai", aiChatRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/calendar", calendarRoutes);
 
 
 /* -------------------------- 🚀 SERVER --------------------------------- */
