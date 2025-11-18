@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from "react";
 import {
   User,
-  Mail,
   Bell,
   Moon,
   Trash2,
   Save,
   ShieldCheck,
-  Loader2,
   Palette,
-  Settings2,
-  SlidersHorizontal,
-  Brain,
+  Loader2,
 } from "lucide-react";
 import API from "../../utils/api";
 import { toast } from "sonner";
@@ -19,225 +15,415 @@ import { toast } from "sonner";
 const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [settings, setSettings] = useState(null);
-  const [user, setUser] = useState(null);
 
-  // Load BOTH: user + settings
+  // =============================
+  // USER PROFILE
+  // =============================
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+  });
+
+  // =============================
+  // APP SETTINGS
+  // =============================
+  const [settings, setSettings] = useState({
+    theme: "dark",
+    accentColor: "#80FFF9",
+    sidebarBehavior: "fixed",
+    density: "normal",
+    emailNotifications: true,
+    notifyInvoicePaid: true,
+    notifyInvoiceOverdue: true,
+    notifyAIInvoice: true,
+    notificationFrequency: "instant",
+    aiTone: "friendly",
+    aiLength: "normal",
+  });
+
+  // =============================
+  // PASSWORD FORM
+  // =============================
+  const [passwordForm, setPasswordForm] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  // =============================
+  // FETCH USER + SETTINGS
+  // =============================
   useEffect(() => {
-    const load = async () => {
+    const loadData = async () => {
       try {
         const token = localStorage.getItem("token");
 
-        const userRes = await API.get("/auth/profile");
-        const settingsRes = await API.get("/settings");
+        const userRes = await API.get("/auth/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-        setUser(userRes.data);
+        const settingsRes = await API.get("/settings", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setProfile({
+          name: userRes.data.name,
+          email: userRes.data.email,
+        });
+
         setSettings(settingsRes.data);
       } catch (err) {
-        console.error(err);
-        toast.error("Failed to load settings");
+        console.error("Load error:", err);
+        toast.error("Failed to load settings.");
       } finally {
         setLoading(false);
       }
     };
 
-    load();
+    loadData();
   }, []);
 
-  const saveAll = async () => {
+  // =============================
+  // SAVE ALL CHANGES
+  // =============================
+  const handleSave = async () => {
     try {
       setSaving(true);
-      await API.put("/settings", settings);
+      const token = localStorage.getItem("token");
+
+      // Save name + email
+      await API.put(
+        "/auth/update",
+        { name: profile.name, email: profile.email },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Save app settings
+      await API.put("/settings", settings, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       toast.success("Settings saved!");
     } catch (err) {
+      console.error("Save error:", err);
       toast.error("Save failed.");
     } finally {
       setSaving(false);
     }
   };
 
-  const deleteAccount = async () => {
-    if (!window.confirm("Are you sure you want to delete your account?")) return;
+  // =============================
+  // UPDATE PASSWORD
+  // =============================
+  const handlePasswordUpdate = async () => {
+    const { oldPassword, newPassword, confirmPassword } = passwordForm;
+
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      return toast.error("Please fill in all password fields.");
+    }
+
+    if (newPassword !== confirmPassword) {
+      return toast.error("New passwords do not match.");
+    }
 
     try {
-      await API.delete("/auth/delete");
-      localStorage.removeItem("token");
-      toast.success("Account deleted.");
-      window.location.href = "/register";
-    } catch {
-      toast.error("Delete failed.");
+      await API.put("/auth/password", { oldPassword, newPassword });
+
+      toast.success("Password updated!");
+
+      setPasswordForm({
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update password.");
     }
   };
 
-  if (loading || !settings)
+  // =============================
+  // DELETE ACCOUNT
+  // =============================
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete your account?")) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await API.delete("/auth/delete", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      toast.success("Account deleted.");
+      localStorage.removeItem("token");
+      window.location.href = "/register";
+    } catch (err) {
+      console.error("Delete error:", err);
+      toast.error("Failed to delete account.");
+    }
+  };
+
+  // =============================
+  // LOADING SCREEN
+  // =============================
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-white">
-        <Loader2 className="animate-spin text-[#80FFF9]" size={30} />
+      <div className="min-h-screen flex items-center justify-center bg-[#0e0e0e] text-white">
+        <Loader2 size={30} className="animate-spin text-[#80FFF9]" />
       </div>
     );
+  }
 
-  const update = (field, value) =>
-    setSettings((p) => ({ ...p, [field]: value }));
-
+  // =====================================================
+  //               PAGE CONTENT
+  // =====================================================
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white px-8 py-10">
-      <h1 className="text-3xl font-semibold flex items-center gap-2 mb-10">
-        <ShieldCheck className="text-[#80FFF9]" /> Settings
-      </h1>
+      <div className="max-w-4xl mx-auto space-y-10">
 
-      <div className="max-w-4xl mx-auto space-y-8">
-
-        {/* --- UI SETTINGS --- */}
-        <div className="p-6 bg-[#111]/80 border border-white/10 rounded-xl">
-          <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
-            <Palette className="text-[#80FFF9]" /> Appearance
-          </h2>
-
-          {/* THEME */}
-          <label className="block mb-4">
-            <span className="text-sm text-gray-400">Theme</span>
-            <select
-              value={settings.theme}
-              onChange={(e) => update("theme", e.target.value)}
-              className="mt-1 bg-[#1a1a1a] border border-white/10 rounded-md px-3 py-2 w-full"
-            >
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-              <option value="system">System Default</option>
-            </select>
-          </label>
-
-          {/* ACCENT COLOR */}
-          <label className="flex items-center gap-3 mt-4">
-            <span className="text-sm text-gray-400">Accent Color</span>
-            <input
-              type="color"
-              value={settings.accentColor}
-              onChange={(e) => update("accentColor", e.target.value)}
-              className="w-10 h-10 rounded"
-            />
-          </label>
-
-          {/* SIDEBAR BEHAVIOR */}
-          <label className="block mt-4">
-            <span className="text-sm text-gray-400">Sidebar</span>
-            <select
-              value={settings.sidebarBehavior}
-              onChange={(e) => update("sidebarBehavior", e.target.value)}
-              className="mt-1 bg-[#1a1a1a] border border-white/10 rounded-md px-3 py-2 w-full"
-            >
-              <option value="fixed">Fixed</option>
-              <option value="auto">Auto Hide</option>
-            </select>
-          </label>
-
-          {/* DENSITY */}
-          <label className="block mt-4">
-            <span className="text-sm text-gray-400">Dashboard Density</span>
-            <select
-              value={settings.density}
-              onChange={(e) => update("density", e.target.value)}
-              className="mt-1 bg-[#1a1a1a] border border-white/10 rounded-md px-3 py-2 w-full"
-            >
-              <option value="normal">Normal</option>
-              <option value="compact">Compact</option>
-            </select>
-          </label>
+        {/* HEADER */}
+        <div>
+          <h1 className="text-3xl font-semibold flex items-center gap-2">
+            <ShieldCheck className="text-[#80FFF9]" size={26} />
+            Settings
+          </h1>
+          <p className="text-gray-400 text-sm">Account & application preferences</p>
         </div>
 
-        {/* --- NOTIFICATIONS --- */}
-        <div className="p-6 bg-[#111]/80 border border-white/10 rounded-xl">
+        {/* PROFILE */}
+        <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg">
           <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
-            <Bell className="text-[#CB52D4]" /> Notifications
+            <User size={18} className="text-[#80FFF9]" /> Profile
           </h2>
 
-          <label className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={settings.emailNotifications}
-              onChange={(e) => update("emailNotifications", e.target.checked)}
-            />
-            Email Notifications
-          </label>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-gray-400 text-sm">Full Name</label>
+              <input
+                type="text"
+                value={profile.name}
+                onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
+              />
+            </div>
 
-          <label className="flex items-center gap-3 mt-3">
-            <input
-              type="checkbox"
-              checked={settings.notifyInvoicePaid}
-              onChange={(e) => update("notifyInvoicePaid", e.target.checked)}
-            />
-            Notify when invoice is paid
-          </label>
-
-          <label className="flex items-center gap-3 mt-3">
-            <input
-              type="checkbox"
-              checked={settings.notifyInvoiceOverdue}
-              onChange={(e) => update("notifyInvoiceOverdue", e.target.checked)}
-            />
-            Notify when invoice is overdue
-          </label>
-
-          <label className="flex items-center gap-3 mt-3">
-            <input
-              type="checkbox"
-              checked={settings.notifyAIInvoice}
-              onChange={(e) => update("notifyAIInvoice", e.target.checked)}
-            />
-            Notify when AI generates invoice
-          </label>
-
-          <label className="block mt-4">
-            <span className="text-sm text-gray-400">Frequency</span>
-            <select
-              value={settings.notificationFrequency}
-              onChange={(e) => update("notificationFrequency", e.target.value)}
-              className="mt-1 bg-[#1a1a1a] border border-white/10 rounded-md px-3 py-2 w-full"
-            >
-              <option value="instant">Instant</option>
-              <option value="daily">Daily Summary</option>
-              <option value="weekly">Weekly Summary</option>
-            </select>
-          </label>
+            <div>
+              <label className="text-gray-400 text-sm">Email Address</label>
+              <input
+                type="email"
+                value={profile.email}
+                onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* --- AI SETTINGS --- */}
-        <div className="p-6 bg-[#111]/80 border border-white/10 rounded-xl">
+        {/* UI SETTINGS */}
+        <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg">
           <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
-            <Brain className="text-[#80FFF9]" /> AI Preferences
+            <Palette size={18} className="text-[#CB52D4]" /> UI Preferences
           </h2>
 
-          <label className="block mb-4">
-            <span className="text-sm text-gray-400">AI Tone</span>
-            <select
-              value={settings.aiTone}
-              onChange={(e) => update("aiTone", e.target.value)}
-              className="mt-1 bg-[#1a1a1a] border border-white/10 rounded-md px-3 py-2 w-full"
-            >
-              <option value="friendly">Friendly</option>
-              <option value="formal">Formal</option>
-              <option value="neutral">Neutral</option>
-            </select>
-          </label>
+          <div className="grid md:grid-cols-2 gap-4">
 
-          <label className="block">
-            <span className="text-sm text-gray-400">Response Length</span>
-            <select
-              value={settings.aiLength}
-              onChange={(e) => update("aiLength", e.target.value)}
-              className="mt-1 bg-[#1a1a1a] border border-white/10 rounded-md px-3 py-2 w-full"
-            >
-              <option value="short">Short</option>
-              <option value="normal">Normal</option>
-              <option value="detailed">Detailed</option>
-            </select>
-          </label>
+            <div>
+              <label className="text-gray-400 text-sm">Theme</label>
+              <select
+                value={settings.theme}
+                onChange={(e) => setSettings({ ...settings, theme: e.target.value })}
+                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
+              >
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+                <option value="system">System</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-gray-400 text-sm">Accent Color</label>
+              <input
+                type="color"
+                value={settings.accentColor}
+                onChange={(e) => setSettings({ ...settings, accentColor: e.target.value })}
+                className="w-full h-10 bg-transparent rounded-md mt-1 cursor-pointer"
+              />
+            </div>
+
+            <div>
+              <label className="text-gray-400 text-sm">Sidebar Behavior</label>
+              <select
+                value={settings.sidebarBehavior}
+                onChange={(e) => setSettings({ ...settings, sidebarBehavior: e.target.value })}
+                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
+              >
+                <option value="fixed">Fixed</option>
+                <option value="floating">Floating</option>
+                <option value="auto-hide">Auto Hide</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-gray-400 text-sm">Information Density</label>
+              <select
+                value={settings.density}
+                onChange={(e) => setSettings({ ...settings, density: e.target.value })}
+                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
+              >
+                <option value="compact">Compact</option>
+                <option value="normal">Normal</option>
+                <option value="spacious">Spacious</option>
+              </select>
+            </div>
+
+          </div>
         </div>
 
-        {/* --- ACTIONS --- */}
+        {/* PASSWORD */}
+        <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg">
+          <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+            <ShieldCheck size={18} className="text-[#80FFF9]" /> Change Password
+          </h2>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-gray-400 text-sm">Old Password</label>
+              <input
+                type="password"
+                value={passwordForm.oldPassword}
+                onChange={(e) =>
+                  setPasswordForm({ ...passwordForm, oldPassword: e.target.value })
+                }
+                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
+              />
+            </div>
+
+            <div>
+              <label className="text-gray-400 text-sm">New Password</label>
+              <input
+                type="password"
+                value={passwordForm.newPassword}
+                onChange={(e) =>
+                  setPasswordForm({ ...passwordForm, newPassword: e.target.value })
+                }
+                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
+              />
+            </div>
+
+            <div>
+              <label className="text-gray-400 text-sm">Confirm New Password</label>
+              <input
+                type="password"
+                value={passwordForm.confirmPassword}
+                onChange={(e) =>
+                  setPasswordForm({
+                    ...passwordForm,
+                    confirmPassword: e.target.value,
+                  })
+                }
+                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
+              />
+            </div>
+          </div>
+
+          <button
+            onClick={handlePasswordUpdate}
+            className="mt-5 px-4 py-2 rounded-xl bg-[#80FFF9]/20 border border-[#80FFF9]/40 hover:bg-[#80FFF9]/30 transition flex items-center gap-2"
+          >
+            <ShieldCheck size={18} className="text-[#80FFF9]" />
+            Update Password
+          </button>
+        </div>
+
+        {/* NOTIFICATIONS */}
+        <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg">
+          <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+            <Bell size={18} className="text-yellow-400" /> Notifications
+          </h2>
+
+          <div className="flex flex-col gap-3">
+            {[
+              ["emailNotifications", "Email notifications"],
+              ["notifyInvoicePaid", "Notify when invoice is paid"],
+              ["notifyInvoiceOverdue", "Notify when invoice becomes overdue"],
+              ["notifyAIInvoice", "Notify when AI generates invoice"],
+            ].map(([key, label]) => (
+              <label key={key} className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings[key]}
+                  onChange={(e) =>
+                    setSettings({ ...settings, [key]: e.target.checked })
+                  }
+                  className="w-5 h-5 accent-[#80FFF9]"
+                />
+                <span className="text-gray-300">{label}</span>
+              </label>
+            ))}
+
+            <div>
+              <label className="text-gray-400 text-sm">Notification Frequency</label>
+              <select
+                value={settings.notificationFrequency}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    notificationFrequency: e.target.value,
+                  })
+                }
+                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-2 text-gray-200"
+              >
+                <option value="instant">Instant</option>
+                <option value="hourly">Hourly Summary</option>
+                <option value="daily">Daily Digest</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* AI SETTINGS */}
+        <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg">
+          <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+            <Moon size={18} className="text-[#80FFF9]" /> AI Preferences
+          </h2>
+
+          <div className="grid md:grid-cols-2 gap-4">
+
+            <div>
+              <label className="text-gray-400 text-sm">AI Tone</label>
+              <select
+                value={settings.aiTone}
+                onChange={(e) => setSettings({ ...settings, aiTone: e.target.value })}
+                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
+              >
+                <option value="friendly">Friendly</option>
+                <option value="professional">Professional</option>
+                <option value="brief">Very Brief</option>
+                <option value="detailed">Detailed</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-gray-400 text-sm">Response Length</label>
+              <select
+                value={settings.aiLength}
+                onChange={(e) => setSettings({ ...settings, aiLength: e.target.value })}
+                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
+              >
+                <option value="short">Short</option>
+                <option value="normal">Normal</option>
+                <option value="long">Long</option>
+              </select>
+            </div>
+
+          </div>
+        </div>
+
+        {/* ACTIONS */}
         <div className="flex justify-end gap-4">
           <button
-            onClick={saveAll}
+            onClick={handleSave}
+            disabled={saving}
             className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2"
           >
             {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
@@ -245,8 +431,8 @@ const Settings = () => {
           </button>
 
           <button
-            onClick={deleteAccount}
-            className="px-4 py-2 rounded-xl border border-red-600/40 text-red-400 hover:bg-red-600/10 transition flex items-center gap-2"
+            onClick={handleDelete}
+            className="flex items-center gap-2 border border-red-500/30 text-red-400 px-4 py-2 rounded-xl hover:bg-red-500/10 transition"
           >
             <Trash2 size={18} /> Delete Account
           </button>
