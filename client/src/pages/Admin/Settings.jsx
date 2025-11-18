@@ -8,6 +8,10 @@ import {
   Save,
   ShieldCheck,
   Loader2,
+  Palette,
+  Settings2,
+  SlidersHorizontal,
+  Brain,
 } from "lucide-react";
 import API from "../../utils/api";
 import { toast } from "sonner";
@@ -15,200 +19,234 @@ import { toast } from "sonner";
 const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [settings, setSettings] = useState(null);
+  const [user, setUser] = useState(null);
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    notifications: true,
-    darkMode: true,
-  });
-
-  // ==========================
-  // FETCH USER SETTINGS
-  // ==========================
+  // Load BOTH: user + settings
   useEffect(() => {
-    const fetchUserData = async () => {
+    const load = async () => {
       try {
         const token = localStorage.getItem("token");
-        const { data } = await API.get("/auth/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
 
-        setForm({
-          name: data.name,
-          email: data.email,
-          notifications: true, // dacă vrei să implementezi în DB, îți fac schema
-          darkMode: true,
-        });
+        const userRes = await API.get("/auth/profile");
+        const settingsRes = await API.get("/settings");
 
+        setUser(userRes.data);
+        setSettings(settingsRes.data);
       } catch (err) {
-        console.error("User fetch error:", err);
-        toast.error("Failed to load user settings.");
+        console.error(err);
+        toast.error("Failed to load settings");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUserData();
+    load();
   }, []);
 
-  // UPDATE STATE
-  const handleChange = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  // ==========================
-  // SAVE SETTINGS (UPDATE USER)
-  // ==========================
-  const handleSave = async () => {
+  const saveAll = async () => {
     try {
       setSaving(true);
-      const token = localStorage.getItem("token");
-
-      await API.put(
-        "/auth/update",
-        {
-          name: form.name,
-          email: form.email,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      toast.success("Settings saved successfully!");
+      await API.put("/settings", settings);
+      toast.success("Settings saved!");
     } catch (err) {
-      console.error("Update error:", err);
-      toast.error(err.response?.data?.message || "Failed to update settings.");
+      toast.error("Save failed.");
     } finally {
       setSaving(false);
     }
   };
 
-  // ==========================
-  // DELETE ACCOUNT
-  // ==========================
-  const handleDelete = async () => {
+  const deleteAccount = async () => {
     if (!window.confirm("Are you sure you want to delete your account?")) return;
 
     try {
-      const token = localStorage.getItem("token");
-
-      await API.delete("/auth/delete", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      toast.success("Your account has been deleted.");
+      await API.delete("/auth/delete");
       localStorage.removeItem("token");
+      toast.success("Account deleted.");
       window.location.href = "/register";
-    } catch (err) {
-      console.error("Delete error:", err);
-      toast.error("Failed to delete account.");
+    } catch {
+      toast.error("Delete failed.");
     }
   };
 
-  if (loading) {
+  if (loading || !settings)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0e0e0e] text-white">
-        <Loader2 size={30} className="animate-spin text-[#80FFF9]" />
+      <div className="min-h-screen flex items-center justify-center text-white">
+        <Loader2 className="animate-spin text-[#80FFF9]" size={30} />
       </div>
     );
-  }
+
+  const update = (field, value) =>
+    setSettings((p) => ({ ...p, [field]: value }));
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white px-8 py-10">
-      {/* ===== HEADER ===== */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold flex items-center gap-2">
-            <ShieldCheck className="text-[#80FFF9]" size={26} />
-            Settings
-          </h1>
-          <p className="text-gray-400 text-sm">
-            Manage your account preferences and appearance
-          </p>
-        </div>
-      </div>
+      <h1 className="text-3xl font-semibold flex items-center gap-2 mb-10">
+        <ShieldCheck className="text-[#80FFF9]" /> Settings
+      </h1>
 
       <div className="max-w-4xl mx-auto space-y-8">
-        {/* ===== PROFILE CARD ===== */}
-        <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg shadow-indigo-900/10">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <User size={18} className="text-[#80FFF9]" /> Profile
+
+        {/* --- UI SETTINGS --- */}
+        <div className="p-6 bg-[#111]/80 border border-white/10 rounded-xl">
+          <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+            <Palette className="text-[#80FFF9]" /> Appearance
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-gray-400 text-sm">Full Name</label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => handleChange("name", e.target.value)}
-                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 text-gray-200 focus:border-[#80FFF9] outline-none mt-1"
-              />
-            </div>
+          {/* THEME */}
+          <label className="block mb-4">
+            <span className="text-sm text-gray-400">Theme</span>
+            <select
+              value={settings.theme}
+              onChange={(e) => update("theme", e.target.value)}
+              className="mt-1 bg-[#1a1a1a] border border-white/10 rounded-md px-3 py-2 w-full"
+            >
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="system">System Default</option>
+            </select>
+          </label>
 
-            <div>
-              <label className="text-gray-400 text-sm">Email Address</label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => handleChange("email", e.target.value)}
-                className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 text-gray-200 focus:border-[#80FFF9] outline-none mt-1"
-              />
-            </div>
-          </div>
+          {/* ACCENT COLOR */}
+          <label className="flex items-center gap-3 mt-4">
+            <span className="text-sm text-gray-400">Accent Color</span>
+            <input
+              type="color"
+              value={settings.accentColor}
+              onChange={(e) => update("accentColor", e.target.value)}
+              className="w-10 h-10 rounded"
+            />
+          </label>
+
+          {/* SIDEBAR BEHAVIOR */}
+          <label className="block mt-4">
+            <span className="text-sm text-gray-400">Sidebar</span>
+            <select
+              value={settings.sidebarBehavior}
+              onChange={(e) => update("sidebarBehavior", e.target.value)}
+              className="mt-1 bg-[#1a1a1a] border border-white/10 rounded-md px-3 py-2 w-full"
+            >
+              <option value="fixed">Fixed</option>
+              <option value="auto">Auto Hide</option>
+            </select>
+          </label>
+
+          {/* DENSITY */}
+          <label className="block mt-4">
+            <span className="text-sm text-gray-400">Dashboard Density</span>
+            <select
+              value={settings.density}
+              onChange={(e) => update("density", e.target.value)}
+              className="mt-1 bg-[#1a1a1a] border border-white/10 rounded-md px-3 py-2 w-full"
+            >
+              <option value="normal">Normal</option>
+              <option value="compact">Compact</option>
+            </select>
+          </label>
         </div>
 
-        {/* ===== PREFERENCES ===== */}
-        <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-6 shadow-lg shadow-indigo-900/10">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Bell size={18} className="text-[#CB52D4]" /> Preferences
+        {/* --- NOTIFICATIONS --- */}
+        <div className="p-6 bg-[#111]/80 border border-white/10 rounded-xl">
+          <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+            <Bell className="text-[#CB52D4]" /> Notifications
           </h2>
 
-          <div className="flex flex-col gap-3">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={form.notifications}
-                onChange={(e) => handleChange("notifications", e.target.checked)}
-                className="w-5 h-5 rounded accent-[#80FFF9]"
-              />
-              <span className="text-gray-300">Enable Email Notifications</span>
-            </label>
+          <label className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={settings.emailNotifications}
+              onChange={(e) => update("emailNotifications", e.target.checked)}
+            />
+            Email Notifications
+          </label>
 
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={form.darkMode}
-                onChange={(e) => handleChange("darkMode", e.target.checked)}
-                className="w-5 h-5 rounded accent-[#CB52D4]"
-              />
-              <span className="text-gray-300 flex items-center gap-2">
-                <Moon size={16} /> Enable Dark Mode
-              </span>
-            </label>
-          </div>
+          <label className="flex items-center gap-3 mt-3">
+            <input
+              type="checkbox"
+              checked={settings.notifyInvoicePaid}
+              onChange={(e) => update("notifyInvoicePaid", e.target.checked)}
+            />
+            Notify when invoice is paid
+          </label>
+
+          <label className="flex items-center gap-3 mt-3">
+            <input
+              type="checkbox"
+              checked={settings.notifyInvoiceOverdue}
+              onChange={(e) => update("notifyInvoiceOverdue", e.target.checked)}
+            />
+            Notify when invoice is overdue
+          </label>
+
+          <label className="flex items-center gap-3 mt-3">
+            <input
+              type="checkbox"
+              checked={settings.notifyAIInvoice}
+              onChange={(e) => update("notifyAIInvoice", e.target.checked)}
+            />
+            Notify when AI generates invoice
+          </label>
+
+          <label className="block mt-4">
+            <span className="text-sm text-gray-400">Frequency</span>
+            <select
+              value={settings.notificationFrequency}
+              onChange={(e) => update("notificationFrequency", e.target.value)}
+              className="mt-1 bg-[#1a1a1a] border border-white/10 rounded-md px-3 py-2 w-full"
+            >
+              <option value="instant">Instant</option>
+              <option value="daily">Daily Summary</option>
+              <option value="weekly">Weekly Summary</option>
+            </select>
+          </label>
         </div>
 
-        {/* ===== ACTION BUTTONS ===== */}
+        {/* --- AI SETTINGS --- */}
+        <div className="p-6 bg-[#111]/80 border border-white/10 rounded-xl">
+          <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+            <Brain className="text-[#80FFF9]" /> AI Preferences
+          </h2>
+
+          <label className="block mb-4">
+            <span className="text-sm text-gray-400">AI Tone</span>
+            <select
+              value={settings.aiTone}
+              onChange={(e) => update("aiTone", e.target.value)}
+              className="mt-1 bg-[#1a1a1a] border border-white/10 rounded-md px-3 py-2 w-full"
+            >
+              <option value="friendly">Friendly</option>
+              <option value="formal">Formal</option>
+              <option value="neutral">Neutral</option>
+            </select>
+          </label>
+
+          <label className="block">
+            <span className="text-sm text-gray-400">Response Length</span>
+            <select
+              value={settings.aiLength}
+              onChange={(e) => update("aiLength", e.target.value)}
+              className="mt-1 bg-[#1a1a1a] border border-white/10 rounded-md px-3 py-2 w-full"
+            >
+              <option value="short">Short</option>
+              <option value="normal">Normal</option>
+              <option value="detailed">Detailed</option>
+            </select>
+          </label>
+        </div>
+
+        {/* --- ACTIONS --- */}
         <div className="flex justify-end gap-4">
           <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-2 rounded-md hover:opacity-90 transition disabled:opacity-50"
+            onClick={saveAll}
+            className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2"
           >
-            {saving ? (
-              <Loader2 className="animate-spin" size={18} />
-            ) : (
-              <Save size={18} />
-            )}
+            {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
             Save Changes
           </button>
 
           <button
-            onClick={handleDelete}
-            className="flex items-center gap-2 border border-red-500/30 text-red-400 px-6 py-2 rounded-md hover:bg-red-500/10 transition"
+            onClick={deleteAccount}
+            className="px-4 py-2 rounded-xl border border-red-600/40 text-red-400 hover:bg-red-600/10 transition flex items-center gap-2"
           >
             <Trash2 size={18} /> Delete Account
           </button>

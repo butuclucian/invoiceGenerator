@@ -1,6 +1,11 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
+import Invoice from "../models/Invoice.js";
+import Client from "../models/Client.js";
+import Subscription from "../models/Subscription.js";
+import Notification from "../models/Notification.js";
+
 // 🔧 funcție helper pentru token
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
@@ -68,5 +73,65 @@ export const getProfile = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch profile", error: error.message });
+  }
+};
+
+// =======================
+// UPDATE USER PROFILE
+// =======================
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { name, email } = req.body;
+
+    if (!name || !email) {
+      return res.status(400).json({ message: "Name and email are required." });
+    }
+
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail && existingEmail._id.toString() !== userId.toString()) {
+      return res.status(400).json({ message: "Email already used by another account." });
+    }
+
+    const updated = await User.findByIdAndUpdate(
+      userId,
+      { name, email },
+      { new: true }
+    );
+
+    return res.json({
+      success: true,
+      message: "Profile updated.",
+      user: updated,
+      token: generateToken(updated._id),
+    });
+  } catch (err) {
+    console.error("Update Profile Error:", err);
+    res.status(500).json({ message: "Failed to update profile." });
+  }
+};
+
+// =======================
+// DELETE ACCOUNT
+// =======================
+export const deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    await Invoice.deleteMany({ user: userId });
+    await Client.deleteMany({ createdBy: userId });
+    await Subscription.deleteMany({ user: userId });
+    await Notification.deleteMany({ user: userId });
+
+    await User.findByIdAndDelete(userId);
+
+    return res.json({
+      success: true,
+      message: "Account deleted successfully.",
+    });
+
+  } catch (err) {
+    console.error("Delete Account Error:", err);
+    res.status(500).json({ message: "Failed to delete account." });
   }
 };
