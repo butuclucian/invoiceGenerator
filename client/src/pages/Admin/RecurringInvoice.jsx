@@ -9,7 +9,6 @@ const RecurringInvoice = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  //  Fetch recurring invoices from backend
   const fetchRecurringInvoices = async () => {
     try {
       setLoading(true);
@@ -27,7 +26,6 @@ const RecurringInvoice = () => {
       const recurringOnly = data.filter((inv) => inv.recurring === true);
       setInvoices(recurringOnly);
     } catch (err) {
-      console.error("❌ Fetch recurring invoices error:", err);
       if (err.response?.status === 401) toast.error("Unauthorized. Please log in again.");
       else toast.error("Failed to load recurring invoices");
     } finally {
@@ -39,7 +37,6 @@ const RecurringInvoice = () => {
     fetchRecurringInvoices();
   }, []);
 
-  //  Delete recurring invoice
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem("token");
@@ -66,12 +63,13 @@ const RecurringInvoice = () => {
   }
 
   return (
-    <div className="p-8 text-white min-h-screen bg-[#0e0e0e]">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
-        {/* title + subttile */}
+    <div className="p-4 sm:p-6 md:p-8 text-white min-h-screen bg-[#0e0e0e]">
+
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
+        {/* title */}
         <div>
-          <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-semibold flex items-center gap-2">
             <Repeat className="text-[#80FFF9]" size={26} />
             Recurring Invoices
           </h1>
@@ -79,16 +77,16 @@ const RecurringInvoice = () => {
             Manage and track your automatically repeating invoices
           </p>
         </div>
-
+        
         {/* add button */}
-        <button onClick={() => toast.info("Add Recurring Invoice (coming soon)")} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2">
+        <button onClick={() => toast.info("Add Recurring Invoice (coming soon)")} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2 text-sm sm:text-base">
           <Plus size={18} />
           Add Recurring Invoice
         </button>
 
       </div>
 
-      {/* Loading or Empty */}
+
       {loading ? (
         <div className="text-center py-16 text-gray-400 animate-pulse">
           Loading recurring invoices...
@@ -104,83 +102,134 @@ const RecurringInvoice = () => {
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto bg-[#1a1a1a]/70 border border-white/10 rounded-xl">
-          <table className="w-full text-sm border-collapse">
-            {/* table col */}
-            <thead>
-              <tr className="text-gray-400 text-left border-b border-white/10">
-                <th className="p-4">Invoice #</th>
-                <th className="p-4">Client</th>
-                <th className="p-4">Frequency</th>
-                <th className="p-4">Next Billing</th>
-                <th className="p-4">Status</th>
-                <th className="p-4 text-right">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {invoices.map((inv) => (
-                <tr key={inv._id} className="border-b border-white/5 hover:bg-white/5 transition" >
-                  <td className="p-4 font-medium text-gray-200">
-                    {inv.invoice_number}
-                  </td>
-                  <td className="p-4">
-                    <p className="text-gray-200">{inv.client?.name || "Unknown"}</p>
-                    <p className="text-xs text-gray-500">{inv.client?.email || "N/A"}</p>
-                  </td>
-                  <td className="p-4 text-gray-300">
-                    {inv.frequency || "Monthly"}
-                  </td>
-                  <td className="p-4 text-gray-400">
-                    {inv.next_billing || "—"}
-                  </td>
-                  <td className="p-4">
-                    <span
-                      className={`text-xs px-3 py-1 rounded-full capitalize ${
-                        inv.status === "paid"
-                          ? "bg-green-500/20 text-green-400"
-                          : inv.status === "sent"
-                          ? "bg-blue-500/20 text-blue-400"
-                          : inv.status === "draft"
-                          ? "bg-gray-500/20 text-gray-400"
-                          : "bg-red-500/20 text-red-400"
-                      }`}
-                    >
-                      {inv.status}
-                    </span>
-                  </td>
-
-                  {/* options */}
-                  <td className="p-4 text-right flex justify-end gap-2">
-                    
-                    {/* preview */}
-                    <button onClick={()=> handlePreview(inv._id)} className="p-2 text-gray-400 hover:text-[#80FFF9] transition" title="View">
-                      <Eye size={16} />
-                    </button>
-
-                    {/* edit */}
-                    <button onClick={() => handleEdit(inv._id)} className="p-2 text-gray-400 hover:text-indigo-400 transition" title="Edit">
-                      <Edit size={16} />
-                    </button>
-
-                    {/* download */}
-                    <button onClick={() => handleDownload(inv.invoice_number)} className="p-2 text-gray-400 hover:text-green-400 transition" title="Download">
-                      <Download size={16} />
-                    </button>
-
-                    {/* delete */}
-                    <button onClick={() => handleDelete(inv._id)} className="p-2 text-gray-400 hover:text-red-400 transition" title="Delete">
-                      <Trash2 size={16} />
-                    </button>
-
-                  </td>
-
+        <>
+          {/* DESKTOP TABLE */}
+          <div className="hidden md:block overflow-x-auto bg-[#1a1a1a]/70 border border-white/10 rounded-xl">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="text-gray-400 border-b border-white/10">
+                  <th className="p-4">Invoice #</th>
+                  <th className="p-4">Client</th>
+                  <th className="p-4">Frequency</th>
+                  <th className="p-4">Next Billing</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
+              </thead>
 
-          </table>
-        </div>
+              <tbody>
+                {invoices.map((inv) => (
+                  <tr key={inv._id} className="border-b border-white/5 hover:bg-white/5 transition">
+                    <td className="p-4 font-medium text-gray-200">{inv.invoice_number}</td>
+
+                    <td className="p-4">
+                      <p className="text-gray-200">{inv.client?.name || "Unknown"}</p>
+                      <p className="text-xs text-gray-500">{inv.client?.email || "N/A"}</p>
+                    </td>
+
+                    <td className="p-4 text-gray-300">{inv.frequency || "Monthly"}</td>
+                    <td className="p-4 text-gray-400">{inv.next_billing || "—"}</td>
+
+                    <td className="p-4">
+                      <span
+                        className={`text-xs px-3 py-1 rounded-full capitalize ${
+                          inv.status === "paid"
+                            ? "bg-green-500/20 text-green-400"
+                            : inv.status === "sent"
+                            ? "bg-blue-500/20 text-blue-400"
+                            : inv.status === "draft"
+                            ? "bg-gray-500/20 text-gray-400"
+                            : "bg-red-500/20 text-red-400"
+                        }`}
+                      >
+                        {inv.status}
+                      </span>
+                    </td>
+
+                    {/* buttons */}
+                    <td className="p-4 text-right flex justify-end gap-2">
+                      <button onClick={()=> handlePreview(inv._id)} className="p-2 hover:text-[#80FFF9]">
+                        <Eye size={16} />
+                      </button>
+
+                      <button onClick={() => handleEdit(inv._id)} className="p-2 hover:text-indigo-400">
+                        <Edit size={16} />
+                      </button>
+
+                      <button onClick={() => handleDownload(inv.invoice_number)} className="p-2 hover:text-green-400">
+                        <Download size={16} />
+                      </button>
+
+                      <button onClick={() => handleDelete(inv._id)} className="p-2 hover:text-red-400">
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
+
+                  </tr>
+                ))}
+              </tbody>
+
+            </table>
+          </div>
+
+
+          {/* MOBILE VERSION — CARD LIST */}
+          <div className="md:hidden flex flex-col gap-4">
+            {invoices.map((inv) => (
+              <div
+                key={inv._id}
+                className="bg-[#1a1a1a]/70 border border-white/10 rounded-xl p-4 shadow-lg"
+              >
+                <div className="flex justify-between items-start">
+                  <p className="text-lg font-semibold text-gray-200">
+                    {inv.invoice_number}
+                  </p>
+
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs capitalize ${
+                      inv.status === "paid"
+                        ? "bg-green-500/20 text-green-400"
+                        : inv.status === "sent"
+                        ? "bg-blue-500/20 text-blue-400"
+                        : inv.status === "draft"
+                        ? "bg-gray-500/20 text-gray-400"
+                        : "bg-red-500/20 text-red-400"
+                    }`}
+                  >
+                    {inv.status}
+                  </span>
+                </div>
+
+                <div className="mt-3 text-sm text-gray-300">
+                  <p><span className="text-gray-400">Client:</span> {inv.client?.name || "Unknown"}</p>
+                  <p><span className="text-gray-400">Email:</span> {inv.client?.email || "N/A"}</p>
+                  <p><span className="text-gray-400">Frequency:</span> {inv.frequency || "Monthly"}</p>
+                  <p><span className="text-gray-400">Next Billing:</span> {inv.next_billing || "—"}</p>
+                </div>
+
+                {/* buttons */}
+                <div className="mt-4 flex justify-end gap-4 text-gray-400">
+                  <button onClick={()=> handlePreview(inv._id)} className="hover:text-[#80FFF9]">
+                    <Eye size={18} />
+                  </button>
+
+                  <button onClick={() => handleEdit(inv._id)} className="hover:text-indigo-400">
+                    <Edit size={18} />
+                  </button>
+
+                  <button onClick={() => handleDownload(inv.invoice_number)} className="hover:text-green-400">
+                    <Download size={18} />
+                  </button>
+
+                  <button onClick={() => handleDelete(inv._id)} className="hover:text-red-400">
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+                
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

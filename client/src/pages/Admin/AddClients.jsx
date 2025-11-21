@@ -18,7 +18,6 @@ const AddClients = () => {
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -53,11 +52,12 @@ const AddClients = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white px-10 pt-8 overflow-hidden">
+    <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-10 pt-8 overflow-hidden">
+
       {/* Header */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-semibold flex items-center gap-2">
             <UserPlus className="text-[#80FFF9]" size={26} />
             Clients
           </h1>
@@ -71,62 +71,67 @@ const AddClients = () => {
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl mx-auto fade-in">
+      <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl mx-auto">
+
         {/* Basic Info */}
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
           <div>
             <label className="block text-sm text-gray-300 mb-2">
               Full Name <span className="text-red-500">*</span>
             </label>
-            <input type="text" name="name" placeholder="Client Name" value={formData.name} onChange={handleChange} className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-[#80FFF9] outline-none transition"
-            />
+            <input type="text" name="name" placeholder="Client Name" value={formData.name} onChange={handleChange} className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-[#80FFF9] outline-none transition" />
           </div>
 
           <div>
             <label className="block text-sm text-gray-300 mb-2">
               Email Address <span className="text-red-500">*</span>
             </label>
-            <input type="email" name="email" placeholder="client@email.com" value={formData.email} onChange={handleChange} className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-[#80FFF9] outline-none transition"
-            />
+            <input type="email" name="email" placeholder="client@email.com" value={formData.email} onChange={handleChange} className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-[#80FFF9] outline-none transition" />
           </div>
+
         </div>
 
         {/* Contact Info */}
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
           <div>
-            <label className="block text-sm text-gray-300 mb-2">Phone Number</label>
-            <input type="text" name="phone" placeholder="07xx xxx xxx" value={formData.phone} onChange={handleChange} className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-[#80FFF9] outline-none transition"
-            />
+            <label className="block text-sm text-gray-300 mb-2">
+              Phone Number
+            </label>
+            <input type="text" name="phone" placeholder="07xx xxx xxx" value={formData.phone} onChange={handleChange} className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-[#80FFF9] outline-none transition" />
           </div>
 
           <div>
             <label className="block text-sm text-gray-300 mb-2">Company</label>
-            <input type="text" name="company" placeholder="Client Company" value={formData.company} onChange={handleChange} className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-[#80FFF9] outline-none transition"
-            />
+            <input type="text" name="company" placeholder="Client Company" value={formData.company} onChange={handleChange} className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-[#80FFF9] outline-none transition" />
           </div>
+
         </div>
 
         {/* Address */}
         <div>
           <label className="block text-sm text-gray-300 mb-2">Address</label>
-          <input type="text" name="address" placeholder="Client address" value={formData.address} onChange={handleChange} className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-[#80FFF9] outline-none transition"/>
+          <input type="text" name="address" placeholder="Client address" value={formData.address} onChange={handleChange} className="w-full bg-[#1a1a1a]/80 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-[#80FFF9] outline-none transition" />
         </div>
 
-        {/* Sticky Footer */}
-        <div className="fixed bottom-0 right-0 left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-4 z-40">
-          <div className="flex justify-center gap-4 pr-8">
-            
-            <button type="button" onClick={handleReset} className="flex items-center gap-2 px-5 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition">
+        {/* Footer Buttons */}
+        <div className=" fixed bottom-0 right-0  left-0 md:left-64  bg-[#111111]/90 border-t border-white/10  backdrop-blur-md py-3 z-10 " >
+          <div className=" flex flex-row  justify-center items-center  gap-2 sm:gap-4  px-3 sm:px-4 " >
+            {/* Reset */}
+            <button type="button" onClick={handleReset} className=" flex items-center justify-center gap-2  px-3 sm:px-5 py-2  border border-white/20  rounded-md text-gray-300  hover:text-white hover:bg-white/10  transition text-sm sm:text-base " >
               <RotateCcw size={16} />
               Reset
             </button>
-            
-            <button type="button" onClick={() => navigate(-1)} className="flex items-center gap-2 px-5 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition">
+
+            {/* Cancel */}
+            <button type="button" onClick={() => navigate(-1)} className=" flex items-center justify-center gap-2  px-3 sm:px-5 py-2  border border-white/20  rounded-md text-gray-300  hover:text-white hover:bg-white/10  transition text-sm sm:text-base " >
               <X size={16} />
               Cancel
             </button>
-            
-            <button type="submit" className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2" >
+
+            {/* Save */}
+            <button type="submit" className=" flex items-center justify-center gap-2  px-3 sm:px-5 py-2  rounded-md bg-indigo-600/20  border border-indigo-600/40  hover:bg-indigo-600/30  transition text-sm sm:text-base " >
               <Save size={16} />
               Save Client
             </button>
@@ -135,7 +140,6 @@ const AddClients = () => {
         </div>
 
       </form>
-
     </div>
   );
 };

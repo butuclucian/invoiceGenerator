@@ -12,14 +12,12 @@ const CalendarPage = () => {
   const [newNote, setNewNote] = useState({ time: "", title: "" });
   const [editingEventId, setEditingEventId] = useState(null);
 
-  // REAL EVENTS FROM DB
+
   const [events, setEvents] = useState([]);
 
   const formattedDate = format(selectedDate, "yyyy-MM-dd");
 
-  // ===================================================
   // FETCH EVENTS FROM BACKEND
-  // ===================================================
   const fetchEvents = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -50,9 +48,7 @@ const CalendarPage = () => {
     });
   }, [events, selectedDate]);
 
-  // ===================================================
   // ADD or EDIT EVENT
-  // ===================================================
   const addNote = async () => {
     if (!newNote.time || !newNote.title)
       return toast.error("Please complete all fields!");
@@ -108,9 +104,7 @@ const CalendarPage = () => {
     }
   };
 
-  // ===================================================
   // DELETE EVENT
-  // ===================================================
   const deleteNote = async (id) => {
     try {
       const token = localStorage.getItem("token");
@@ -126,9 +120,6 @@ const CalendarPage = () => {
     }
   };
 
-  // ===================================================
-  // UI (UNCHANGED)
-  // ===================================================
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white p-10">
 
@@ -145,10 +136,7 @@ const CalendarPage = () => {
         </div>
 
         {/* NEW EVENT BUTTON */}
-        <button
-          onClick={() => setOpenPopup(true)}
-          className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2"
-        >
+        <button onClick={() => setOpenPopup(true)} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2" >
           <Plus size={16} className="text-indigo-400" />
           New Event
         </button>
@@ -159,17 +147,12 @@ const CalendarPage = () => {
 
         {/* === MAIN CALENDAR === */}
         <div className="w-full">
-          <Calendar
-            onChange={setSelectedDate}
-            value={selectedDate}
-            className="full-calendar"
-            tileClassName={({ date }) => {
+          <Calendar onChange={setSelectedDate} value={selectedDate} className="full-calendar" tileClassName={({ date }) => {
               const key = format(date, "yyyy-MM-dd");
               if (events.some((n) => n.date === key)) return "has-event";
               if (isSameDay(date, new Date())) return "today-highlight";
               return null;
-            }}
-          />
+            }} />
 
           {/* YOUR EXACT STYLING */}
           <style>{`
@@ -267,10 +250,7 @@ const CalendarPage = () => {
             ) : (
               <div className="flex flex-col gap-3 max-h-[250px] overflow-y-auto pr-2">
                 {monthEvents.map((ev) => (
-                  <div
-                    key={ev._id}
-                    className="bg-[#1a1a1a] border border-white/10 rounded-xl p-3 hover:bg-[#222] transition flex justify-between items-center"
-                  >
+                  <div key={ev._id} className="bg-[#1a1a1a] border border-white/10 rounded-xl p-3 hover:bg-[#222] transition flex justify-between items-center" >
                     <div>
                       <p className="text-indigo-400 text-sm font-semibold">
                         {format(new Date(ev.date), "MMM d")} — {ev.time}
@@ -281,15 +261,7 @@ const CalendarPage = () => {
                     <div className="flex items-center gap-3">
 
                       {/* EDIT */}
-                      <button
-                        onClick={() => {
-                          setNewNote({ time: ev.time, title: ev.title });
-                          setSelectedDate(new Date(ev.date));
-                          setEditingEventId(ev._id);
-                          setOpenPopup(true);
-                        }}
-                        className="text-indigo-400 hover:text-indigo-300 transition"
-                      >
+                      <button onClick={() => { setNewNote({ time: ev.time, title: ev.title }); setSelectedDate(new Date(ev.date)); setEditingEventId(ev._id); setOpenPopup(true); }} className="text-indigo-400 hover:text-indigo-300 transition" >
                         <PenIcon size={18}/>
                       </button>
 
@@ -297,12 +269,14 @@ const CalendarPage = () => {
                       <button onClick={() => deleteNote(ev._id)} className="text-red-500 hover:text-red-400 transition">
                         <Trash2 size={18} />
                       </button>
+
                     </div>
                   </div>
                 ))}
               </div>
             )}
           </div>
+
         </div>
       </div>
 
@@ -321,34 +295,19 @@ const CalendarPage = () => {
             </div>
 
             <div className="flex flex-col gap-3">
-              <input
-                type="time"
-                value={newNote.time}
-                onChange={(e) =>
-                  setNewNote({ ...newNote, time: e.target.value })
-                }
-                className="bg-[#0d0d0d] border border-white/10 px-4 py-2 rounded-xl outline-none"
-              />
+              <input type="time" value={newNote.time} onChange={(e) => setNewNote({ ...newNote, time: e.target.value }) } className="bg-[#0d0d0d] border border-white/10 px-4 py-2 rounded-xl outline-none" />
 
-              <input
-                type="text"
-                placeholder="Event title..."
-                value={newNote.title}
-                onChange={(e) =>
-                  setNewNote({ ...newNote, title: e.target.value })
-                }
-                className="bg-[#0d0d0d] border border-white/10 px-4 py-2 rounded-xl outline-none"
-              />
+              <input type="text" placeholder="Event title..." value={newNote.title} onChange={(e) => setNewNote({ ...newNote, title: e.target.value }) } className="bg-[#0d0d0d] border border-white/10 px-4 py-2 rounded-xl outline-none" />
 
-              <button
-                onClick={addNote}
-                className="bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 py-2 rounded-xl flex justify-center items-center gap-2 transition text-indigo-300"
-              >
+              <button onClick={addNote} className="bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 py-2 rounded-xl flex justify-center items-center gap-2 transition text-indigo-300" >
                 <Plus size={16} />
                 {editingEventId ? "Save Changes" : "Add Event"}
               </button>
+
             </div>
+
           </div>
+
         </div>
       )}
     </div>

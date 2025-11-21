@@ -19,9 +19,7 @@ const Invoices = () => {
   //  search global din navbar
   const { query } = useSearchStore();
 
-  // =====================================================
   // FETCH INVOICES
-  // =====================================================
   const fetchInvoices = async () => {
     try {
       setLoading(true);
@@ -50,9 +48,7 @@ const Invoices = () => {
     fetchInvoices();
   }, []);
 
-  // =====================================================
   // FILTER BY STATUS
-  // =====================================================
   useEffect(() => {
     let temp = invoices;
 
@@ -74,9 +70,7 @@ const Invoices = () => {
     setFilteredInvoices(temp);
   }, [filterStatus, invoices, query]);
 
-  // =====================================================
   // DELETE INVOICE
-  // =====================================================
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem("token");
@@ -92,9 +86,7 @@ const Invoices = () => {
     }
   };
 
-  // =====================================================
   // DOWNLOAD PDF
-  // =====================================================
   const handleDownloadPDF = async (invoice) => {
     const doc = new jsPDF("p", "mm", "a4");
     const accent = [58, 110, 165];
@@ -241,9 +233,6 @@ const Invoices = () => {
     navigate(`/dashboard/invoices/${invoiceId}`)
   }
 
-  // =====================================================
-  // UI RENDER
-  // =====================================================
   return (
     <div className="relative p-8 text-white min-h-screen bg-[#0e0e0e]">
       
@@ -300,10 +289,7 @@ const Invoices = () => {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredInvoices.map((inv) => (
-            <div
-              key={inv._id}
-              className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-6 hover:border-[#80FFF9]/40 transition"
-            >
+            <div key={inv._id} className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-6 hover:border-[#80FFF9]/40 transition">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-semibold">{inv.invoice_number}</h2>
 
@@ -336,33 +322,27 @@ const Invoices = () => {
                 </p>
               </div>
 
+              {/* card buttons */}
               <div className="flex justify-between mt-4">
+                
                 <button onClick={()=> handlePreview(inv._id)} className="p-2 text-gray-400 hover:text-[#80FFF9] transition" title="View">
                   <Eye size={18} />
                 </button>
-                <button
-                  onClick={() =>
-                    navigate(`/dashboard/invoices/${inv._id}/edit`)
-                  }
-                  className="p-2 text-gray-400 hover:text-indigo-400 transition"
-                >
+                
+                <button onClick={() => navigate(`/dashboard/invoices/${inv._id}/edit`) } className="p-2 text-gray-400 hover:text-indigo-400 transition" >
                   <Edit size={18} />
                 </button>
 
-                <button
-                  onClick={() => handleDownloadPDF(inv)}
-                  className="p-2 text-gray-400 hover:text-green-400 transition"
-                >
+                <button onClick={() => handleDownloadPDF(inv)} className="p-2 text-gray-400 hover:text-green-400 transition" >
                   <Download size={18} />
                 </button>
 
-                <button
-                  onClick={() => handleDelete(inv._id)}
-                  className="p-2 text-gray-400 hover:text-red-400 transition"
-                >
+                <button onClick={() => handleDelete(inv._id)} className="p-2 text-gray-400 hover:text-red-400 transition" >
                   <Trash2 size={18} />
                 </button>
+              
               </div>
+
             </div>
           ))}
         </div>

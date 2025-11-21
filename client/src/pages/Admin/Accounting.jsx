@@ -1,20 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-  DollarSign,
-  TrendingUp,
-  CreditCard,
-  FileText,
-  Calculator,
-} from "lucide-react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+import { DollarSign, TrendingUp, CreditCard, FileText, Calculator,} from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer,} from "recharts";
 import API from "../../utils/api";
 import { toast } from "sonner";
 
@@ -27,8 +13,7 @@ const Accounting = () => {
       try {
         const { data } = await API.get("/invoices");
         setInvoices(data);
-      } catch (err) {
-        console.error(err);
+      } catch {
         toast.error("Failed to load invoices");
       } finally {
         setLoading(false);
@@ -45,7 +30,6 @@ const Accounting = () => {
     );
   }
 
-  // 🧮 Calcul statistici
   const totalIncome = invoices
     .filter((inv) => inv.status === "paid")
     .reduce((sum, inv) => sum + (inv.total || 0), 0);
@@ -54,12 +38,9 @@ const Accounting = () => {
     (inv) => inv.status === "sent" || inv.status === "overdue"
   ).length;
 
-  const expenses = 0; // (dacă adaugi o colecție Expense, îl facem real)
-  // const profit = totalIncome - expenses;
+  const expenses = 0;
   const profit = Math.max(0, totalIncome - expenses);
 
-
-  // 🧾 Grupare venituri pe lună (cash flow)
   const monthlyData = {};
   invoices.forEach((inv) => {
     if (inv.status === "paid" && inv.date) {
@@ -76,7 +57,6 @@ const Accounting = () => {
     ...values,
   }));
 
-  // 📑 Ultimele tranzacții (ultimele 5 facturi)
   const recentTransactions = invoices
     .slice()
     .reverse()
@@ -121,11 +101,11 @@ const Accounting = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white px-10 pt-8 pb-16">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+    <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-6 md:px-10 pt-8 pb-16">
+
+      <div className="flex flex-col md:flex-row justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
+          <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-2">
             <Calculator className="text-[#80FFF9]" size={26} />
             Accounting
           </h1>
@@ -135,16 +115,17 @@ const Accounting = () => {
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-10">
         {stats.map((s, i) => (
           <div
             key={i}
-            className={`flex items-center justify-between p-5 rounded-xl border border-white/10 shadow-md shadow-indigo-500/10 ${s.bg}`}
+            className={`flex items-center justify-between p-4 sm:p-5 rounded-xl border border-white/10 shadow-md ${s.bg}`}
           >
             <div>
               <h3 className="text-gray-400 text-sm">{s.title}</h3>
-              <p className={`text-2xl font-semibold ${s.color}`}>{s.value}</p>
+              <p className={`text-xl sm:text-2xl font-semibold ${s.color}`}>
+                {s.value}
+              </p>
             </div>
             <div className={`p-3 rounded-lg border border-white/10 ${s.bg}`}>
               {s.icon}
@@ -153,16 +134,21 @@ const Accounting = () => {
         ))}
       </div>
 
-      {/* Cash Flow Chart */}
-      <div className="bg-[#1a1a1a]/80 p-6 rounded-xl border border-white/10 shadow-lg shadow-indigo-500/10 mb-10">
-        <h2 className="text-xl font-semibold text-[#80FFF9] mb-4">
+      <div className="bg-[#1a1a1a]/80 p-4 sm:p-6 rounded-xl border border-white/10 shadow-lg mb-10">
+        <h2 className="text-lg sm:text-xl font-semibold text-[#80FFF9] mb-4">
           Cash Flow (Income vs Expenses)
         </h2>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={280}>
           <LineChart data={cashFlowData}>
             <XAxis dataKey="month" stroke="#888" />
             <YAxis stroke="#888" />
-            <Tooltip contentStyle={{ backgroundColor: "#111", border: "1px solid #333", borderRadius: "8px"}}/>
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#111",
+                border: "1px solid #333",
+                borderRadius: "8px",
+              }}
+            />
             <Legend />
             <Line type="monotone" dataKey="income" stroke="#80FFF9" strokeWidth={2} />
             <Line type="monotone" dataKey="expenses" stroke="#ff6b6b" strokeWidth={2} />
@@ -170,16 +156,13 @@ const Accounting = () => {
         </ResponsiveContainer>
       </div>
 
-      {/* Transactions Table */}
-      <div className="bg-[#1a1a1a]/80 p-6 rounded-xl border border-white/10 shadow-lg shadow-indigo-500/10">
-        <h2 className="text-xl font-semibold text-[#80FFF9] mb-4">
+      <div className="bg-[#1a1a1a]/80 p-4 sm:p-6 rounded-xl border border-white/10 shadow-lg">
+        <h2 className="text-lg sm:text-xl font-semibold text-[#80FFF9] mb-4">
           Recent Transactions
         </h2>
-        
-        <div className="overflow-x-auto">
-          
+
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
-            
             <thead>
               <tr className="border-b border-white/10 text-gray-400">
                 <th className="text-left py-3 px-4">Type</th>
@@ -188,10 +171,13 @@ const Accounting = () => {
                 <th className="text-left py-3 px-4">Date</th>
               </tr>
             </thead>
-            
+
             <tbody>
               {recentTransactions.map((t) => (
-                <tr key={t.id} className="border-b border-white/5 hover:bg-white/5 transition">
+                <tr
+                  key={t.id}
+                  className="border-b border-white/5 hover:bg-white/5 transition"
+                >
                   <td className="py-3 px-4">{t.type}</td>
                   <td className="py-3 px-4 text-[#80FFF9] font-semibold">
                     {t.amount}
@@ -206,22 +192,46 @@ const Accounting = () => {
                           : t.status === "overdue"
                           ? "bg-red-500/10 text-red-400"
                           : "bg-gray-500/10 text-gray-400"
-                      }`}>
+                      }`}
+                    >
                       {t.status}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-gray-400">{t.date}</td>
                 </tr>
               ))}
-            
             </tbody>
-          
           </table>
-        
+        </div>
+
+        {/* MOBILE VERSION — CARD LIST */}
+        <div className="md:hidden flex flex-col gap-4">
+          {recentTransactions.map((t) => (
+            <div key={t.id} className="p-4 rounded-xl border border-white/10 bg-[#121212] shadow-lg" >
+              <div className="flex justify-between">
+                <p className="text-[#80FFF9] font-semibold">{t.amount}</p>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs ${
+                    t.status === "paid"
+                      ? "bg-green-500/10 text-green-400"
+                      : t.status === "sent"
+                      ? "bg-yellow-500/10 text-yellow-400"
+                      : t.status === "overdue"
+                      ? "bg-red-500/10 text-red-400"
+                      : "bg-gray-500/10 text-gray-400"
+                  }`}
+                >
+                  {t.status}
+                </span>
+              </div>
+
+              <div className="mt-2 text-sm text-gray-300">{t.type}</div>
+              <div className="text-xs text-gray-500">{t.date}</div>
+            </div>
+          ))}
         </div>
 
       </div>
-
     </div>
   );
 };

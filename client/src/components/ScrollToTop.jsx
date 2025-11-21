@@ -5,7 +5,6 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // activează doar pentru paginile de dashboard
     const dashboardRoutes = [
       "/dashboard",
       "/clients",
