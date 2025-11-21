@@ -11,37 +11,42 @@ const Dashboard = () => {
   return (
     <div className="flex bg-[#0e0e0e] min-h-screen text-white">
 
-      {/* DESKTOP SIDEBAR */}
+      {/* SIDEBAR DESKTOP */}
       <div className="hidden md:block">
         <Sidebar />
       </div>
 
-      {/* MOBILE SIDEBAR */}
+      {/* SIDEBAR MOBILE */}
       <AnimatePresence>
         {sidebarOpen && (
           <>
-            {/* ==== OVERLAY CLICK TO CLOSE ==== */}
-            <motion.div onClick={() => setSidebarOpen(false)} initial={{ opacity: 0 }} animate={{ opacity: 0.5 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black z-40 md:hidden" />
-
-            {/* ==== SIDEBAR MOBILE ==== */}
-            <Sidebar
-              isMobile
-              closeSidebar={() => setSidebarOpen(false)}
+            {/* overlay */}
+            <motion.div
+              onClick={() => setSidebarOpen(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black z-40 md:hidden"
             />
+
+            {/* mobile sidebar */}
+            <Sidebar isMobile closeSidebar={() => setSidebarOpen(false)} />
           </>
         )}
       </AnimatePresence>
 
-      {/* CONTENT */}
-      <div className="flex-1 md:ml-64 flex flex-col relative">
+      {/* MAIN CONTENT */}
+      <div className="flex-1 flex flex-col relative">
 
-        <div className="pt-20">
+        {/* NAVBAR FIX — moves right on desktop */}
+        <div className="md:ml-64 fixed top-0 left-0 right-0 z-30">
           <Navbar openSidebar={() => setSidebarOpen(true)} />
-
-          <main className="p-6 overflow-y-auto">
-            <Outlet />
-          </main>
         </div>
+
+        {/* PAGE CONTENT */}
+        <main className="pt-24 p-6 overflow-y-auto md:ml-64">
+          <Outlet />
+        </main>
 
         <AIChatPanel />
       </div>
