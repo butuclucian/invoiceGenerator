@@ -38,6 +38,8 @@ import DataProcessingAgreement from "./pages/Legal/DataProcessingAgreement";
 import CookiePolicy from "./pages/Legal/Cookies";
 import Blog from "./pages/Legal/Blog";
 
+import ConsentBanner from "./components/ConsentBanner";
+
 const App = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
@@ -95,6 +97,7 @@ const App = () => {
 
         </Route>
       </Routes>
+      <ConsentBanner />
     </>
   );
 };

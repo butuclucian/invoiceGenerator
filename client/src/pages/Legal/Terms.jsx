@@ -1,79 +1,124 @@
 import React from "react";
-import PageTemplate from "./PageTemplate";
+import { ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Terms = () => {
   return (
-    <PageTemplate
-      title="Terms of Service"
-      subtitle="Please review the terms governing the use of BillForgeAI."
-    >
-      <p className="mb-6">
-        By accessing or using BillForgeAI, you acknowledge that you have read,
-        understood, and agreed to be bound by these Terms of Service.
-      </p>
+    <div className="min-h-screen bg-[#0e0e0e] text-white px-6 py-20">
+      <div className="max-w-3xl mx-auto">
 
-      <h3 className="text-white font-semibold mt-10 mb-2">1. Acceptance of Terms</h3>
-      <p>
-        The use of the BillForgeAI platform constitutes your acceptance of these terms.
-        If you do not agree, please discontinue using the service immediately.
-      </p>
+        {/* Back button */}
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-sm text-gray-300 hover:text-white mb-10"
+        >
+          <ArrowLeft size={16} /> Back to Home
+        </Link>
 
-      <h3 className="text-white font-semibold mt-10 mb-2">2. Eligibility</h3>
-      <p>
-        You must be at least 16 years old to use BillForgeAI. If you are under 18,
-        you must have parental or guardian consent.
-      </p>
+        <h1 className="text-4xl font-bold mb-6">Terms of Service</h1>
+        <p className="text-gray-400 mb-10">
+          Last updated: {new Date().toISOString().split("T")[0]}
+        </p>
 
-      <h3 className="text-white font-semibold mt-10 mb-2">3. Account Responsibilities</h3>
-      <ul className="list-disc ml-6 space-y-2 text-white/80">
-        <li>You are responsible for maintaining the confidentiality of your login credentials.</li>
-        <li>You agree to notify us immediately if you suspect unauthorized access.</li>
-        <li>You may not share your account or resell access to the platform.</li>
-      </ul>
+        {/* Content */}
+        <div className="space-y-8 text-gray-300 leading-relaxed">
 
-      <h3 className="text-white font-semibold mt-10 mb-2">4. Use of the Service</h3>
-      <p>Users agree NOT to:</p>
-      <ul className="list-disc ml-6 space-y-2 text-white/80">
-        <li>Upload harmful or malicious files.</li>
-        <li>Attempt to breach security or misuse the platform.</li>
-        <li>Use AI-generated invoices for fraudulent or illegal purposes.</li>
-      </ul>
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">1. About BillForgeAI</h2>
+            <p>
+              BillForgeAI is an AI-assisted invoicing platform operated by an independent
+              developer located in Romania. By using this service, you agree to abide by
+              these Terms of Service.
+            </p>
+          </section>
 
-      <h3 className="text-white font-semibold mt-10 mb-2">5. Payments & Subscriptions</h3>
-      <p>
-        Subscriptions renew automatically unless canceled. You can manage your
-        subscription at any time in the dashboard. Refunds follow Stripe’s policies.
-      </p>
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">2. Use of Service</h2>
+            <p>
+              You may use BillForgeAI only for lawful purposes and in compliance with all
+              applicable regulations. You are responsible for the accuracy of any invoice,
+              client data, or financial information uploaded or generated through the app.
+            </p>
+          </section>
 
-      <h3 className="text-white font-semibold mt-10 mb-2">6. Intellectual Property</h3>
-      <p>
-        BillForgeAI retains full ownership of the platform, branding, software,
-        and AI generation models. Your data remains yours.
-      </p>
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">
+              3. AI-Generated Content Disclaimer
+            </h2>
+            <p>
+              BillForgeAI uses Google Gemini to assist with invoice extraction and
+              generation. AI may produce inaccurate or incomplete information. You agree to
+              verify all AI-generated output before using it for accounting, tax reporting,
+              or client communication.
+            </p>
+            <p className="mt-2">
+              BillForgeAI is not liable for damages arising from incorrect AI-generated
+              content, including calculation errors, missing fields, or misinterpretation of
+              uploaded documents.
+            </p>
+          </section>
 
-      <h3 className="text-white font-semibold mt-10 mb-2">7. Limitation of Liability</h3>
-      <p>
-        BillForgeAI is provided “as is” without warranties of any kind. We are not
-        responsible for financial losses, missed payments, or incorrect invoices.
-      </p>
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">4. User Responsibilities</h2>
+            <ul className="list-disc ml-6 space-y-2">
+              <li>Ensure all invoice data is correct before sending it to clients.</li>
+              <li>Ensure that uploaded documents do not violate intellectual property rights.</li>
+              <li>Maintain the confidentiality of your account credentials.</li>
+            </ul>
+          </section>
 
-      <h3 className="text-white font-semibold mt-10 mb-2">8. Termination</h3>
-      <p>
-        We may suspend or terminate access if these terms are violated.
-      </p>
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">5. Subscriptions & Payments</h2>
+            <p>
+              Paid plans (Pro, Enterprise) are managed through Stripe. All billing,
+              cancellations, and refunds follow Stripe’s policies. Subscription fees are
+              non-refundable unless required by law.
+            </p>
+          </section>
 
-      <h3 className="text-white font-semibold mt-10 mb-2">9. Changes to Terms</h3>
-      <p>
-        We reserve the right to update these terms at any time. Continued use
-        represents acceptance of any updates.
-      </p>
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">6. Data & Privacy</h2>
+            <p>
+              BillForgeAI processes personal data according to the{" "}
+              <Link to="/privacy" className="text-[#80FFF9] hover:underline">
+                Privacy Policy
+              </Link>.  
+              AI submissions are processed temporarily for inference and are not stored permanently or used to train models.
+            </p>
+          </section>
 
-      <h3 className="text-white font-semibold mt-10 mb-2">10. Contact</h3>
-      <p>
-        For questions regarding these Terms, contact us at{" "}
-        <span className="text-[#80FFF9]">legal@billforgeai.com</span>.
-      </p>
-    </PageTemplate>
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">7. Limitation of Liability</h2>
+            <p>
+              The service is provided “as is.” BillForgeAI is not responsible for financial
+              losses, penalties, tax issues, or damages resulting from:
+            </p>
+            <ul className="list-disc ml-6 mt-2 space-y-2">
+              <li>incorrect AI-generated content,</li>
+              <li>user-input errors,</li>
+              <li>third-party errors (Stripe, Gemini, MongoDB Atlas),</li>
+              <li>service interruptions.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">8. Termination</h2>
+            <p>
+              You may close your account at any time. The platform reserves the right to
+              terminate accounts for abuse, fraud, or illegal use.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-2">9. Contact Information</h2>
+            <p>
+              Email: <a href="mailto:support@billforgeai.com" className="text-[#80FFF9]">support@billforgeai.com</a>
+            </p>
+          </section>
+
+        </div>
+      </div>
+    </div>
   );
 };
 

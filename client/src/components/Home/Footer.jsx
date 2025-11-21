@@ -84,6 +84,12 @@ const Footer = () => {
         {/* BOTTOM */}
         <div className="border-t border-white/10 py-6 flex flex-col md:flex-row justify-between items-center text-white/60 text-sm">
           <p>© {new Date().getFullYear()} BillForgeAI. All rights reserved.</p>
+
+          <p className="text-white/40 text-xs">
+            BillForgeAI is operated by an independent developer based in Romania. 
+            Contact: support@billforgeai.com
+          </p>
+
           
           <div className="flex gap-4 mt-4 md:mt-0">
             <Link to="/privacy" className="hover:text-[#80FFF9]">Privacy</Link>

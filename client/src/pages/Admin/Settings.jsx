@@ -111,22 +111,21 @@ const Settings = () => {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete your account?")) return;
+  if (!window.confirm("Are you sure? This cannot be undone.")) return;
 
-    try {
-      const token = localStorage.getItem("token");
+  try {
+    const token = localStorage.getItem("token");
+    await API.delete("/delete-account", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-      await API.delete("/auth/delete", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  } catch (err) {
+    toast.error("Failed to delete account.");
+  }
+};
 
-      toast.success("Account deleted.");
-      localStorage.removeItem("token");
-      window.location.href = "/register";
-    } catch {
-      toast.error("Failed to delete account.");
-    }
-  };
 
   const calculateStrength = (pwd) => {
     let score = 0;
