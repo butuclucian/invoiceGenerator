@@ -4,6 +4,7 @@ import {
   generateNearDueNotifications,
   getUserNotifications,
   markAllAsRead,
+  testPushNotification,
 } from "../controllers/notificationController.js";
 
 const router = express.Router();
@@ -16,5 +17,8 @@ router.get("/", protect, getUserNotifications);
 
 // ✅ Marchează toate ca citite
 router.put("/mark-read", protect, markAllAsRead);
+
+// TEST PUSH
+router.get("/test-push", protect, testPushNotification); 
 
 export default router;

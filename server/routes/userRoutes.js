@@ -31,6 +31,24 @@ router.post("/sync", async (req, res) => {
   }
 });
 
+router.post("/save-push-token", protect, async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token)
+      return res.status(400).json({ message: "Missing push token" });
+
+    const user = await User.findById(req.user._id);
+    user.pushToken = token;
+    await user.save();
+
+    res.json({ message: "Push token saved successfully" });
+  } catch (err) {
+    console.error("❌ Error saving push token:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 router.get("/me", protect, getMe);
 router.put("/me", protect, updateUser);
 

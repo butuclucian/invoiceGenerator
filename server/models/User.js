@@ -6,6 +6,9 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+
+    // 🔔 PUSH TOKEN (pentru aplicația mobilă)
+    pushToken: { type: String, default: null },
   },
   { timestamps: true }
 );

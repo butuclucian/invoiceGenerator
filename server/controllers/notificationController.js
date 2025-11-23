@@ -1,20 +1,23 @@
 import Notification from "../models/Notification.js";
 import Invoice from "../models/Invoice.js";
+import { sendPush } from "../utils/push.js"; // ✅ IMPORT PENTRU MOBILE PUSH
 
-// ✅ Creează notificări pentru facturile near due
+// =====================================================================================
+// ✅ Creează notificări pentru facturile near due + TRIMITE PUSH PE MOBIL
+// =====================================================================================
 export const generateNearDueNotifications = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    // 📅 Azi și Mâine
+    // 📅 Azi și mâine
     const now = new Date();
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
-    // 🕐 Normalizează la zi (fără ore)
+    // 🕐 Normalizează la zi
     const startOfToday = new Date(now.setHours(0, 0, 0, 0));
     const endOfTomorrow = new Date(tomorrow.setHours(23, 59, 59, 999));
 
-    // 🔍 Caută facturile near due
+    // 🔍 Facturile near-due
     const nearDueInvoices = await Invoice.find({
       user: userId,
       status: { $ne: "paid" },
@@ -37,14 +40,28 @@ export const generateNearDueNotifications = async (req, res) => {
             ? "is due today!"
             : "is due within 24 hours!";
 
+        // 📩 Mesajul notificării
+        const message = `Invoice ${inv.invoice_number} for ${
+          inv.client?.name || "Unknown Client"
+        } ${dueText}`;
+
+        // === CREATE NOTIFICATION IN DATABASE ===
         const note = await Notification.create({
           user: userId,
           invoice: inv._id,
-          message: ` Invoice ${inv.invoice_number} for ${
-            inv.client?.name || "Unknown Client"
-          } ${dueText}`,
+          message,
         });
+
         created.push(note);
+
+        // === SEND PUSH NOTIFICATION TO MOBILE ===
+        if (req.user.pushToken) {
+          await sendPush(
+            req.user.pushToken,
+            "Invoice Reminder",
+            message
+          );
+        }
       }
     }
 
@@ -55,8 +72,9 @@ export const generateNearDueNotifications = async (req, res) => {
   }
 };
 
-
+// =====================================================================================
 // ✅ Obține toate notificările utilizatorului
+// =====================================================================================
 export const getUserNotifications = async (req, res) => {
   try {
     const notifications = await Notification.find({ user: req.user._id })
@@ -74,12 +92,42 @@ export const getUserNotifications = async (req, res) => {
   }
 };
 
+// =====================================================================================
 // ✅ Marchează toate notificările ca citite
+// =====================================================================================
 export const markAllAsRead = async (req, res) => {
   try {
     await Notification.updateMany({ user: req.user._id }, { read: true });
     res.status(200).json({ success: true, message: "All notifications marked as read" });
   } catch (error) {
     res.status(500).json({ message: "Failed to mark as read" });
+  }
+};
+
+
+// =====================================================================================
+// 🚀 TEST PUSH NOTIFICATION
+// =====================================================================================
+export const testPushNotification = async (req, res) => {
+  try {
+    const token = req.user.pushToken;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "User does not have a push token saved.",
+      });
+    }
+
+    await sendPush(
+      token,
+      "📱 Push Test",
+      "Your mobile push notifications are working!"
+    );
+
+    res.status(200).json({ success: true, message: "Push sent!" });
+  } catch (error) {
+    console.error("❌ Error sending test push:", error);
+    res.status(500).json({ success: false, message: "Failed to send push" });
   }
 };

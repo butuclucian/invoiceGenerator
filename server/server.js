@@ -38,14 +38,23 @@ app.post(
 /* -------------------------- 🌍 MIDDLEWARES ----------------------------- */
 app.use(express.json());
 app.use(morgan("dev"));
+// app.use(
+//   cors({
+//     origin: [
+//       "https://invoice-generator-olive-gamma.vercel.app",
+//       "https://invoice-generator-ungi.vercel.app",
+//       "http://localhost:5173",
+//     ],
+//     credentials: true,
+//   })
+// );
+
 app.use(
   cors({
-    origin: [
-      "https://invoice-generator-olive-gamma.vercel.app",
-      "https://invoice-generator-ungi.vercel.app",
-      "http://localhost:5173",
-    ],
+    origin: "*", // permite web + mobil
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
 
