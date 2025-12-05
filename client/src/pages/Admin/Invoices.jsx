@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FileText, Edit, Trash2, Download, Plus, Eye } from "lucide-react";
+import { FileText, Edit, Trash2, Download, Filter, Plus, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import API from "../../utils/api";
@@ -10,233 +10,352 @@ import { useSearchStore } from "../../store/useSearchStore";
 
 const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
-  const [billingProfile, setBillingProfile] = useState(null);
   const [filteredInvoices, setFilteredInvoices] = useState([]);
   const [filterStatus, setFilterStatus] = useState("all");
+  const [billingProfile, setBillingProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const formatCurrency = (value, currency = "RON") => {
+  if (!value && value !== 0) return `0,00 ${currency}`;
+
+  return new Intl.NumberFormat("ro-RO", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+  })
+    .format(value)
+    .replace(/\s/g, " ");
+  };
+
+  
+const hexToRgb = (hex) => {
+  hex = hex.replace("#", "");
+  if (hex.length === 3) {
+    hex = hex.split("").map(ch => ch + ch).join("");
+  }
+  const bigint = parseInt(hex, 16);
+  return [
+    (bigint >> 16) & 255,
+    (bigint >> 8) & 255,
+    bigint & 255,
+  ];
+};
+
+
+
   const { query } = useSearchStore();
 
-  const fetchData = async () => {
-    const token = localStorage.getItem("token");
-
+  // FETCH INVOICES + BILLING DATA
+  const fetchInvoices = async () => {
     try {
       setLoading(true);
 
-      const [invRes, billRes] = await Promise.all([
-        API.get("/invoices", { headers: { Authorization: `Bearer ${token}` } }),
-        API.get("/billing-profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
+      const token = localStorage.getItem("token");
+      if (!token) return toast.error("You must be logged in to view invoices");
 
-      setInvoices(invRes.data || []);
-      setFilteredInvoices(invRes.data || []);
-      setBillingProfile(billRes.data || null);
+      const invRes = await API.get("/invoices", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const billRes = await API.get("/billing-profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setInvoices(invRes.data);
+      setFilteredInvoices(invRes.data);
+      if (billRes.data) setBillingProfile(billRes.data);
 
     } catch (err) {
-      toast.error("Failed to load invoices or billing data");
-      console.error(err);
+      console.error("❌ Fetch error:", err);
+      toast.error("Failed to load invoices or billing profile");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchInvoices();
   }, []);
 
-  // Filter and search
+
+  // FILTER
   useEffect(() => {
     let temp = invoices;
 
-    if (filterStatus !== "all") {
-      temp = temp.filter((i) => i.status === filterStatus);
-    }
+    if (filterStatus !== "all") temp = temp.filter(i => i.status === filterStatus);
 
     if (query.trim() !== "") {
       const q = query.toLowerCase();
-      temp = temp.filter(
-        (i) =>
-          i.invoice_number?.toLowerCase().includes(q) ||
-          i.client?.name?.toLowerCase().includes(q)
+      temp = temp.filter(inv =>
+        inv.invoice_number.toLowerCase().includes(q) ||
+        inv.client?.name?.toLowerCase().includes(q) ||
+        String(inv.total).includes(q)
       );
     }
 
     setFilteredInvoices(temp);
-  }, [filterStatus, query, invoices]);
+  }, [filterStatus, invoices, query]);
 
-  // PDF generation
-  const handleDownloadPDF = async (invoice) => {
-    const b = billingProfile || {};
-    const c = invoice.client || {};
-    const currency = b.currency || "RON";
 
-    const doc = new jsPDF("p", "mm", "a4");
-
-    // LOGO only if exists
-    if (b.logo) {
-      try {
-        doc.addImage(b.logo, "PNG", 15, 10, 25, 25);
-      } catch (err) {
-        console.warn("Logo is invalid or blocked by CORS");
-      }
-    }
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(20);
-    doc.text(b.business_name || "Company Name", 45, 20);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    if (b.address) doc.text(b.address, 45, 26);
-    if (b.email) doc.text(`Email: ${b.email}`, 45, 30);
-    if (b.phone) doc.text(`Phone: ${b.phone}`, 45, 34);
-    if (b.fiscal_code) doc.text(`CIF: ${b.fiscal_code}`, 45, 38);
-    if (b.iban) doc.text(`IBAN: ${b.iban}`, 45, 42);
-    if (b.bank) doc.text(`Bank: ${b.bank}`, 45, 46);
-
-    const qrURL = `${window.location.origin}/dashboard/invoices/${invoice._id}`;
-    const qr = await QRCode.toDataURL(qrURL);
-    doc.addImage(qr, "PNG", 165, 10, 30, 30);
-
-    let y = 60;
-
-    doc.setFont("helvetica", "bold");
-    doc.text("Bill To:", 15, y);
-
-    y += 6;
-    doc.setFont("helvetica", "normal");
-    doc.text(c.name || "Unnamed Client", 15, y);
-    if (c.email) doc.text(c.email, 15, y + 5);
-    if (c.address) doc.text(c.address, 15, y + 10);
-
-    doc.setFont("helvetica", "bold");
-    doc.text("Invoice Details:", 120, 60);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Invoice #${invoice.invoice_number}`, 120, 66);
-    doc.text(`Date: ${invoice.date || "-"}`, 120, 72);
-    doc.text(`Due: ${invoice.due_date || "-"}`, 120, 78);
-    doc.text(`Status: ${invoice.status}`, 120, 84);
-
-    const items =
-      invoice.items?.map((i) => [
-        i.description,
-        i.quantity,
-        `${currency} ${Number(i.unit_price).toFixed(2)}`,
-        `${currency} ${Number(i.total).toFixed(2)}`,
-      ]) || [];
-
-    autoTable(doc, {
-      startY: 100,
-      head: [["Description", "Qty", "Price", "Total"]],
-      body: items,
-      theme: "striped",
-      margin: { left: 15, right: 15 },
-    });
-
-    const fy = doc.lastAutoTable.finalY + 10;
-
-    doc.setFont("helvetica", "bold");
-    doc.text("Summary", 140, fy);
-
-    doc.setFont("helvetica", "normal");
-    doc.text(`Subtotal: ${currency} ${Number(invoice.subtotal).toFixed(2)}`, 140, fy + 7);
-    doc.text(
-      `VAT (${b.vat_rate || 0}%): ${currency} ${Number(invoice.tax_amount).toFixed(2)}`,
-      140,
-      fy + 14
-    );
-    doc.text(
-      `Discount: ${currency} ${Number(invoice.discount_amount).toFixed(2)}`,
-      140,
-      fy + 21
-    );
-
-    doc.setFont("helvetica", "bold");
-    doc.text(
-      `Total: ${currency} ${Number(invoice.total).toFixed(2)}`,
-      140,
-      fy + 32
-    );
-
-    doc.save(`invoice_${invoice.invoice_number}.pdf`);
-  };
-
+  // DELETE INVOICE
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem("token");
       await API.delete(`/invoices/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Invoice deleted");
-      fetchData();
+      toast.success("Invoice deleted successfully");
+      fetchInvoices();
     } catch {
-      toast.error("Delete failed");
+      toast.error("Failed to delete invoice");
     }
   };
 
+
+  const handleDownloadPDF = async (invoice) => {
+    if (!billingProfile) {
+      toast.error("Billing profile missing!");
+      return;
+    }
+
+    const b = billingProfile;
+    const c = invoice.client || {};
+    const currency = b.currency || "RON";
+    const accent = hexToRgb("#0f6c91");
+    const gray = [50, 50, 50];
+
+    // Format date -> DD-MM-YYYY
+    const formatDate = (d) => {
+      if (!d) return "-";
+      const date = new Date(d);
+      return date.toLocaleDateString("en-GB").replaceAll("/", "-");
+    };
+
+    const doc = new jsPDF("p", "mm", "a4");
+    let y = 15;
+
+    // QR Code → new website
+    const qrImg = await QRCode.toDataURL("https://invoice-generator-ungi.vercel.app/");
+    doc.addImage(qrImg, "PNG", 165, 10, 35, 35);
+
+    // LOGO
+    if (b.logo) {
+      doc.addImage(b.logo, "PNG", 15, y, 26, 26);
+    }
+
+    // Company Header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.setTextColor(...accent);
+    doc.text(b.business_name || "Company Name", 50, y + 10);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(...gray);
+
+    if (b.address) doc.text(b.address, 50, y + 16);
+    if (b.email) doc.text(b.email, 50, y + 21);
+    if (b.phone) doc.text(b.phone, 50, y + 26);
+    if (b.fiscal_code) doc.text(`CIF: ${b.fiscal_code}`, 50, y + 31);
+    if (b.iban) doc.text(`IBAN: ${b.iban}`, 50, y + 36);
+
+    y += 48;
+    doc.setDrawColor(...accent);
+    doc.line(15, y, 195, y);
+    y += 10;
+
+    // Bill To
+    doc.setFont("helvetica", "bold").setTextColor(...accent);
+    doc.text("Bill To", 15, y);
+    y += 6;
+
+    doc.setFont("helvetica", "normal").setTextColor(...gray);
+    doc.text(c.name || "Unknown Client", 15, y);
+
+    let lineY = y;
+
+    if (c.email) doc.text(c.email, 15, (lineY += 5));
+    if (c.address) doc.text(c.address, 15, (lineY += 5));
+    if (c.phone) doc.text(c.phone, 15, (lineY += 5));
+
+    // Invoice Details
+    const infoY = 68;
+    doc.setFont("helvetica", "bold").setTextColor(...accent);
+    doc.text("Invoice Details", 120, infoY);
+
+    doc.setFont("helvetica", "normal").setTextColor(...gray);
+    doc.text(`Invoice : #${invoice.invoice_number}`, 120, infoY + 6);
+    doc.text(`Date: ${formatDate(invoice.date)}`, 120, infoY + 12);
+    doc.text(`Due: ${formatDate(invoice.due_date)}`, 120, infoY + 18);
+    doc.text(`Status: ${invoice.status}`, 120, infoY + 24);
+
+    // Items Table
+    const formattedItems = invoice.items?.map(i => [
+      i.description,
+      i.quantity,
+      `${(i.unit_price ?? 0).toFixed(2)} ${currency}`,
+      `${(i.total ?? 0).toFixed(2)} ${currency}`
+    ]) || [];
+
+    autoTable(doc, {
+      startY: infoY + 35,
+      head: [["Description", "Qty", "Unit Price", "Total"]],
+      body: formattedItems,
+      theme: "grid",
+      headStyles: {
+        fillColor: accent,
+        textColor: [255, 255, 255],
+        fontStyle: "bold"
+      },
+      styles: { fontSize: 10, textColor: [20, 20, 20], fillStyle: "solid" },
+      margin: { left: 15, right: 15 }
+    });
+
+    const finalY = doc.lastAutoTable.finalY + 12;
+
+    // Summary Section
+    doc.setFont("helvetica", "bold").setTextColor(...accent);
+    doc.text("Summary", 140, finalY);
+
+    doc.setFont("helvetica", "normal").setTextColor(...gray);
+    doc.text(`VAT (${b.vat_rate}%):`, 120, finalY + 8);
+    doc.text(`${(invoice.tax_amount ?? 0).toFixed(2)} ${currency}`, 185, finalY + 8, { align: "right" });
+
+    doc.text(`Discount:`, 120, finalY + 14);
+    doc.text(`${(invoice.discount_amount ?? 0).toFixed(2)} ${currency}`, 185, finalY + 14, { align: "right" });
+
+    doc.setFont("helvetica", "bold").setTextColor(...accent);
+    doc.setFontSize(12);
+    doc.text(`Total:`, 120, finalY + 26);
+    doc.text(`${(invoice.total ?? 0).toFixed(2)} ${currency}`, 185, finalY + 26, { align: "right" });
+
+    // Footer - Signatures
+    doc.setFontSize(9).setTextColor(120, 120, 120);
+
+    // Authorized Signature (left)
+    doc.line(25, 275, 85, 275);
+    doc.text("Authorized Signature", 35, 280);
+
+    // Client Signature (right)
+    doc.line(125, 275, 185, 275);
+    doc.text("Client Signature", 145, 280);
+
+    doc.save(`invoice_${invoice.invoice_number}.pdf`);
+  };
+
+
+  const handlePreview = (id) => navigate(`/dashboard/invoices/${id}`);
+
   return (
-    <div className="relative p-8 min-h-screen bg-[#0e0e0e] text-white">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl flex items-center gap-2">
-          <FileText className="text-[#80FFF9]" /> Invoices
-        </h1>
+    <div className="relative p-8 text-white min-h-screen bg-[#0e0e0e]">
+      
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold flex items-center gap-2">
+            <FileText className="text-[#80FFF9]" size={26} />
+            Invoices
+          </h1>
+          <p className="text-gray-400 text-sm">Manage and track all invoices</p>
+        </div>
 
         <button
           onClick={() => navigate("/dashboard/invoices/create")}
-          className="px-4 py-2 flex gap-2 items-center rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30"
+          className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2"
         >
-          <Plus size={18} /> Create Invoice
+          <Plus size={18} />
+          Create Invoice
         </button>
       </div>
 
-      {!billingProfile && (
-        <div className="mb-6 p-4 bg-red-500/20 border border-red-500/40 rounded-md text-red-300 text-sm">
-          ⚠ You must configure your Billing Profile before sending invoices!
+      {/* FILTER BAR */}
+      <div className="flex flex-wrap items-center gap-4 mb-8 bg-[#1a1a1a]/70 border border-white/10 p-4 rounded-xl">
+        <div className="flex items-center gap-2">
+          <Filter size={18} className="text-[#80FFF9]" />
+          <span className="text-gray-300">Filter by status:</span>
         </div>
-      )}
 
-      {!loading && filteredInvoices.length === 0 ? (
-        <p className="text-center opacity-70">No invoices found</p>
+        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="cursor-pointer bg-[#1a1a1a] border border-white/10 text-gray-200 px-4 py-2 rounded-md">
+          <option value="all">All</option>
+          <option value="draft">Draft</option>
+          <option value="sent">Sent</option>
+          <option value="paid">Paid</option>
+          <option value="overdue">Overdue</option>
+        </select>
+
+        <span className="text-gray-400 text-sm">
+          Showing {filteredInvoices.length} of {invoices.length}
+        </span>
+      </div>
+
+      {/* LIST */}
+      {loading ? (
+        <div className="flex justify-center items-center py-20">
+          <p className="text-gray-400 animate-pulse">Loading invoices...</p>
+        </div>
+      ) : filteredInvoices.length === 0 ? (
+        <div className="text-center py-16 border border-dashed border-white/20 rounded-xl bg-[#1a1a1a]/60">
+          <FileText className="w-16 h-16 text-white/20 mx-auto mb-3" />
+          <h3 className="text-lg font-medium text-gray-300">No invoices</h3>
+          <p className="text-sm text-gray-500">Try creating one!</p>
+        </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredInvoices.map((inv) => (
-            <div
-              key={inv._id}
-              className="bg-[#1a1a1a]/80 border border-white/10 p-6 rounded-xl"
-            >
-              <div className="flex justify-between">
-                <span className="font-semibold">{inv.invoice_number}</span>
-                <span className="text-xs capitalize opacity-60">
+            <div key={inv._id} className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-6 hover:border-[#80FFF9]/40 transition">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-semibold">{inv.invoice_number}</h2>
+
+                <span
+                  className={`text-xs px-3 py-1 rounded-full capitalize ${
+                    inv.status === "paid"
+                      ? "bg-green-500/20 text-green-400"
+                      : inv.status === "sent"
+                      ? "bg-blue-500/20 text-blue-400"
+                      : inv.status === "draft"
+                      ? "bg-gray-500/20 text-gray-400"
+                      : "bg-red-500/20 text-red-400"
+                  }`}
+                >
                   {inv.status}
                 </span>
               </div>
 
-              <p className="text-sm opacity-70 mt-1">{inv.client?.name}</p>
+              <p className="text-sm text-gray-400 mb-1">
+                {inv.client?.name || "Unknown Client"}
+              </p>
+              <p className="text-xs text-gray-500 mb-2">
+                {inv.client?.email || "no-email@example.com"}
+              </p>
 
-              <div className="flex justify-between items-center mt-3 border-t pt-3 border-white/10">
-                <span>Total</span>
-                <span className="text-[#80FFF9] font-medium">
-                  {billingProfile?.currency || "RON"}{" "}
-                  {Number(inv.total).toFixed(2)}
-                </span>
+              <div className="border-t border-white/10 pt-3 flex items-center justify-between">
+                <p className="text-gray-400 text-sm">Total</p>
+                <p className="text-[#80FFF9] font-semibold">
+                  {formatCurrency(inv.total, billingProfile?.currency)}
+                </p>
               </div>
 
-              <div className="flex justify-end gap-3 mt-4">
-                <button onClick={() => navigate(`/dashboard/invoices/${inv._id}`)}>
+              {/* card buttons */}
+              <div className="flex justify-between mt-4">
+                
+                <button onClick={()=> handlePreview(inv._id)} className="p-2 text-gray-400 hover:text-[#80FFF9] transition" title="View">
                   <Eye size={18} />
                 </button>
-                <button onClick={() => navigate(`/dashboard/invoices/${inv._id}/edit`)}>
+                
+                <button onClick={() => navigate(`/dashboard/invoices/${inv._id}/edit`) } className="p-2 text-gray-400 hover:text-indigo-400 transition" >
                   <Edit size={18} />
                 </button>
-                <button onClick={() => handleDownloadPDF(inv)}>
+
+                <button onClick={() => handleDownloadPDF(inv)} className="p-2 text-gray-400 hover:text-green-400 transition" >
                   <Download size={18} />
                 </button>
-                <button onClick={() => handleDelete(inv._id)}>
+
+                <button onClick={() => handleDelete(inv._id)} className="p-2 text-gray-400 hover:text-red-400 transition" >
                   <Trash2 size={18} />
                 </button>
+              
               </div>
+
             </div>
           ))}
         </div>
