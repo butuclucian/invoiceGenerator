@@ -7,6 +7,21 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // Billing Profile (company data)
+  const [billing, setBilling] = useState({
+      business_name: "",
+      fiscal_code: "",
+      address: "",
+      phone: "",
+      email: "",
+      bank: "",
+      iban: "",
+      vat_rate: 19,
+      currency: "RON",
+      logo: "",
+    });
+
+
   const [profile, setProfile] = useState({
     name: "",
     email: "",
@@ -33,33 +48,53 @@ const Settings = () => {
   });
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const token = localStorage.getItem("token");
+  const loadData = async () => {
+    const token = localStorage.getItem("token");
 
-        const userRes = await API.get("/auth/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+    try {
+      const userRes = await API.get("/auth/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        const settingsRes = await API.get("/settings", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+      const settingsRes = await API.get("/settings", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        setProfile({
-          name: userRes.data.name,
-          email: userRes.data.email,
-        });
+      const billingRes = await API.get("/billing-profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
+      // Set general profile info
+      setProfile({
+        name: userRes.data.name || "",
+        email: userRes.data.email || "",
+      });
+
+      // Set UI settings
+      if (settingsRes.data) {
         setSettings(settingsRes.data);
-      } catch (err) {
-        toast.error("Failed to load settings.");
-      } finally {
-        setLoading(false);
       }
-    };
 
-    loadData();
-  }, []);
+      // Set billing data only if exists
+      if (billingRes.data) {
+        setBilling(prev => ({
+          ...prev,
+          ...billingRes.data,
+        }));
+      }
+
+    } catch (err) {
+      console.error("Load settings error:", err);
+      toast.error("Failed to load settings.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadData();
+}, []);
+
+
 
   const handleSave = async () => {
     try {
@@ -110,6 +145,20 @@ const Settings = () => {
     }
   };
 
+  const handleBillingSave = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    await API.put("/billing-profile", billing, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    toast.success("Billing profile updated!");
+  } catch (err) {
+    toast.error("Failed to update billing profile.");
+  }
+  };
+
+
   const handleDelete = async () => {
   if (!window.confirm("Are you sure? This cannot be undone.")) return;
 
@@ -124,8 +173,7 @@ const Settings = () => {
   } catch (err) {
     toast.error("Failed to delete account.");
   }
-};
-
+  };
 
   const calculateStrength = (pwd) => {
     let score = 0;
@@ -198,6 +246,89 @@ const Settings = () => {
 
           </div>
 
+        </div>
+
+        {/* billing profile */}
+        <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-5 sm:p-6 shadow-lg">
+          <h2 className="text-lg md:text-xl font-semibold flex items-center gap-2 mb-4">
+            <Moon size={18} className="text-[#80FFF9]" /> Billing Profile
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Business Name */}
+            <div>
+              <label className="text-gray-400 text-sm">Business / Legal Name</label>
+              <input type="text" value={billing.business_name} onChange={(e) => setBilling({ ...billing, business_name: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200" />
+            </div>
+
+            {/* Fiscal Code */}
+            <div>
+              <label className="text-gray-400 text-sm">CIF / Fiscal ID</label>
+              <input type="text" value={billing.fiscal_code} onChange={(e) => setBilling({ ...billing, fiscal_code: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200" />
+            </div>
+
+            {/* Address */}
+            <div>
+              <label className="text-gray-400 text-sm">Address</label>
+              <input type="text" value={billing.address} onChange={(e) => setBilling({ ...billing, address: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200" />
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label className="text-gray-400 text-sm">Phone</label>
+              <input type="text" value={billing.phone} onChange={(e) => setBilling({ ...billing, phone: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200" />
+            </div>
+
+            {/* Billing Email */}
+            <div>
+              <label className="text-gray-400 text-sm">Billing Email</label>
+              <input type="email" value={billing.email} onChange={(e) => setBilling({ ...billing, email: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200" />
+            </div>
+
+            {/* Bank */}
+            <div>
+              <label className="text-gray-400 text-sm">Bank</label>
+              <input type="text" value={billing.bank} onChange={(e) => setBilling({ ...billing, bank: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200" />
+            </div>
+
+            {/* IBAN */}
+            <div>
+              <label className="text-gray-400 text-sm">IBAN</label>
+              <input type="text" value={billing.iban} onChange={(e) => setBilling({ ...billing, iban: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"
+              />
+            </div>
+
+            {/* VAT Rate */}
+            <div>
+              <label className="text-gray-400 text-sm">VAT Rate (%)</label>
+              <input type="number" value={billing.vat_rate} onChange={(e) => setBilling({ ...billing, vat_rate: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200" />
+            </div>
+
+            {/* Currency */}
+            <div>
+              <label className="text-gray-400 text-sm">Currency</label>
+              <select value={billing.currency} onChange={(e) => setBilling({ ...billing, currency: e.target.value })} className="cursor-pointer w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200" >
+                <option value="RON">RON</option>
+                <option value="EUR">EUR</option>
+                <option value="USD">USD</option>
+              </select>
+            </div>
+
+            {/* Logo URL */}
+            <div className="md:col-span-2">
+              <label className="text-gray-400 text-sm">Company Logo URL</label>
+              <input type="text" placeholder="https://example.com/logo.png" value={billing.logo} onChange={(e) => setBilling({ ...billing, logo: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200" />
+              {billing.logo && (
+                <img src={billing.logo} alt="Logo Preview" className="w-20 h-20 rounded-lg object-contain mt-3 border border-white/10" />
+              )}
+            </div>
+
+          </div>
+
+          <button onClick={handleBillingSave} className="mt-5 px-4 py-2 rounded-xl bg-[#80FFF9]/20 border border-[#80FFF9]/40 hover:bg-[#80FFF9]/30 transition flex items-center gap-2" >
+            <SaveIcon size={18} className="text-[#80FFF9]" />
+            Save Billing Info
+          </button>
         </div>
 
         {/* change password form */}
@@ -368,6 +499,8 @@ const Settings = () => {
 
           </div>
         </div>
+
+
 
         {/* buttons */}
         <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">

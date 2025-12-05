@@ -109,6 +109,14 @@ const InvoicePreview = () => {
     toast.success("Invoice downloaded!");
   };
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "N/A";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-GB").replace(/\//g, "-");
+
+  };
+
+
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-6 md:px-10 py-8">
 
@@ -121,28 +129,6 @@ const InvoicePreview = () => {
           <h1 className="text-2xl sm:text-3xl font-semibold">Invoice Preview</h1>
         </div>
 
-        {/* Buttons */}
-        <div className="flex flex-wrap gap-3 justify-center w-full md:w-auto md:justify-end">
-
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 px-4 py-2 border border-white/20 rounded-lg
-            text-gray-300 hover:text-white hover:bg-white/10 transition text-sm sm:text-base" >
-            <ArrowLeft size={16} />
-            Back
-          </button>
-
-          <button onClick={() => navigate(`/dashboard/invoices/${invoice._id}/edit`)} className="flex items-center gap-2 px-4 py-2 border border-white/20 rounded-lg
-            text-indigo-400 hover:text-white hover:bg-indigo-500/10 transition text-sm sm:text-base" >
-            <Edit size={16} />
-            Edit
-          </button>
-
-          <button onClick={handleDownload} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600/20
-            border border-indigo-600/40 hover:bg-indigo-600/30 transition text-sm sm:text-base" >
-            <Download size={16} />
-            Download
-          </button>
-
-        </div>
         
       </div>
 
@@ -157,9 +143,9 @@ const InvoicePreview = () => {
               {invoice.invoice_number}
             </h2>
             <p className="text-gray-400 text-sm mt-1">
-              Date: {invoice.date}
+              Date: {formatDate(invoice.date)}
               <br />
-              Due: {invoice.due_date || "N/A"}
+              Due Date: {formatDate(invoice.due_date)}
             </p>
           </div>
 
@@ -226,28 +212,25 @@ const InvoicePreview = () => {
 
           <div className="flex justify-between">
             <span>Subtotal:</span>
-            <span>${invoice.subtotal.toFixed(2)}</span>
+            <span>${(invoice.subtotal ?? 0).toFixed(2)}</span>
           </div>
 
-          {invoice.discount_amount > 0 && (
-            <div className="flex justify-between text-red-400">
-              <span>Discount ({invoice.discount_rate}%):</span>
-              <span>- ${invoice.discount_amount.toFixed(2)}</span>
-            </div>
-          )}
+          <div className="flex justify-between text-red-400">
+            <span>Discount ({invoice.discount_rate}%):</span>
+            <span>${(invoice.discount_amount ?? 0).toFixed(2)}</span>
+          </div>
 
-          {invoice.tax_amount > 0 && (
-            <div className="flex justify-between text-[#80FFF9]">
-              <span>Tax ({invoice.tax_rate}%):</span>
-              <span>+ ${invoice.tax_amount.toFixed(2)}</span>
-            </div>
-          )}
+          <div className="flex justify-between text-[#80FFF9]">
+            <span>Tax ({invoice.tax_rate}%):</span>
+            <span>${(invoice.tax_amount ?? 0).toFixed(2)}</span>
+          </div>
 
           <div className="flex justify-between font-semibold text-[#80FFF9] text-lg mt-2 border-t border-white/10 pt-2">
             <span>Total:</span>
-            <span>${invoice.total.toFixed(2)}</span>
+            <span>${(invoice.total ?? 0).toFixed(2)}</span>
           </div>
         </div>
+
 
         {/* Notes */}
         {invoice.notes && (
@@ -260,6 +243,34 @@ const InvoicePreview = () => {
         )}
 
       </div>
+
+      {/* Sticky Footer */}
+      <div className="fixed bottom-0 right-0 left-0 md:left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-3 z-10">
+        <div className="flex flex-row justify-center items-center gap-2 sm:gap-4 px-3 sm:px-4">
+
+          {/* Edit */}
+          <button
+            type="button"
+            onClick={() => navigate(`/dashboard/invoices/${invoice._id}/edit`)}
+            className="flex items-center justify-center gap-2 px-3 sm:px-5 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition text-sm sm:text-base"
+          >
+            <Edit size={16} />
+            Edit
+          </button>
+
+          {/* Download */}
+          <button
+            type="button"
+            onClick={handleDownload}
+            className="flex items-center justify-center gap-2 px-3 sm:px-5 py-2 rounded-md bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition text-sm sm:text-base"
+          >
+            <Download size={16} />
+            Download
+          </button>
+
+        </div>
+      </div>
+
 
     </div>
   );

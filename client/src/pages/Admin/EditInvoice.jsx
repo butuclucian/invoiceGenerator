@@ -129,12 +129,12 @@ const EditInvoice = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="text-gray-300 text-sm">Invoice Number *</label>
+              <label className="text-gray-300 text-sm">Invoice Number <span className="text-red-500">*</span></label>
               <input name="invoice_number" value={formData.invoice_number} onChange={handleChange} className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-lg px-3 py-2 mt-1"/>
             </div>
 
             <div>
-              <label className="text-gray-300 text-sm">Date *</label>
+              <label className="text-gray-300 text-sm">Date <span className="text-red-500">*</span></label>
               <input type="date" name="date" value={formData.date?.split("T")[0] || ""} onChange={handleChange} className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-lg px-3 py-2 mt-1" />
             </div>
 
@@ -147,7 +147,7 @@ const EditInvoice = () => {
           {/* CLIENT + STATUS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             <div>
-              <label className="text-gray-300 text-sm">Client *</label>
+              <label className="text-gray-300 text-sm">Client <span className="text-red-500">*</span></label>
               <select name="client" value={formData.client?._id || formData.client} onChange={handleChange} className="w-full mt-1 bg-[#1a1a1a]/70 border border-white/10 rounded-lg px-3 py-2">
                 <option value="">Select client</option>
                 {clients.map((c) => (
@@ -159,7 +159,7 @@ const EditInvoice = () => {
             </div>
 
             <div>
-              <label className="text-gray-300 text-sm">Status</label>
+              <label className="text-gray-300 text-sm">Status <span className="text-red-500">*</span></label>
               <select name="status" value={formData.status} onChange={handleChange} className="w-full mt-1 bg-[#1a1a1a]/70 border border-white/10 rounded-lg px-3 py-2" >
                 <option value="draft">Draft</option>
                 <option value="sent">Sent</option>
@@ -185,17 +185,17 @@ const EditInvoice = () => {
             <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-[#1a1a1a]/60 border border-white/10 rounded-lg" >
               
               <div className="md:col-span-5">
-                <label className="text-gray-300 text-sm">Description</label>
+                <label className="text-gray-300 text-sm">Description <span className="text-red-500">*</span></label>
                 <input value={item.description} onChange={(e) => handleItemChange(index, "description", e.target.value) } className="w-full mt-1 bg-transparent border border-white/10 rounded-md px-3 py-2"/>
               </div>
 
               <div className="md:col-span-2">
-                <label className="text-gray-300 text-sm">Qty</label>
+                <label className="text-gray-300 text-sm">Quantity <span className="text-red-500">*</span></label>
                 <input type="number" value={item.quantity} onChange={(e) => handleItemChange(index, "quantity", e.target.value) } className="w-full mt-1 bg-transparent border border-white/10 rounded-md px-3 py-2" />
               </div>
 
               <div className="md:col-span-2">
-                <label className="text-gray-300 text-sm">Unit Price</label>
+                <label className="text-gray-300 text-sm">Unit Price <span className="text-red-500">*</span></label>
                 <input type="number" value={item.unit_price} onChange={(e) => handleItemChange(index, "unit_price", e.target.value) } className="w-full mt-1 bg-transparent border border-white/10 rounded-md px-3 py-2"
                 />
               </div>
@@ -229,15 +229,13 @@ const EditInvoice = () => {
           {/* taxe rate */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="text-gray-300 text-sm">Tax Rate (%)</label>
+              <label className="text-gray-300 text-sm">Tax Rate (%) <span className="text-red-500">*</span></label>
               <input type="number" value={formData.tax_rate} onChange={(e) => setFormData({ ...formData, tax_rate: parseFloat(e.target.value) || 0, ...calculateTotals( formData.items, parseFloat(e.target.value) || 0, formData.discount_rate ), }) } className="w-full mt-1 bg-[#1a1a1a]/70 border border-white/10 rounded-lg px-3 py-2" />
             </div>
 
             {/* discount */}
             <div>
-              <label className="text-gray-300 text-sm">
-                Discount Rate (%)
-              </label>
+              <label className="text-gray-300 text-sm"> Discount Rate (%) <span className="text-red-500">*</span></label>
               <input type="number" value={formData.discount_rate} onChange={(e) => setFormData({ ...formData, discount_rate: parseFloat(e.target.value) || 0, ...calculateTotals( formData.items, formData.tax_rate, parseFloat(e.target.value) || 0 ), }) } className="w-full mt-1 bg-[#1a1a1a]/70 border border-white/10 rounded-lg px-3 py-2" />
             </div>
 

@@ -16,6 +16,7 @@ import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 import aiChatRoutes from "./routes/aiChatRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
 import calendarRoutes from "./routes/calendarRoutes.js";
+import billingRoutes from "./routes/billingRoutes.js"
 
 
 import { generateNearDueNotifications } from "./controllers/notificationController.js";
@@ -60,7 +61,7 @@ app.use(
 
 /* -------------------------- ✅ ROUTES ---------------------------------- */
 app.get("/", (req, res) => {
-  res.send("✅ BillForge AI API is running...");
+  res.send("BillForge AI API is running...");
 });
 
 app.use("/api/auth", authRoutes);
@@ -73,6 +74,7 @@ app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/ai", aiChatRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/calendar", calendarRoutes);
+app.use("/api/billing-profile", billingRoutes);
 
 
 /* -------------------------- 🚀 SERVER --------------------------------- */

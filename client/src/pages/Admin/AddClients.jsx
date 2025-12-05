@@ -116,8 +116,8 @@ const AddClients = () => {
         </div>
 
         {/* Footer Buttons */}
-        <div className=" fixed bottom-0 right-0  left-0 md:left-64  bg-[#111111]/90 border-t border-white/10  backdrop-blur-md py-3 z-10 " >
-          <div className=" flex flex-row  justify-center items-center  gap-2 sm:gap-4  px-3 sm:px-4 " >
+        <div className="fixed bottom-0 right-0  left-0 md:left-64  bg-[#111111]/90 border-t border-white/10  backdrop-blur-md py-3 z-10 " >
+          <div className="flex flex-row  justify-center items-center  gap-2 sm:gap-4  px-3 sm:px-4 " >
             {/* Reset */}
             <button type="button" onClick={handleReset} className=" flex items-center justify-center gap-2  px-3 sm:px-5 py-2  border border-white/20  rounded-md text-gray-300  hover:text-white hover:bg-white/10  transition text-sm sm:text-base " >
               <RotateCcw size={16} />

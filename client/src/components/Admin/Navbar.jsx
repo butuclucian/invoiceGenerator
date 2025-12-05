@@ -16,8 +16,10 @@ import { toast } from "sonner";
 import API from "../../utils/api";
 import { useAIChatStore } from "../../store/useAIChatStore";
 import { useSearchStore } from "../../store/useSearchStore";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = ({ openSidebar }) => {
+  const navigate = useNavigate();
   const { isOpen: aiOpen, toggleChat } = useAIChatStore();
   const { query, setQuery } = useSearchStore();
 
@@ -31,6 +33,7 @@ const Navbar = ({ openSidebar }) => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [userData, setUserData] = useState(null);
   const [subscription, setSubscription] = useState(null);
+  
 
   const currentPlan = subscription?.plan || "Free";
 
@@ -174,7 +177,7 @@ const Navbar = ({ openSidebar }) => {
 
           {/* GO HOME */}
           <button
-            onClick={() => (window.location.href = "/")}
+            onClick={() => navigate(-1)}
             className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10"
           >
             <ArrowLeft size={18} className="text-[#80FFF9]" />
