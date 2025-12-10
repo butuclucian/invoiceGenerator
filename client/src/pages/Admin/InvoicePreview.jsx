@@ -116,6 +116,15 @@ const InvoicePreview = () => {
 
   };
 
+  const discountAmount = invoice.discount_rate
+  ? (invoice.subtotal * invoice.discount_rate) / 100
+  : 0;
+
+const taxAmount = invoice.tax_rate
+  ? ((invoice.subtotal - discountAmount) * invoice.tax_rate) / 100
+  : 0;
+
+
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-6 md:px-10 py-8">
@@ -216,14 +225,19 @@ const InvoicePreview = () => {
           </div>
 
           <div className="flex justify-between text-red-400">
-            <span>Discount ({invoice.discount_rate}%):</span>
-            <span>${(invoice.discount_amount ?? 0).toFixed(2)}</span>
-          </div>
+  <span>Discount ({invoice.discount_rate || 0}%):</span>
+  <span>
+    -${discountAmount.toFixed(2)}
+  </span>
+</div>
 
-          <div className="flex justify-between text-[#80FFF9]">
-            <span>Tax ({invoice.tax_rate}%):</span>
-            <span>${(invoice.tax_amount ?? 0).toFixed(2)}</span>
-          </div>
+<div className="flex justify-between text-[#80FFF9]">
+  <span>Tax ({invoice.tax_rate || 0}%):</span>
+  <span>
+    +${taxAmount.toFixed(2)}
+  </span>
+</div>
+
 
           <div className="flex justify-between font-semibold text-[#80FFF9] text-lg mt-2 border-t border-white/10 pt-2">
             <span>Total:</span>

@@ -27,20 +27,19 @@ const Invoices = () => {
     .format(value)
     .replace(/\s/g, " ");
   };
-
   
-const hexToRgb = (hex) => {
-  hex = hex.replace("#", "");
-  if (hex.length === 3) {
-    hex = hex.split("").map(ch => ch + ch).join("");
-  }
-  const bigint = parseInt(hex, 16);
-  return [
-    (bigint >> 16) & 255,
-    (bigint >> 8) & 255,
-    bigint & 255,
-  ];
-};
+  const hexToRgb = (hex) => {
+    hex = hex.replace("#", "");
+    if (hex.length === 3) {
+      hex = hex.split("").map(ch => ch + ch).join("");
+    }
+    const bigint = parseInt(hex, 16);
+    return [
+      (bigint >> 16) & 255,
+      (bigint >> 8) & 255,
+      bigint & 255,
+    ];
+  };
 
 
 

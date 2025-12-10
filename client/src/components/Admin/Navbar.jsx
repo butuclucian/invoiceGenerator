@@ -263,12 +263,13 @@ const Navbar = ({ openSidebar }) => {
                       </div>
                     ) : (
                       notifications.map((note) => (
-                        <div
-                          key={note._id}
-                          className={`p-4 border-b border-white/10 hover:bg-white/5 transition ${
-                            !note.read && "bg-white/5"
-                          }`}
-                        >
+                        <button key={note._id} onClick={() => {
+                            if (note.invoice?._id) {
+                              navigate(`/dashboard/invoices/${note.invoice._id}`);
+                              setShowPopup(false);
+                            }
+                          }} className={`w-full text-left p-4 border-b border-white/10 hover:bg-white/10 transition ${!note.read && "bg-white/5"}`} >
+
                           <p className="text-sm text-[#80FFF9] font-medium">
                             {note.message}
                           </p>
@@ -285,7 +286,7 @@ const Navbar = ({ openSidebar }) => {
                               </p>
                             </>
                           )}
-                        </div>
+                        </button>
                       ))
                     )}
                   </div>

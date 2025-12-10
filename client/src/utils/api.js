@@ -11,7 +11,7 @@ API.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   } else {
-    console.warn("⚠️  Nu există token în localStorage!");
+    console.warn("Nu există token în localStorage!");
   }
 
   return config;
