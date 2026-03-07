@@ -5,7 +5,6 @@ import morgan from "morgan";
 import cron from "node-cron";
 import bodyParser from "body-parser";
 import connectDB from "./config/db.js";
-
 import authRoutes from "./routes/authRoutes.js";
 import clientRoutes from "./routes/clientRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
@@ -17,8 +16,6 @@ import aiChatRoutes from "./routes/aiChatRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
 import calendarRoutes from "./routes/calendarRoutes.js";
 import billingRoutes from "./routes/billingRoutes.js"
-
-
 import { generateNearDueNotifications } from "./controllers/notificationController.js";
 import User from "./models/User.js";
 
@@ -27,8 +24,7 @@ connectDB();
 
 const app = express();
 
-/* -------------------------- 🧩 STRIPE WEBHOOK -------------------------- */
-// ⚠️ Trebuie să vină înainte de express.json()!
+// stripe webhook
 import { handleWebhook } from "./controllers/subscriptionController.js";
 app.post(
   "/api/subscription/webhook",
@@ -36,19 +32,10 @@ app.post(
   handleWebhook
 );
 
-/* -------------------------- 🌍 MIDDLEWARES ----------------------------- */
+
+// middlewares
 app.use(express.json());
 app.use(morgan("dev"));
-// app.use(
-//   cors({
-//     origin: [
-//       "https://invoice-generator-olive-gamma.vercel.app",
-//       "https://invoice-generator-ungi.vercel.app",
-//       "http://localhost:5173",
-//     ],
-//     credentials: true,
-//   })
-// );
 
 app.use(
   cors({
@@ -59,9 +46,9 @@ app.use(
   })
 );
 
-/* -------------------------- ✅ ROUTES ---------------------------------- */
+// routes
 app.get("/", (req, res) => {
-  res.send("BillForge AI API is running...");
+  res.send("invoiceGenAI is running...");
 });
 
 app.use("/api/auth", authRoutes);
@@ -77,13 +64,13 @@ app.use("/api/calendar", calendarRoutes);
 app.use("/api/billing-profile", billingRoutes);
 
 
-/* -------------------------- 🚀 SERVER --------------------------------- */
+// server
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, "0.0.0.0", () =>
   console.log(`🚀 Server running on port ${PORT}`)
 );
 
-/* -------------------------- ⏰ CRON JOB ------------------------------- */
+// cron job to check for near due invoices every hour
 cron.schedule("0 * * * *", async () => {
   try {
     const users = await User.find();
@@ -97,6 +84,6 @@ cron.schedule("0 * * * *", async () => {
       );
     }
   } catch (error) {
-    console.error("❌ Cron job error:", error);
+    console.error("Cron job error:", error);
   }
 });

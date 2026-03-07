@@ -32,7 +32,7 @@ export const getInvoiceById = async (req, res) => {
 
     res.json(invoice);
   } catch (err) {
-    console.error("❌ Error fetching invoice by ID:", err);
+    console.error("Error fetching invoice by ID:", err);
     res.status(500).json({ message: "Error fetching invoice" });
   }
 };
@@ -61,11 +61,10 @@ export const createInvoice = async (req, res) => {
       ...rest,
     });
 
-    // ✅ Trimite email cu Resend
     try {
       await sendInvoiceEmail(newInvoice, existingClient);
     } catch (mailErr) {
-      console.error("❌ Failed to send invoice email:", mailErr);
+      console.error("Failed to send invoice email:", mailErr);
     }
 
     res.status(201).json({
@@ -74,7 +73,7 @@ export const createInvoice = async (req, res) => {
       invoice: newInvoice,
     });
   } catch (err) {
-    console.error("❌ Invoice create error:", err);
+    console.error("Invoice create error:", err);
     res.status(500).json({
       message: "Failed to create invoice",
       error: err.message,
@@ -95,6 +94,7 @@ export const updateInvoice = async (req, res) => {
   }
 };
 
+
 // DELETE invoice
 export const deleteInvoice = async (req, res) => {
   try {
@@ -106,20 +106,19 @@ export const deleteInvoice = async (req, res) => {
   }
 };
 
+
 // GET /api/invoices/near-due
 export const getNearDueInvoices = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    // Data de azi (format simplu)
     const today = new Date();
-    const todayStr = today.toISOString().split("T")[0]; // "2025-11-08"
+    const todayStr = today.toISOString().split("T")[0];
 
-    // Data de mâine (pentru intervalul de 24h)
     const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
     const tomorrowStr = tomorrow.toISOString().split("T")[0];
 
-    console.log("🔍 Checking near-due invoices for:", todayStr, "to", tomorrowStr);
+    console.log("Checking near-due invoices for:", todayStr, "to", tomorrowStr);
 
     // Extragem TOATE facturile utilizatorului
     const allInvoices = await Invoice.find({
@@ -127,17 +126,17 @@ export const getNearDueInvoices = async (req, res) => {
       status: { $ne: "paid" },
     }).populate("client", "name email");
 
-    // Filtrare manuală tolerantă la formate
+    // Filtrare manuala toleranta la formate
     const nearDue = allInvoices.filter((inv) => {
       if (!inv.due_date) return false;
-      const dueStr = inv.due_date.toString().slice(0, 10); // normalizează stringul
+      const dueStr = inv.due_date.toString().slice(0, 10);
       return dueStr === todayStr || dueStr === tomorrowStr;
     });
 
-    console.log(`📋 Found ${nearDue.length} invoices near due`);
+    console.log(`Found ${nearDue.length} invoices near due`);
     res.status(200).json(nearDue);
   } catch (err) {
-    console.error("❌ Error fetching near-due invoices:", err);
+    console.error("Error fetching near-due invoices:", err);
     res.status(500).json({ message: "Error fetching invoice" });
   }
 };

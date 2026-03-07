@@ -55,7 +55,7 @@ const Login = () => {
           </div>
           <h1 className="text-2xl font-semibold text-white">Welcome Back</h1>
           <p className="text-gray-400 text-sm mt-1">
-            Join <span className="text-[#80FFF9]">BillForge AI</span> and simplify your billing
+            Join <span className="text-[#80FFF9]">InvoiceGenAi</span> and simplify your billing
           </p>
         </div>
 

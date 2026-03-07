@@ -18,13 +18,13 @@ export const aiChat = async (req, res) => {
       });
     }
 
-    // 1) Load contextual data
+    // Load contextual data
     const clients = await Client.find({ createdBy: userId }).lean();
     const invoices = await Invoice.find({ user: userId })
       .populate("client")
       .lean();
 
-    // 2) History formatting
+    // History formatting
     const historyText = Array.isArray(history)
       ? history
           .map(
@@ -34,9 +34,9 @@ export const aiChat = async (req, res) => {
           .join("\n")
       : "";
 
-    // 3) Prompt final (ADDED: no markdown, no *, no **, no bullets)
+    // Prompt final (ADDED: no markdown, no *, no **, no bullets)
     const prompt = `
-      You are BillForge AI Assistant, a friendly and knowledgeable finance helper.
+      You are invoiceGenAI — a smart invoice & client assistant.
 
       You answer questions about:
       invoices, clients, payments, overdue invoices, totals, summaries, insights,

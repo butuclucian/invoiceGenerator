@@ -1,16 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import {
-  Bell,
-  X,
-  Check,
-  LogOut,
-  ArrowLeft,
-  Settings,
-  Search,
-  User2,
-  MessageSquare,
-  Menu,
-} from "lucide-react";
+import { Bell, X, Check, LogOut, ArrowLeft, Settings, Search, User2, MessageSquare, Menu} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import API from "../../utils/api";
@@ -181,7 +170,7 @@ const Navbar = ({ openSidebar }) => {
             className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10"
           >
             <ArrowLeft size={18} className="text-[#80FFF9]" />
-            <span className="text-sm text-gray-200">Home</span>
+            <span className="text-sm text-gray-200">Back</span>
           </button>
 
           {/* CHATBOT */}

@@ -6,12 +6,9 @@ import User from "../models/User.js";
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// ✅ 1. Creează o sesiune de checkout pentru upgrade
+// creeaza o sesiune de checkout pentru upgrade
 export const createCheckoutSession = async (req, res) => {
   try {
-    console.log("🔹 createCheckoutSession user:", req.user);
-    console.log("🔹 req.body:", req.body);
-
     const { plan } = req.body;
     const normalizedPlan = plan?.toLowerCase();
 
@@ -31,20 +28,19 @@ export const createCheckoutSession = async (req, res) => {
       cancel_url: `${process.env.CLIENT_URL}/dashboard/subscription?canceled=true`,
       customer_email: req.user.email,
       metadata: {
-        userId: String(req.user._id), // 🧠 pentru backup
+        userId: String(req.user._id),
         plan: normalizedPlan,
       },
     });
 
-    console.log("✅ Stripe session created:", session.id);
     res.json({ url: session.url });
   } catch (error) {
-    console.error("❌ Stripe session error:", error);
+    console.error("Stripe session error:", error);
     res.status(500).json({ message: "Failed to create checkout session" });
   }
 };
 
-// ✅ 2. Webhook handler (Stripe → App)
+//  Webhook handler
 export const handleWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
   let event;
@@ -56,7 +52,7 @@ export const handleWebhook = async (req, res) => {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
-    console.error("⚠️ Webhook signature verification failed:", err.message);
+    console.error("Webhook signature verification failed:", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
@@ -64,12 +60,10 @@ export const handleWebhook = async (req, res) => {
 
   try {
     switch (event.type) {
-      // 🔹 Caz 1: Checkout finalizat (Stripe Checkout completat)
+      //  Caz 1: Checkout finalizat
       case "checkout.session.completed": {
         const email = data.customer_email;
         const planMeta = data.metadata?.plan || "pro";
-
-        console.log("🔔 Webhook: checkout.session.completed for:", email);
 
         const user = await User.findOne({ email });
         if (user) {
@@ -88,19 +82,17 @@ export const handleWebhook = async (req, res) => {
             },
             { upsert: true, new: true }
           );
-          console.log(`✅ Subscription created/updated for ${user.email}: ${updated.plan}`);
+          console.log(`Subscription created/updated for ${user.email}: ${updated.plan}`);
         } else {
-          console.warn("⚠️ No user found for email:", email);
+          console.warn("No user found for email:", email);
         }
         break;
       }
 
-      // 🔹 Caz 2: Subscriptie nouă (Stripe Customer -> Subscription)
+      // Caz 2: Subscriptie noua (Stripe Customer -> Subscription)
       case "customer.subscription.created": {
         const sub = data;
         const customerId = sub.customer;
-
-        console.log("🔔 Webhook: customer.subscription.created:", sub.id);
 
         const customer = await stripe.customers.retrieve(customerId);
         const email = customer.email;
@@ -122,17 +114,16 @@ export const handleWebhook = async (req, res) => {
             },
             { upsert: true, new: true }
           );
-          console.log(`✅ Subscription synced for ${user.email}: ${updated.plan}`);
+          console.log(`Subscription synced for ${user.email}: ${updated.plan}`);
         } else {
-          console.warn("⚠️ No user found for customer email:", email);
+          console.warn("No user found for customer email:", email);
         }
         break;
       }
 
-      // 🔹 Caz 3: Subscriptie ștearsă / anulată
+      //  Caz 3: Subscriptie stearsa / anulata
       case "customer.subscription.deleted": {
         const subId = data.id;
-        console.log("❌ Webhook: customer.subscription.deleted:", subId);
 
         const sub = await Subscription.findOne({
           stripeSubscriptionId: subId,
@@ -140,23 +131,23 @@ export const handleWebhook = async (req, res) => {
         if (sub) {
           sub.status = "Cancelled";
           await sub.save();
-          console.log("🟥 Subscription cancelled for user:", sub.user);
+          console.log("Subscription cancelled for user:", sub.user);
         }
         break;
       }
 
       default:
-        console.log(`ℹ️ Unhandled event type: ${event.type}`);
+        console.log(`ℹUnhandled event type: ${event.type}`);
     }
 
     res.status(200).json({ received: true });
   } catch (err) {
-    console.error("❌ Webhook handling failed:", err);
+    console.error("Webhook handling failed:", err);
     res.status(500).send("Webhook handler error");
   }
 };
 
-// ✅ 3. Obține datele curente ale subscriptiei
+// 3. Obbine datele curente ale subscriptiei
 export const getMySubscription = async (req, res) => {
   try {
     const sub = await Subscription.findOne({ user: req.user._id });
@@ -165,12 +156,12 @@ export const getMySubscription = async (req, res) => {
     }
     res.json(sub);
   } catch (err) {
-    console.error("❌ getMySubscription error:", err);
+    console.error("getMySubscription error:", err);
     res.status(500).json({ message: "Failed to fetch subscription data" });
   }
 };
 
-// ✅ 4. Anulează abonamentul activ
+// 4. Anuleaza abonamentul activ
 export const cancelSubscription = async (req, res) => {
   try {
     const sub = await Subscription.findOne({ user: req.user._id });
@@ -183,12 +174,12 @@ export const cancelSubscription = async (req, res) => {
 
     res.json({ message: "Subscription cancelled successfully" });
   } catch (err) {
-    console.error("❌ Cancel subscription error:", err);
+    console.error("Cancel subscription error:", err);
     res.status(500).json({ message: "Failed to cancel subscription" });
   }
 };
 
-// ✅ 5. Open Billing Portal
+//  5. Open Billing Portal
 export const createBillingPortal = async (req, res) => {
   try {
     const sub = await Subscription.findOne({ user: req.user._id });
@@ -202,12 +193,12 @@ export const createBillingPortal = async (req, res) => {
 
     res.json({ url: portalSession.url });
   } catch (err) {
-    console.error("❌ Billing portal error:", err);
+    console.error("Billing portal error:", err);
     res.status(500).json({ message: "Failed to create billing portal session" });
   }
 };
 
-// ✅ 6. Fetch Stripe invoices for user
+// 6. Fetch Stripe invoices for user
 export const getInvoices = async (req, res) => {
   try {
     const sub = await Subscription.findOne({ user: req.user._id });
@@ -221,7 +212,7 @@ export const getInvoices = async (req, res) => {
 
     res.json(invoices.data);
   } catch (err) {
-    console.error("❌ Invoice fetch error:", err);
+    console.error("Invoice fetch error:", err);
     res.status(500).json({ message: "Failed to fetch invoices" });
   }
 };

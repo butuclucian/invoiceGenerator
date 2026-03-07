@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-//  Hash parola înainte de salvare
+//  hash parola inainte de salvare
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(10);
@@ -36,7 +36,7 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// Compara parola introdusă cu cea hash-uită
+// Compara parola introdusa cu cea stocata
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };

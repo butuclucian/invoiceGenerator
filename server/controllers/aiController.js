@@ -3,9 +3,7 @@ import Invoice from "../models/Invoice.js";
 import Client from "../models/Client.js";
 import Subscription from "../models/Subscription.js";
 
-/* ===========================================
-   1) GENERATE INVOICE FROM TEXT (EMAIL → JSON)
-=========================================== */
+
 export const generateInvoiceFromText = async (req, res) => {
   try {
     const { text } = req.body;
@@ -18,51 +16,51 @@ export const generateInvoiceFromText = async (req, res) => {
     // Check subscription
     const sub = await Subscription.findOne({ user: userId });
     if (!sub) {
-      console.warn("⚠️ No subscription found — defaulting to Free plan");
+      console.warn("No subscription found — defaulting to Free plan");
     } else if (sub.status !== "Active") {
       return res.status(403).json({
         message: "AI access restricted. Please upgrade your plan.",
       });
     }
 
-    console.log("✅ AI access granted for plan:", sub?.plan || "Free");
+    console.log("AI access granted for plan:", sub?.plan || "Free");
 
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `
-You are an AI specialized in extracting invoice data from text.
-Return ONLY valid JSON in this structure (no markdown, no comments):
+      You are an AI specialized in extracting invoice data from text.
+      Return ONLY valid JSON in this structure (no markdown, no comments):
 
-{
-  "invoice_number": "string",
-  "date": "YYYY-MM-DD",
-  "due_date": "YYYY-MM-DD or null",
-  "client": {
-    "name": "string",
-    "email": "string or null",
-    "company": "string or null",
-    "address": "string or null"
-  },
-  "status": "draft" | "sent" | "paid" | "overdue",
-  "items": [
-    {
-      "description": "string",
-      "quantity": number,
-      "unit_price": number,
-      "total": number
-    }
-  ],
-  "tax_rate": number,
-  "discount_rate": number,
-  "subtotal": number,
-  "total": number,
-  "notes": "string",
-  "payment_terms": "string"
-}
+      {
+        "invoice_number": "string",
+        "date": "YYYY-MM-DD",
+        "due_date": "YYYY-MM-DD or null",
+        "client": {
+          "name": "string",
+          "email": "string or null",
+          "company": "string or null",
+          "address": "string or null"
+        },
+        "status": "draft" | "sent" | "paid" | "overdue",
+        "items": [
+          {
+            "description": "string",
+            "quantity": number,
+            "unit_price": number,
+            "total": number
+          }
+        ],
+        "tax_rate": number,
+        "discount_rate": number,
+        "subtotal": number,
+        "total": number,
+        "notes": "string",
+        "payment_terms": "string"
+      }
 
-Now extract all possible data from this text and output JSON only:
-${text}
-`;
+      Now extract all possible data from this text and output JSON only:
+      ${text}
+      `;
 
     // Gemini response
     let outputText;
@@ -72,7 +70,7 @@ ${text}
         result?.response?.text?.() ||
         result?.response?.candidates?.[0]?.content?.parts?.[0]?.text;
     } catch (aiError) {
-      console.error("❌ Gemini API error:", aiError);
+      console.error("Gemini API error:", aiError);
       return res.status(500).json({
         message: "Failed to connect to Gemini API",
         error: aiError.message,
@@ -92,7 +90,7 @@ ${text}
     try {
       parsedData = JSON.parse(cleanOutput);
     } catch (err) {
-      console.error("❌ Invalid JSON from Gemini:", cleanOutput);
+      console.error("Invalid JSON from Gemini:", cleanOutput);
       return res.status(400).json({
         message: "Gemini returned invalid JSON",
         raw: cleanOutput,
@@ -188,14 +186,12 @@ ${text}
       invoice: populatedInvoice,
     });
   } catch (error) {
-    console.error("❌ Invoice Generation Error:", error);
+    console.error("Invoice Generation Error:", error);
     res.status(500).json({ message: error.message });
   }
 };
 
-/* ===========================================
-   2) AI CHAT — Unified Assistant
-=========================================== */
+
 export const aiChat = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -204,7 +200,7 @@ export const aiChat = async (req, res) => {
     if (!messages)
       return res.status(400).json({ message: "Missing messages" });
 
-    // Build history
+
     const historyText = messages
       .map(
         (m) => `${m.sender === "user" ? "User" : "Assistant"}: ${m.text}`
@@ -222,26 +218,26 @@ export const aiChat = async (req, res) => {
     });
 
     const prompt = `
-You are BillForge AI — a smart invoice & client assistant.
+      You are invoiceGenAI — a smart invoice & client assistant.
 
-You ALWAYS answer using the real data below:
+      You ALWAYS answer using the real data below:
 
-CLIENTS:
-${JSON.stringify(clients, null, 2)}
+      CLIENTS:
+      ${JSON.stringify(clients, null, 2)}
 
-INVOICES:
-${JSON.stringify(invoices, null, 2)}
+      INVOICES:
+      ${JSON.stringify(invoices, null, 2)}
 
-Conversation so far:
-${historyText}
+      Conversation so far:
+      ${historyText}
 
-Rules:
-- Be friendly and professional.
-- Use ONLY real data from above.
-- If user asks for totals, overdue invoices, predictions → calculate them.
-- If user asks something impossible → say info is not available.
-- Never invent clients or invoices.
-`;
+      Rules:
+      - Be friendly and professional.
+      - Use ONLY real data from above.
+      - If user asks for totals, overdue invoices, predictions → calculate them.
+      - If user asks something impossible → say info is not available.
+      - Never invent clients or invoices.
+      `;
 
     const result = await model.generateContent(prompt);
 

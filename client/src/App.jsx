@@ -17,7 +17,6 @@ import EditInvoice from "./pages/Admin/EditInvoice";
 import InvoicePreview from "./pages/Admin/InvoicePreview";
 
 
-// 🆕 noile pagini de autentificare
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import { Toaster } from "sonner";
@@ -37,7 +36,6 @@ import EULA from "./pages/Legal/EULA";
 import DataProcessingAgreement from "./pages/Legal/DataProcessingAgreement";
 import CookiePolicy from "./pages/Legal/Cookies";
 import Blog from "./pages/Legal/Blog";
-
 import ConsentBanner from "./components/ConsentBanner";
 
 const App = () => {

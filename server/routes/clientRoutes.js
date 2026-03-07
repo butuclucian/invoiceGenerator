@@ -1,24 +1,18 @@
 import express from "express";
-import {
-  getClients,
-  getClientById,
-  createClient,
-  updateClient,
-  deleteClient,
-} from "../controllers/clientController.js";
+import { getClients, getClientById, createClient, updateClient, deleteClient} from "../controllers/clientController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// 🧾 /api/clients
+// /api/clients
 router.route("/")
-  .get(protect, getClients)      // GET all clients (for logged-in user)
-  .post(protect, createClient);  // POST create new client
+  .get(protect, getClients)
+  .post(protect, createClient);
 
-// 🧍 /api/clients/:id
+// /api/clients/:id
 router.route("/:id")
-  .get(protect, getClientById)   // GET single client
-  .put(protect, updateClient)    // PUT update client
-  .delete(protect, deleteClient);// DELETE client
+  .get(protect, getClientById)
+  .put(protect, updateClient)
+  .delete(protect, deleteClient);
 
 export default router;

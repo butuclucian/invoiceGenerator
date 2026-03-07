@@ -16,17 +16,15 @@ router.post("/sync", async (req, res) => {
 
     if (!user) {
       user = await User.create({ clerkId, email, name });
-      console.log("✅ New user created:", user.email);
     } else {
       user.email = email;
       user.name = name;
       await user.save();
-      console.log("🔄 User updated:", user.email);
     }
 
     res.status(200).json({ message: "User synced successfully", user });
   } catch (err) {
-    console.error("❌ Error syncing user:", err);
+    console.error("Error syncing user:", err);
     res.status(500).json({ message: "Server error syncing user" });
   }
 });
@@ -44,7 +42,7 @@ router.post("/save-push-token", protect, async (req, res) => {
 
     res.json({ message: "Push token saved successfully" });
   } catch (err) {
-    console.error("❌ Error saving push token:", err);
+    console.error("Error saving push token:", err);
     res.status(500).json({ message: "Server error" });
   }
 });

@@ -6,12 +6,12 @@ import Client from "../models/Client.js";
 import Subscription from "../models/Subscription.js";
 import Notification from "../models/Notification.js";
 
-// 🔧 funcție helper pentru token
+
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
 };
 
-// 📌 Register
+
 export const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -36,7 +36,7 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// 📌 Login
+
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -58,7 +58,7 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// 📌 Get user profile (requires auth)
+
 export const getProfile = async (req, res) => {
   try {
     if (!req.user) {
@@ -76,9 +76,7 @@ export const getProfile = async (req, res) => {
   }
 };
 
-// =======================
-// UPDATE USER PROFILE
-// =======================
+
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -111,9 +109,7 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-// =======================
-// DELETE ACCOUNT
-// =======================
+
 export const deleteAccount = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -137,9 +133,7 @@ export const deleteAccount = async (req, res) => {
 };
 
 
-// =======================
-// UPDATE PASSWORD
-// =======================
+
 export const updatePassword = async (req, res) => {
   try {
     const userId = req.user._id;

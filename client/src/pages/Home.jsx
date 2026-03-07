@@ -20,18 +20,12 @@ const Home = () => {
       <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden">
 
         {/* VIDEO BACKGROUND */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-40"
-        >
+        <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-40" >
           <source src="/hero-video.mp4" type="video/mp4" />
         </video>
 
         {/* GRADIENT OVERLAY */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/70 to-[#0e0e0e]" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/70 to-[#0e0e0e]" />
 
         {/* BLUR CIRCLES */}
         <BlurCircle top="-100px" left="20%" size="450px" color="#80FFF950" />
@@ -47,7 +41,7 @@ const Home = () => {
 
           {/* TITLE */}
           <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">
-            <span className="bg-gradient-to-r from-[#80FFF9] to-[#CB52D4] bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-[#80FFF9] to-[#CB52D4] bg-clip-text text-transparent">
               Automate Your Invoicing
             </span>
             <br />
@@ -64,28 +58,12 @@ const Home = () => {
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
 
             {/* PRIMARY CTA */}
-            <button
-              onClick={() => navigate("/register")}
-              className="
-                px-9 py-3 rounded-full
-                bg-white text-black
-                text-base font-medium
-                hover:bg-white/90 transition
-              "
-            >
+            <button onClick={() => navigate("/register")} className=" px-9 py-3 rounded-full bg-white text-black text-base font-medium hover:bg-white/90 transition " >
               Get Started
             </button>
 
             {/* SECONDARY CTA */}
-            <button
-              className="
-                px-9 py-3 rounded-full
-                border border-white/20
-                text-white font-light
-                hover:bg-white/10
-                transition
-              "
-            >
+            <button className=" px-9 py-3 rounded-full border border-white/20 text-white font-light hover:bg-white/10 transition " >
               Learn More
             </button>
 
@@ -321,7 +299,7 @@ const Home = () => {
                   );
 
                   if (data?.url) {
-                    window.location.href = data.url; // redirect la Stripe
+                    window.location.href = data.url;
                   } else {
                     toast.error("Something went wrong starting checkout.");
                   }
@@ -330,7 +308,7 @@ const Home = () => {
                   toast.error("Failed to start checkout.");
                 }
               }}
-              className="w-full py-3 rounded-md bg-gradient-to-r from-[#CB52D4] to-[#80FFF9] text-white hover:opacity-90 transition"
+              className="w-full py-3 rounded-md bg-linear-to-r from-[#CB52D4] to-[#80FFF9] text-white hover:opacity-90 transition"
             >
               Upgrade to Enterprise
             </button>

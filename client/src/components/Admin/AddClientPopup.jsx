@@ -129,7 +129,7 @@ const AddClientPopup = ({ onClose, onCreate }) => {
             </button>
             <button
               type="submit"
-              className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition"
+              className="flex items-center gap-2 px-5 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-md hover:opacity-90 transition"
             >
               <Save size={16} />
               Save Client

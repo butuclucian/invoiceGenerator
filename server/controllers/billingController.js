@@ -3,7 +3,7 @@ import BillingProfile from "../models/BillingProfile.js";
 export const getBillingProfile = async (req, res) => {
   try {
     const profile = await BillingProfile.findOne({ user: req.user._id });
-    res.json(profile || {}); // returnam gol dacă nu există
+    res.json(profile || {});
   } catch (err) {
     res.status(500).json({ message: "Failed to load billing profile" });
   }

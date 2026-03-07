@@ -9,6 +9,6 @@ export const sendPush = async (token, title, body) => {
       body,
     });
   } catch (err) {
-    console.error("❌ Error sending push notification:", err?.response?.data || err);
+    console.error("Error sending push notification:", err?.response?.data || err);
   }
 };
