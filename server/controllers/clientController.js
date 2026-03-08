@@ -1,6 +1,6 @@
 import Client from "../models/Client.js";
 
-// GET all clients for logged-in user
+
 export const getClients = async (req, res) => {
   try {
     const clients = await Client.find({ createdBy: req.user._id });
@@ -10,7 +10,7 @@ export const getClients = async (req, res) => {
   }
 };
 
-// GET single client by ID
+
 export const getClientById = async (req, res) => {
   try {
     const client = await Client.findById(req.params.id);
@@ -21,7 +21,7 @@ export const getClientById = async (req, res) => {
   }
 };
 
-// CREATE new client
+
 export const createClient = async (req, res) => {
   try {
     const { name, email, company, address, phone } = req.body;
@@ -43,7 +43,7 @@ export const createClient = async (req, res) => {
   }
 };
 
-// UPDATE client
+
 export const updateClient = async (req, res) => {
   try {
     const updated = await Client.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -54,7 +54,7 @@ export const updateClient = async (req, res) => {
   }
 };
 
-// DELETE client
+
 export const deleteClient = async (req, res) => {
   try {
     const deleted = await Client.findByIdAndDelete(req.params.id);

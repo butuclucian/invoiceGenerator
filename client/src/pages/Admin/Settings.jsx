@@ -17,7 +17,7 @@ const Settings = () => {
       bank: "",
       iban: "",
       vat_rate: 19,
-      currency: "RON",
+      currency: "EUR",
       logo: "",
     });
 

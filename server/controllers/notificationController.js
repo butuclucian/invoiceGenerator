@@ -1,6 +1,6 @@
 import Notification from "../models/Notification.js";
 import Invoice from "../models/Invoice.js";
-import { sendPush } from "../utils/push.js"; // import pentru mobile
+import { sendPush } from "../utils/push.js";
 
 
 export const generateNearDueNotifications = async (req, res) => {
@@ -95,7 +95,7 @@ export const markAllAsRead = async (req, res) => {
 };
 
 
-
+// for mobile
 export const testPushNotification = async (req, res) => {
   try {
     const token = req.user.pushToken;

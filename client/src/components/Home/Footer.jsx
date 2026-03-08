@@ -8,7 +8,7 @@ const Footer = () => {
       
       {/* BACKGROUND GLOW */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[650px] h-[250px] bg-gradient-to-r from-[#80FFF9]/20 via-[#CB52D4]/20 to-[#80FFF9]/20 blur-[120px] rounded-full" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[650px] h-[250px] bg-linear-to-r from-[#80FFF9]/20 via-[#CB52D4]/20 to-[#80FFF9]/20 blur-[120px] rounded-full" />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -21,7 +21,7 @@ const Footer = () => {
             <div className="flex items-center gap-3 mb-4">
               <img src="invoicelogo.png" className="w-10 h-10 rounded-full" />
               <span className="text-2xl font-semibold">
-                BillForge<span className="text-[#80FFF9]">AI</span>
+                InvoiceGen<span className="text-[#80FFF9]">AI</span>
               </span>
             </div>
 
@@ -83,11 +83,11 @@ const Footer = () => {
 
         {/* BOTTOM */}
         <div className="border-t border-white/10 py-6 flex flex-col md:flex-row justify-between items-center text-white/60 text-sm">
-          <p>© {new Date().getFullYear()} BillForgeAI. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} InvoiceGenAI. All rights reserved.</p>
 
           <p className="text-white/40 text-xs">
-            BillForgeAI is operated by an independent developer based in Romania. 
-            Contact: support@billforgeai.com
+            InvoiceGenAI is operated by an independent developer based in Romania. 
+            Contact: support@invoicegenai.com
           </p>
 
           

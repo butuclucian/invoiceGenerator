@@ -10,10 +10,8 @@ router.post("/login", loginUser);
 
 // Protected route
 router.get("/profile", protect, getProfile);
-
 router.put("/update", protect, updateProfile);
 router.delete("/delete", protect, deleteAccount);
-
 router.put("/password", protect, updatePassword);
 
 export default router;

@@ -42,10 +42,8 @@ const Invoices = () => {
   };
 
 
-
   const { query } = useSearchStore();
 
-  // FETCH INVOICES + BILLING DATA
   const fetchInvoices = async () => {
     try {
       setLoading(true);
@@ -65,7 +63,7 @@ const Invoices = () => {
       if (billRes.data) setBillingProfile(billRes.data);
 
     } catch (err) {
-      console.error("❌ Fetch error:", err);
+      console.error("Fetch error:", err);
       toast.error("Failed to load invoices or billing profile");
     } finally {
       setLoading(false);
@@ -96,7 +94,6 @@ const Invoices = () => {
   }, [filterStatus, invoices, query]);
 
 
-  // DELETE INVOICE
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem("token");
@@ -110,7 +107,6 @@ const Invoices = () => {
     }
   };
 
-
   const handleDownloadPDF = async (invoice) => {
     if (!billingProfile) {
       toast.error("Billing profile missing!");
@@ -119,11 +115,10 @@ const Invoices = () => {
 
     const b = billingProfile;
     const c = invoice.client || {};
-    const currency = b.currency || "RON";
+    const currency = b.currency || "EUR";
     const accent = hexToRgb("#0f6c91");
     const gray = [50, 50, 50];
 
-    // Format date -> DD-MM-YYYY
     const formatDate = (d) => {
       if (!d) return "-";
       const date = new Date(d);
@@ -133,11 +128,11 @@ const Invoices = () => {
     const doc = new jsPDF("p", "mm", "a4");
     let y = 15;
 
-    // QR Code → new website
+    // QR Code - new website
     const qrImg = await QRCode.toDataURL("https://invoice-generator-ungi.vercel.app/");
     doc.addImage(qrImg, "PNG", 165, 10, 35, 35);
 
-    // LOGO
+    // logo
     if (b.logo) {
       doc.addImage(b.logo, "PNG", 15, y, 26, 26);
     }
@@ -258,10 +253,7 @@ const Invoices = () => {
           <p className="text-gray-400 text-sm">Manage and track all invoices</p>
         </div>
 
-        <button
-          onClick={() => navigate("/dashboard/invoices/create")}
-          className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2"
-        >
+        <button onClick={() => navigate("/dashboard/invoices/create")} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2" >
           <Plus size={18} />
           Create Invoice
         </button>

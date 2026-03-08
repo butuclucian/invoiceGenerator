@@ -51,10 +51,10 @@ const Home = () => {
           {/* SUBTITLE */}
           <p className="text-white/70 max-w-2xl mx-auto text-lg md:text-xl mb-14">
             Generate invoices, extract details with AI, track payments and scale your
-            business — everything becomes effortless with BillForgeAI.
+            business — everything becomes effortless with invoiceGenAi.
           </p>
 
-          {/* === CLEAN MINIMAL CTA SECTION === */}
+          {/* CLEAN MINIMAL CTA SECTION */}
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
 
             {/* PRIMARY CTA */}
@@ -73,7 +73,7 @@ const Home = () => {
       </section>
 
 
-      {/* ===== FEATURES ===== */}
+      {/* FEATURES */}
       <section id="features" className="py-28 relative bg-linear-to-b from-[#0e0e0e] to-[#141414]">
         <BlurCircle bottom="0" right="0" />
         <div className="max-w-6xl mx-auto px-6 text-center">
@@ -81,7 +81,7 @@ const Home = () => {
             Your AI Assistant for Effortless Invoicing
           </h2>
           <p className="text-white/70 mb-16 max-w-2xl mx-auto">
-            BillForgeAI automates every step of the invoicing process so you can
+            invoiceGenAi automates every step of the invoicing process so you can
             focus on what really matters — growing your business.
           </p>
 
@@ -122,7 +122,7 @@ const Home = () => {
             Trusted by Professionals Worldwide
           </h2>
           <p className="text-white/70 mb-16 max-w-2xl mx-auto">
-            Thousands of freelancers and small teams rely on BillForgeAI for
+            Thousands of freelancers and small teams rely on invoiceGenAi for
             faster, smarter, and more reliable invoicing.
           </p>
 
@@ -132,7 +132,7 @@ const Home = () => {
                 name: "Alex Johnson",
                 role: "Freelance Designer",
                 quote:
-                  "BillForgeAI saves me hours every week. The AI extraction is insanely accurate!",
+                  "invoiceGenAi saves me hours every week. The AI extraction is insanely accurate!",
               },
               {
                 name: "Sophia Lee",
@@ -167,7 +167,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ===== PRICING / SUBSCRIPTIONS ===== */}
+      {/* PRICING / SUBSCRIPTIONS */}
       <section id="pricing" className="py-28 text-center bg-linear-to-r from-[#1a1a1a] via-[#111] to-[#1a1a1a] relative">
         <BlurCircle top="0" left="0" />
         <div className="max-w-6xl mx-auto px-6">
@@ -175,7 +175,7 @@ const Home = () => {
             Choose the Perfect Plan for You
           </h2>
           <p className="text-white/70 mb-16 max-w-2xl mx-auto">
-            Unlock the full power of BillForgeAI — automate your invoicing and
+            Unlock the full power of invoiceGenAi — automate your invoicing and
             supercharge productivity with AI.
           </p>
 
@@ -320,7 +320,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ===== FOOTER ===== */}
+      {/* FOOTER */}
       <Footer />
     </div>
   );

@@ -34,7 +34,6 @@ export const aiChat = async (req, res) => {
           .join("\n")
       : "";
 
-    // Prompt final (ADDED: no markdown, no *, no **, no bullets)
     const prompt = `
       You are invoiceGenAI — a smart invoice & client assistant.
 

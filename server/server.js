@@ -39,7 +39,7 @@ app.use(morgan("dev"));
 
 app.use(
   cors({
-    origin: "*", // permite web + mobil
+    origin: "*",
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
     methods: ["GET", "POST", "PUT", "DELETE"],

@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from "uuid";
 import { sendInvoiceEmail } from "../utils/emailService.js";
 
 
-// GET all invoices
 export const getInvoices = async (req, res) => {
   try {
     const invoices = await Invoice.find({ user: req.user._id })
@@ -20,7 +19,6 @@ export const getInvoices = async (req, res) => {
 };
 
 
-// GET invoice by ID
 export const getInvoiceById = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id)
@@ -38,7 +36,7 @@ export const getInvoiceById = async (req, res) => {
 };
 
 
-// CREATE new invoice
+
 export const createInvoice = async (req, res) => {
   try {
     const { client, invoice_number, date, due_date, ...rest } = req.body;
@@ -83,7 +81,6 @@ export const createInvoice = async (req, res) => {
 
 
 
-// UPDATE invoice
 export const updateInvoice = async (req, res) => {
   try {
     const updated = await Invoice.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -95,7 +92,6 @@ export const updateInvoice = async (req, res) => {
 };
 
 
-// DELETE invoice
 export const deleteInvoice = async (req, res) => {
   try {
     const deleted = await Invoice.findByIdAndDelete(req.params.id);
@@ -107,7 +103,6 @@ export const deleteInvoice = async (req, res) => {
 };
 
 
-// GET /api/invoices/near-due
 export const getNearDueInvoices = async (req, res) => {
   try {
     const userId = req.user._id;

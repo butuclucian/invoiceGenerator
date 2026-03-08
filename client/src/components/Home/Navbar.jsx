@@ -8,20 +8,17 @@ const Navbar = () => {
   const [isSticky, setIsSticky] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Check JWT token on load
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
   }, []);
 
-  // Sticky scroll
   useEffect(() => {
     const handleScroll = () => setIsSticky(window.scrollY > 30);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Logout handler
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
@@ -38,10 +35,10 @@ const Navbar = () => {
     >
       {/* Logo */}
       <Link to="/" className="flex items-center gap-2">
-        <img src="invoicelogo.png" alt="BillForge Logo" className="w-8 h-8"
+        <img src="invoicelogo.png" alt="invoiceGenAi Logo" className="w-10 h-10"
         />
         <span className="text-white font-semibold tracking-wide hidden sm:inline">
-          BillForge<span className="text-[#80FFF9]">AI</span>
+          InvoiceGen<span className="text-[#80FFF9]">AI</span>
         </span>
       </Link>
 

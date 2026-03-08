@@ -11,12 +11,11 @@ const Dashboard = () => {
   return (
     <div className="flex bg-[#0e0e0e] min-h-screen text-white">
 
-      {/* SIDEBAR DESKTOP */}
       <div className="hidden md:block">
         <Sidebar />
       </div>
 
-      {/* SIDEBAR MOBILE */}
+      {/* sidebar mobile */}
       <AnimatePresence>
         {sidebarOpen && (
           <>
@@ -35,15 +34,15 @@ const Dashboard = () => {
         )}
       </AnimatePresence>
 
-      {/* MAIN CONTENT */}
+      {/* main content */}
       <div className="flex-1 flex flex-col relative">
 
-        {/* NAVBAR FIX — moves right on desktop */}
+        {/* navbar */}
         <div className="md:ml-64 fixed top-0 left-0 right-0 z-30">
           <Navbar openSidebar={() => setSidebarOpen(true)} />
         </div>
 
-        {/* PAGE CONTENT */}
+        {/* page content */}
         <main className="pt-24 p-6 overflow-y-auto md:ml-64">
           <Outlet />
         </main>

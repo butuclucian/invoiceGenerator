@@ -20,7 +20,6 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
 
-    
     pushToken: { type: String, default: null },
 
     billing_profile: { type: billingProfileSchema, default: () => ({}) },
@@ -28,7 +27,6 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-//  hash parola inainte de salvare
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(10);
@@ -36,7 +34,6 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// Compara parola introdusa cu cea stocata
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };

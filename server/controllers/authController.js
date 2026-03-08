@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
-
 import Invoice from "../models/Invoice.js";
 import Client from "../models/Client.js";
 import Subscription from "../models/Subscription.js";

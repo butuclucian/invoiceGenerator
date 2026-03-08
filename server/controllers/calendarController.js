@@ -1,12 +1,12 @@
 import CalendarEvent from "../models/CalendarEvent.js";
 
-// Get all events for logged-in user
+
 export const getEvents = async (req, res) => {
   const events = await CalendarEvent.find({ user: req.user._id }).sort("date");
   res.json(events);
 };
 
-// Create new event
+
 export const addEvent = async (req, res) => {
   const { date, time, title } = req.body;
 
@@ -20,7 +20,7 @@ export const addEvent = async (req, res) => {
   res.json(event);
 };
 
-// Update event
+
 export const updateEvent = async (req, res) => {
   const { date, time, title } = req.body;
 
@@ -33,7 +33,7 @@ export const updateEvent = async (req, res) => {
   res.json(updated);
 };
 
-// Delete event
+
 export const deleteEvent = async (req, res) => {
   await CalendarEvent.findOneAndDelete({
     _id: req.params.id,
