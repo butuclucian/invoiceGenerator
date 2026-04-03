@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Ms+Madi&display=swap');
 @import "tailwindcss";
+
 
 @theme{
   --color-primary: #F84565;
@@ -8,16 +8,53 @@
 }
 
 *{
-  font-family: "Outfit", sans-serif;
+  font-family: 'Axiforma', sans-serif;
   scroll-behavior: smooth;
   scrollbar-width: thin;
   scrollbar-color: #787777 #1e1e1e;
 }
 
+
 body{
-  color:white;
-  background-color: #09090B;
+  color:black;
+  background-color: #E8E8E8;
 }
+
+.font-handwriting {
+  font-family: 'Ms Madi', cursive;
+}
+
+@font-face {
+  font-family: 'Axiforma';
+  src: url('/fonts/Axiforma-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Axiforma';
+  src: url('/fonts/Axiforma-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Axiforma';
+  src: url('/fonts/Axiforma-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Axiforma';
+  src: url('/fonts/Axiforma-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+}
+
+
+
+
 
 .no-scrollbar{
   scrollbar-width: none;
@@ -28,9 +65,6 @@ body{
         @apply cursor-pointer;
     }
 }
-
-
-
 
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1);

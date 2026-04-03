@@ -128,20 +128,17 @@ const Invoices = () => {
     const doc = new jsPDF("p", "mm", "a4");
     let y = 15;
 
-    // QR Code - new website
     const qrImg = await QRCode.toDataURL("https://invoice-generator-ungi.vercel.app/");
     doc.addImage(qrImg, "PNG", 165, 10, 35, 35);
 
-    // logo
     if (b.logo) {
       doc.addImage(b.logo, "PNG", 15, y, 26, 26);
     }
 
-    // Company Header
     doc.setFont("helvetica", "bold");
     doc.setFontSize(20);
     doc.setTextColor(...accent);
-    doc.text(b.business_name || "Company Name", 50, y + 10);
+    doc.text(b.business_name || "invoiceGenAi", 50, y + 10);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
