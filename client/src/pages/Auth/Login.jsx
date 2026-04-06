@@ -1,121 +1,54 @@
-import React, { useState } from "react";
+import React from 'react'
+import { Link } from 'react-router-dom'
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import axios from "axios";
-import { LockKeyhole, Mail, LogIn, ArrowLeft } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const { data } = await axios.post( `${import.meta.env.VITE_API_URL}/auth/login`, formData);
-      localStorage.setItem("token", data.token);
-      toast.success("Welcome back!");
-      navigate("/");
-    } catch (error) {
-      toast.error("Invalid email or password");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-[#0e0e0e] to-[#1a1a1a] text-white relative overflow-hidden">
-      {/* 🌀 Background Glow */}
-      <div className="absolute -top-40 -left-40 w-[400px] h-[400px] bg-[#80FFF9]/20 rounded-full blur-[200px]" />
-      <div className="absolute -bottom-40 -right-40 w-[400px] h-[400px] bg-purple-600/20 rounded-full blur-[200px]" />
-
-      {/* 🔙 Back Button */}
-      <button
-        onClick={() => navigate("/")}
-        className="absolute top-6 left-6 flex items-center gap-2 text-gray-400 hover:text-[#80FFF9] transition"
-      >
-        <ArrowLeft size={18} />
-        <span className="text-sm font-medium">Back to Home</span>
+    <div className='overflow-hidden min-h-screen flex items-center justify-center bg-[#E8E8E8] relative'>
+      
+      <button onClick={() => navigate("/")} className='bg-[#1E1E1E] text-white px-20 pt-3 pb-3 rounded-xl hover:bg-[#333] absolute top-20 left-10 z-10'>
+        Back
       </button>
 
-      {/* 🧾 Login Card */}
-      <div className="relative bg-[#111]/90 border border-[#1e1e1e] backdrop-blur-md p-10 rounded-2xl w-[90%] max-w-md shadow-lg shadow-indigo-500/10 animate-in fade-in slide-in-from-bottom-4">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="flex justify-center mb-3">
-            <div className="p-3 bg-[#1a1a1a] border border-[#222] rounded-full">
-              <LockKeyhole size={26} className="text-[#80FFF9]" />
-            </div>
-          </div>
-          <h1 className="text-2xl font-semibold text-white">Welcome Back</h1>
-          <p className="text-gray-400 text-sm mt-1">
-            Join <span className="text-[#80FFF9]">InvoiceGenAi</span> and simplify your billing
-          </p>
-        </div>
+      <div>
+        <img src="SIGNIN.png" alt="" className='absolute top-30'/>
+        <p className='font-bold tracking-[-13%] absolute top-50 left-195 text-9xl'>SIGN IN</p>
+      </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Email */}
-          <div>
-            <label className="block mb-1 text-sm text-gray-300">Email</label>
-            <div className="flex items-center gap-2 bg-[#0f0f0f] border border-[#2a2a2a] rounded-md px-3 focus-within:border-[#80FFF9] transition">
-              <Mail size={18} className="text-[#80FFF9]" />
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                className="w-full bg-transparent p-2 text-white outline-none placeholder-gray-500"
-              />
-            </div>
-          </div>
+      
 
-          {/* Password */}
-          <div>
-            <label className="block mb-1 text-sm text-gray-300">Password</label>
-            <div className="flex items-center gap-2 bg-[#0f0f0f] border border-[#2a2a2a] rounded-md px-3 focus-within:border-[#80FFF9] transition">
-              <LockKeyhole size={18} className="text-[#80FFF9]" />
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                className="w-full bg-transparent p-2 text-white outline-none placeholder-gray-500"
-              />
-            </div>
-          </div>
-
-          {/* Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-linear-to-r from-indigo-600 to-purple-600 py-2.5 rounded-md font-medium hover:opacity-90 transition-all duration-300 shadow-md shadow-indigo-500/20"
-          >
-            {loading ? "Logging in..." : <> <LogIn size={18} /> Login </>}
-          </button>
+      <div className='w-full max-w-md mt-30 ml-10'>
+        <form action="" className='flex flex-col gap-3'>
+          <label htmlFor="email">Email</label>
+          <input type="email" id="email" placeholder="Enter your email address" className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10'/>
+          <label htmlFor="password">Password</label>
+          <input type="password" id="password" placeholder="Enter your password" className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10'/>
+          <button type="submit" className='bg-[#1E1E1E] text-white pt-3 pb-3 rounded-xl hover:bg-[#333] mt-5'>Continue</button>
         </form>
 
-        {/* Footer */}
-        <div className="text-center mt-6 text-sm text-gray-400">
-          Don’t have an account?{" "}
-          <button
-            onClick={() => navigate("/register")}
-            className="text-[#80FFF9] hover:underline"
-          >
+        <div className="text-center mt-6 text-sm text-[#1E1E1E]">
+          Already have an account?
+          <Link to="/register" className="text-[#1E1E1E] hover:underline">
             Register
-          </button>
+          </Link>
         </div>
-      </div>
-    </div>
-  );
-};
 
-export default Login;
+      </div>
+
+      <div className=''>
+        <img src="INVBLACK.png" alt="" className='left-300 bottom-180 rotate-20 absolute' />
+        <img src="INVBLACK.png" alt="" className='left-315 top-150 rotate-340 absolute' />
+        <img src="Chenar.png" alt="" className='left-0 top-10 absolute'/>
+        <img src="Circles.png" alt="" className='right-0 bottom-75 absolute' />
+        <img src="invoiceGenAi1.png" alt="" className='left-60 top-107 absolute'/>
+        <img src="invoiceGenAi2.png" alt="" className='right-155 bottom-162 absolute'/>
+      </div>
+      
+
+    </div>
+  )
+}
+
+export default Login

@@ -5,6 +5,7 @@ import Navbar from '../components/Home/Navbar';
 import ScrollDownPopup from '../components/ScrollDownPopup';
 import { Menu } from "lucide-react";
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const Home = () => {
 
@@ -41,10 +42,15 @@ const Home = () => {
     ));
 
     const [menuOpen, setMenuOpen] = useState(false);
-    const menuHeight = 700;
 
 
   return (
+
+    <div>
+      {/* <img src="/INVBLACK.png" alt="" className='absolute -translate-y-[-2200px] rotate-330 -translate-x-0 z-0' />
+        <img src="/INVBLACK.png" alt="" className='absolute -translate-y-280 rotate-300 translate-x-350 z-0' /> */}
+
+
     <div className='min-h-screen flex items-center justify-center flex-col mr-5 ml-5'>
 
       <ScrollDownPopup />
@@ -53,9 +59,9 @@ const Home = () => {
       <div className='w-full mt-2 m-5 pb-9 bg-[#1E1E1E] rounded-4xl overflow-hidden relative'>
 
         <div className="absolute top-8 right-20 flex items-center gap-4 z-50">
-          <button className="text-[#1E1E1E] text-sm bg-white px-6 py-2 rounded-full font-bold">
-            Contact us
-          </button>
+          <Link to="/register" className="text-[#1E1E1E] text-sm bg-white px-6 py-2 rounded-full font-bold">
+            Get Started
+          </Link>
           <img src={menuOpen ? "OpenMenu.png" : "menu.png"} alt="" className="w-7 h-auto cursor-pointer" onClick={() => setMenuOpen(!menuOpen)} />
         </div>
 
@@ -131,7 +137,6 @@ const Home = () => {
         </div>
 
         <img src="/INVBLACK.png" alt="" className='absolute -translate-y-120 rotate-330 -translate-x-100 z-0' />
-
         <img src="/INVBLACK.png" alt="" className='absolute -translate-y-280 rotate-300 translate-x-350 z-0' />
 
         <div className="flex justify-center mb-20 -translate-y-10">
@@ -243,6 +248,7 @@ const Home = () => {
       </div>
       
 
+    </div>
     </div>
   )
 }
