@@ -1,9 +1,35 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import axios from 'axios';
+import { toast } from "sonner";
+
 
 const Login = () => {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { data } = await axios.post( `${import.meta.env.VITE_API_URL}/auth/login`, formData);
+      localStorage.setItem("token", data.token);
+      toast.success("Welcome back!");
+      navigate("/");
+    } catch (error) {
+      toast.error("Invalid email or password");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className='overflow-hidden min-h-screen flex items-center justify-center bg-[#E8E8E8] relative'>
@@ -20,13 +46,16 @@ const Login = () => {
       
 
       <div className='w-full max-w-md mt-30 ml-10'>
-        <form action="" className='flex flex-col gap-3'>
-          <label htmlFor="email">Email</label>
-          <input type="email" id="email" placeholder="Enter your email address" className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10'/>
+        <form onSubmit={handleSubmit} className='flex flex-col gap-3'>
+          <label>Email</label>
+          <input type="email" name="email" placeholder="Enter your email address" value={formData.email} onChange={handleChange} className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10' />
           <label htmlFor="password">Password</label>
-          <input type="password" id="password" placeholder="Enter your password" className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10'/>
-          <button type="submit" className='bg-[#1E1E1E] text-white pt-3 pb-3 rounded-xl hover:bg-[#333] mt-5'>Continue</button>
+          <input type="password" name="password" placeholder="Enter your password" value={formData.password} onChange={handleChange} className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10' />
+          <button type="submit" disabled={loading} className='bg-[#1E1E1E] text-white pt-3 pb-3 rounded-xl hover:bg-[#333] mt-5'>
+            {loading ? "Signing in..." : "Continue"}
+          </button>
         </form>
+        
 
         <div className="text-center mt-6 text-sm text-[#1E1E1E]">
           Already have an account?
@@ -46,7 +75,6 @@ const Login = () => {
         <img src="invoiceGenAi2.png" alt="" className='right-155 bottom-162 absolute'/>
       </div>
       
-
     </div>
   )
 }

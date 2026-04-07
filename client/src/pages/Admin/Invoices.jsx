@@ -108,131 +108,156 @@ const Invoices = () => {
   };
 
   const handleDownloadPDF = async (invoice) => {
-    if (!billingProfile) {
-      toast.error("Billing profile missing!");
-      return;
-    }
+  if (!billingProfile) {
+    toast.error("Billing profile missing!");
+    return;
+  }
 
-    const b = billingProfile;
-    const c = invoice.client || {};
-    const currency = b.currency || "EUR";
-    const accent = hexToRgb("#0f6c91");
-    const gray = [50, 50, 50];
+  const b = billingProfile;
+  const cl = invoice.client || {};
+  const currency = b.currency || "GBP";
 
-    const formatDate = (d) => {
-      if (!d) return "-";
-      const date = new Date(d);
-      return date.toLocaleDateString("en-GB").replaceAll("/", "-");
-    };
+  const BG    = [245, 242, 236]; // #F5F2EC cream
+  const TEXT  = [26, 26, 26];
+  const MUTED = [102, 102, 102];
 
-    const doc = new jsPDF("p", "mm", "a4");
-    let y = 15;
-
-    const qrImg = await QRCode.toDataURL("https://invoice-generator-ungi.vercel.app/");
-    doc.addImage(qrImg, "PNG", 165, 10, 35, 35);
-
-    if (b.logo) {
-      doc.addImage(b.logo, "PNG", 15, y, 26, 26);
-    }
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(20);
-    doc.setTextColor(...accent);
-    doc.text(b.business_name || "invoiceGenAi", 50, y + 10);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(...gray);
-
-    if (b.address) doc.text(b.address, 50, y + 16);
-    if (b.email) doc.text(b.email, 50, y + 21);
-    if (b.phone) doc.text(b.phone, 50, y + 26);
-    if (b.fiscal_code) doc.text(`CIF: ${b.fiscal_code}`, 50, y + 31);
-    if (b.iban) doc.text(`IBAN: ${b.iban}`, 50, y + 36);
-
-    y += 48;
-    doc.setDrawColor(...accent);
-    doc.line(15, y, 195, y);
-    y += 10;
-
-    // Bill To
-    doc.setFont("helvetica", "bold").setTextColor(...accent);
-    doc.text("Bill To", 15, y);
-    y += 6;
-
-    doc.setFont("helvetica", "normal").setTextColor(...gray);
-    doc.text(c.name || "Unknown Client", 15, y);
-
-    let lineY = y;
-
-    if (c.email) doc.text(c.email, 15, (lineY += 5));
-    if (c.address) doc.text(c.address, 15, (lineY += 5));
-    if (c.phone) doc.text(c.phone, 15, (lineY += 5));
-
-    // Invoice Details
-    const infoY = 68;
-    doc.setFont("helvetica", "bold").setTextColor(...accent);
-    doc.text("Invoice Details", 120, infoY);
-
-    doc.setFont("helvetica", "normal").setTextColor(...gray);
-    doc.text(`Invoice : #${invoice.invoice_number}`, 120, infoY + 6);
-    doc.text(`Date: ${formatDate(invoice.date)}`, 120, infoY + 12);
-    doc.text(`Due: ${formatDate(invoice.due_date)}`, 120, infoY + 18);
-    doc.text(`Status: ${invoice.status}`, 120, infoY + 24);
-
-    // Items Table
-    const formattedItems = invoice.items?.map(i => [
-      i.description,
-      i.quantity,
-      `${(i.unit_price ?? 0).toFixed(2)} ${currency}`,
-      `${(i.total ?? 0).toFixed(2)} ${currency}`
-    ]) || [];
-
-    autoTable(doc, {
-      startY: infoY + 35,
-      head: [["Description", "Qty", "Unit Price", "Total"]],
-      body: formattedItems,
-      theme: "grid",
-      headStyles: {
-        fillColor: accent,
-        textColor: [255, 255, 255],
-        fontStyle: "bold"
-      },
-      styles: { fontSize: 10, textColor: [20, 20, 20], fillStyle: "solid" },
-      margin: { left: 15, right: 15 }
-    });
-
-    const finalY = doc.lastAutoTable.finalY + 12;
-
-    // Summary Section
-    doc.setFont("helvetica", "bold").setTextColor(...accent);
-    doc.text("Summary", 140, finalY);
-
-    doc.setFont("helvetica", "normal").setTextColor(...gray);
-    doc.text(`VAT (${b.vat_rate}%):`, 120, finalY + 8);
-    doc.text(`${(invoice.tax_amount ?? 0).toFixed(2)} ${currency}`, 185, finalY + 8, { align: "right" });
-
-    doc.text(`Discount:`, 120, finalY + 14);
-    doc.text(`${(invoice.discount_amount ?? 0).toFixed(2)} ${currency}`, 185, finalY + 14, { align: "right" });
-
-    doc.setFont("helvetica", "bold").setTextColor(...accent);
-    doc.setFontSize(12);
-    doc.text(`Total:`, 120, finalY + 26);
-    doc.text(`${(invoice.total ?? 0).toFixed(2)} ${currency}`, 185, finalY + 26, { align: "right" });
-
-    // Footer - Signatures
-    doc.setFontSize(9).setTextColor(120, 120, 120);
-
-    // Authorized Signature (left)
-    doc.line(25, 275, 85, 275);
-    doc.text("Authorized Signature", 35, 280);
-
-    // Client Signature (right)
-    doc.line(125, 275, 185, 275);
-    doc.text("Client Signature", 145, 280);
-
-    doc.save(`invoice_${invoice.invoice_number}.pdf`);
+  const fmt = (d) => {
+    if (!d) return "-";
+    return new Date(d).toLocaleDateString("en-GB", {
+      day: "2-digit", month: "short", year: "numeric"
+    }).toLowerCase();
   };
+
+  const doc = new jsPDF("p", "mm", "a4");
+  const W = 210;
+  const M = 20;   // left margin
+  const R = W - M; // right edge
+
+  // ── BACKGROUND ─────────────────────────────────────────
+  doc.setFillColor(...BG);
+  doc.rect(0, 0, 210, 297, "F");
+
+  const t = (x, y, text, { size = 9, bold = false, color = TEXT, align = "left" } = {}) => {
+    doc.setFillColor(...color);
+    doc.setTextColor(...color);
+    doc.setFont("helvetica", bold ? "bold" : "normal");
+    doc.setFontSize(size);
+    if (align === "right")       doc.text(text, x, y, { align: "right" });
+    else if (align === "center") doc.text(text, x, y, { align: "center" });
+    else                         doc.text(text, x, y);
+  };
+
+  const hline = (y, x1 = M, x2 = R, lw = 0.3) => {
+    doc.setDrawColor(...TEXT);
+    doc.setLineWidth(lw);
+    doc.line(x1, y, x2, y);
+  };
+
+  // ── HEADER ─────────────────────────────────────────────
+  t(M, 18, "invoice", { size: 28, bold: true });
+
+  const lx = W - 65;
+  t(lx, 12, "invoice no:", { color: MUTED, align: "right" });
+  t(lx, 19, "date:",        { color: MUTED, align: "right" });
+  t(lx, 26, "due date:",    { color: MUTED, align: "right" });
+
+  t(R, 12, `INV-${invoice.invoice_number}`, { align: "right" });
+  t(R, 19, fmt(invoice.date),               { align: "right" });
+  t(R, 26, fmt(invoice.due_date),           { align: "right" });
+
+  // ── CUSTOMER ───────────────────────────────────────────
+  const yc = 40;
+  t(M, yc, "customer", { size: 10, bold: true });
+  const cx = M + 22;
+  t(cx, yc,      cl.name    || "Digital Growth Agency Ltd",               { size: 9 });
+  t(cx, yc + 6,  cl.address || "14 King Street, Manchester, M2 6AG, UK",  { size: 9 });
+  t(cx, yc + 12, cl.vat     || "GB987654321",                             { size: 9 });
+
+  hline(yc + 17);
+
+  // ── SUPPLIER ───────────────────────────────────────────
+  const ys = yc + 26;
+  t(M, ys, "supplier", { size: 10, bold: true });
+  const sx = M + 22;
+  [
+    b.business_name || "BrightTech Solutions Ltd",
+    b.phone         || "+44 20 7946 0958",
+    b.address       || "221B Baker Street, London, NW1 6XE, UK",
+    b.fiscal_code   || "GB123456789",
+    b.email         || "contact@brighttech.co.uk",
+  ].forEach((line, i) => t(sx, ys + i * 6, line, { size: 9 }));
+
+  // ── TABLE ──────────────────────────────────────────────
+  const yt = ys + 38;
+
+  const cNo   = M + 2;
+  const cDesc = M + 20;
+  const cPri  = M + 82;
+  const cQty  = M + 110;
+  const cTot  = R;
+
+  hline(yt - 6);
+
+  t(cNo,   yt, "no",               { size: 8, color: MUTED });
+  t(cDesc, yt, "item description", { size: 8, color: MUTED });
+  t(cPri,  yt, "price",            { size: 8, color: MUTED });
+  t(cQty,  yt, "quantity",         { size: 8, color: MUTED });
+  t(cTot,  yt, "total",            { size: 8, color: MUTED, align: "right" });
+
+  hline(yt + 4);
+
+  const items = invoice.items || [];
+  let rowY = yt + 13;
+  items.forEach((item, idx) => {
+    const no    = String(idx + 1).padStart(2, "0");
+    const price = `${(item.unit_price ?? 0).toFixed(2)} ${currency}`;
+    const qty   = String(item.quantity ?? 1);
+    const total = `${(item.total ?? 0).toFixed(2)} ${currency}`;
+
+    t(cNo,   rowY, no,               { size: 9 });
+    t(cDesc, rowY, item.description, { size: 9 });
+    t(cPri,  rowY, price,            { size: 9 });
+    t(cQty,  rowY, qty,              { size: 9 });
+    t(cTot,  rowY, total,            { size: 9, align: "right" });
+    rowY += 13;
+  });
+
+  hline(rowY - 7);
+
+  // Subtotal row
+  t(cNo,  rowY, "subtotal (excl. vat)", { size: 9 });
+  const subtotal = (invoice.subtotal ?? 0).toFixed(2);
+  t(cTot, rowY, `${subtotal} ${currency}`, { size: 9, bold: true, align: "right" });
+
+  // VAT / Discount / Total
+  let sy = rowY + 12;
+  t(cQty + 14, sy,     "vat (" + (b.vat_rate || 20) + "%)",    { size: 9, color: MUTED, align: "right" });
+  t(cTot,      sy,     `${(invoice.tax_amount ?? 0).toFixed(2)} ${currency}`, { size: 9, align: "right" });
+
+  t(cQty + 14, sy + 7, "discount (" + (b.discount_rate || 10) + "%)", { size: 9, color: MUTED, align: "right" });
+  t(cTot,      sy + 7, `${(invoice.discount_amount ?? 0).toFixed(2)} ${currency}`, { size: 9, align: "right" });
+
+  t(cQty + 14, sy + 16, "total (incl. VAT)", { size: 10, bold: true, align: "right" });
+  t(cTot,      sy + 16, `${(invoice.total ?? 0).toFixed(2)} ${currency}`, { size: 10, bold: true, align: "right" });
+
+  // ── FOOTER ─────────────────────────────────────────────
+  const yf = 225;
+  t(M, yf, "payment options", { size: 11, bold: true });
+
+  [
+    "Bank Transfer",
+    b.business_name || "BrightTech Solutions Ltd",
+    b.iban          || "GB29NWBK60161331926819",
+    b.bank_name     || "Barclays",
+  ].forEach((line, i) => t(M, yf + 8 + i * 5.5, line, { size: 9 }));
+
+  // Right contact info
+  t(R, yf + 10, `${b.email || "contact@brighttech.co.uk"}  ✉`,  { size: 8, align: "right" });
+  t(R, yf + 18, `${b.address || "221B Baker Street, London"}  ⊞`, { size: 8, align: "right" });
+  t(R, yf + 26, `${b.phone || "+44 20 7946 0958"}  ☎`,           { size: 8, align: "right" });
+
+  doc.save(`invoice_${invoice.invoice_number}.pdf`);
+};
 
 
   const handlePreview = (id) => navigate(`/dashboard/invoices/${id}`);

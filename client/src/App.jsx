@@ -37,6 +37,7 @@ import DataProcessingAgreement from "./pages/Legal/DataProcessingAgreement";
 import CookiePolicy from "./pages/Legal/Cookies";
 import Blog from "./pages/Legal/Blog";
 import ConsentBanner from "./components/ConsentBanner";
+import InvoicesTemplates from "./pages/InvoicesTemplates";
 
 const App = () => {
   const location = useLocation();
@@ -65,6 +66,7 @@ const App = () => {
         <Route path="/blog" element={<Blog />} />
         <Route path="/careers" element={<Careers />} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="/invoice-template" element={<InvoicesTemplates />} />
 
         {/* Legal */}
         <Route path="/terms" element={<Terms />} />
