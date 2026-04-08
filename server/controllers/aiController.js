@@ -122,8 +122,14 @@ ${text}`;
         "";
     } catch (aiError) {
       console.error("Gemini API error:", aiError);
+      if (aiError.message.includes("429")) {
+        return res.status(429).json({
+          message: "AI quota exceeded. Please try again later or upgrade plan.",
+        });
+      }
+
       return res.status(500).json({
-        message: "Failed to connect to Gemini API",
+        message: "AI service error",
         error: aiError.message,
       });
     }
