@@ -206,7 +206,7 @@ ${text}`;
 
     if (hasClientName) {
       let client = await Client.findOne({
-        name: parsedData.client.name,
+        name: new RegExp(`^${parsedData.client.name}$`, "i"),
         createdBy: userId,
       });
 
@@ -229,15 +229,20 @@ ${text}`;
     }
 
     // Strip price_known before saving — not in Invoice schema
-    const cleanItems = parsedData.items.map(({ price_known, ...item }) => item);
+    const cleanItems = parsedData.items.map(({ price_known, ...item }) => ({
+      description: item.description || "Item",
+      quantity: Number(item.quantity) || 1,
+      unit_price: Number(item.unit_price) || 0,
+      total: Number(item.total) || 0,
+    }));
 
     // ── Create invoice — always saved as "draft" in DB ──────────────────────
     const newInvoice = await Invoice.create({
       user: userId,
       client: clientId,
       invoice_number: parsedData.invoice_number || `DRAFT-${Date.now()}`,
-      date: parsedData.date || new Date().toISOString().split("T")[0],
-      due_date: parsedData.due_date || "",
+      date: parsedData.date ? new Date(parsedData.date) : new Date(),
+      due_date: parsedData.due_date ? new Date(parsedData.due_date) : undefined,
       status: "draft",
       items: cleanItems,
       tax_rate: taxRate,

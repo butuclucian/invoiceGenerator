@@ -418,7 +418,7 @@ const AIGenerator = () => {
           </p>
           <button
             onClick={handleUpgrade}
-            className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2 rounded-md mx-auto hover:opacity-90 transition"
+            className="flex items-center gap-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white px-6 py-2 rounded-md mx-auto hover:opacity-90 transition"
           >
             <Sparkles size={16} /> Upgrade Now
           </button>
