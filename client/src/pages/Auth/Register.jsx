@@ -1,10 +1,34 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useNavigate } from "react-router-dom";
-
+import { useState } from 'react';
+import axios from 'axios';
+import { toast } from "sonner";
+  
 const Register = () => {
   const navigate = useNavigate();
   
+   const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try { const { data } = await axios.post( `${import.meta.env.VITE_API_URL}/auth/register`, form);
+      localStorage.setItem("token", data.token);
+      toast.success("Account created successfully!");
+      navigate("/");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className='overflow-hidden min-h-screen flex items-center justify-center bg-[#E8E8E8] relative'>
       
@@ -20,14 +44,14 @@ const Register = () => {
       
 
       <div className='w-full max-w-md mt-40 ml-10'>
-        <form action="" className='flex flex-col gap-3'>
+        <form action="" onSubmit={handleSubmit} className='flex flex-col gap-3'>
           <label htmlFor="fullName">Full Name</label>
-          <input type="text" id="fullName" placeholder="Enter your full name" className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10'/>
+          <input type="text" name='name' placeholder="Enter your full name" value={form.name} required onChange={handleChange} className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10' />
           <label htmlFor="email">Email</label>
-          <input type="email" id="email" placeholder="Enter your email address" className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10'/>
+          <input type="email" name='email' placeholder="Enter your email address" value={form.email} required onChange={handleChange} className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10' />
           <label htmlFor="password">Password</label>
-          <input type="password" id="password" placeholder="Enter your password" className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10'/>
-          <button type="submit" className='bg-[#1E1E1E] text-white pt-3 pb-3 rounded-xl hover:bg-[#333] mt-5'>Continue</button>
+          <input type="password" name='password' placeholder="Enter your password" value={form.password} required onChange={handleChange} className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10' />
+          <button type="submit" disabled={loading} className='bg-[#1E1E1E] text-white pt-3 pb-3 rounded-xl hover:bg-[#333] mt-5'>Continue</button>
         </form>
 
         <div className="text-center mt-6 text-sm text-[#1E1E1E]">
