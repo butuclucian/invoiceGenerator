@@ -12,7 +12,7 @@ const CreateInvoice = () => {
   const [formData, setFormData] = useState({
   invoice_number: `INV-${Date.now()}`,
   date: new Date().toISOString().split("T")[0],
-  due_date: "",
+  due_date: new Date().toISOString().split("T")[0],
   client: "",
   status: "draft",
   items: [{ description: "", quantity: 1, unit_price: 0, total: 0 }],
@@ -98,7 +98,7 @@ const CreateInvoice = () => {
     setFormData({
       invoice_number: `INV-${Date.now()}`,
       date: new Date().toISOString().split("T")[0],
-      due_date: "",
+      due_date: new Date().toISOString().split("T")[0],
       client: "",
       status: "draft",
       items: [{ description: "", quantity: 1, unit_price: 0, total: 0 }],
@@ -150,25 +150,6 @@ const CreateInvoice = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="max-w-6xl mx-auto space-y-12">
-        <section>
-          <div>
-            <label className="text-gray-300 block mb-1">
-              Template <span className="text-red-500">*</span>
-            </label>
-
-            <select
-              name="template"
-              value={formData.template}
-              onChange={handleChange}
-              className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white"
-            >
-              <option value="eu">EU (VAT)</option>
-              <option value="us">US (Sales Tax)</option>
-              <option value="global">Global (Freelancer)</option>
-              <option value="einvoice">E-Invoice (Enterprise)</option>
-            </select>
-          </div>
-        </section>
 
         {/* --- SECTION 1: Invoice Details --- */}
         <section>

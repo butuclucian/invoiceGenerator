@@ -1,12 +1,48 @@
-import React, { useEffect, useState } from "react";
-import { FileText, Edit, Trash2, Download, Filter, Plus, Eye } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { FileText, Edit, Trash2, Download, Filter, Plus, Eye, X } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import API from "../../utils/api";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import QRCode from "qrcode";
+import html2pdf from "html2pdf.js";
 import { useSearchStore } from "../../store/useSearchStore";
+
+import Template1 from "../../components/invoiceTemplates/Template1";
+import Template2 from "../../components/invoiceTemplates/Template2";
+import Template3 from "../../components/invoiceTemplates/Template3";
+
+// ─── Componenta de preview — randează template-ul ca HTML vizibil ───────────────
+const InvoicePreview = ({ invoice, template, billingProfile }) => {
+  if (!invoice || !billingProfile) return null;
+
+  const props = { invoice, billingProfile };
+
+  // Scalăm template-ul (794px lățime) la ~280px pentru preview în modal
+  const scale = 280 / 794;
+
+  return (
+    <div style={{
+      width: "280px",
+      height: `${Math.round(1123 * scale)}px`,
+      overflow: "hidden",
+      position: "relative",
+      borderRadius: "6px",
+      border: "1px solid rgba(255,255,255,0.1)",
+      backgroundColor: "#F5F2EC",
+    }}>
+      <div style={{
+        transform: `scale(${scale})`,
+        transformOrigin: "top left",
+        width: "794px",
+        pointerEvents: "none",
+      }}>
+        {template === 1 && <Template1 {...props} />}
+        {template === 2 && <Template2 {...props} />}
+        {template === 3 && <Template3 {...props} />}
+      </div>
+    </div>
+  );
+};
+// ─────────────────────────────────────────────────────────────────────────────────
 
 const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
@@ -16,33 +52,26 @@ const Invoices = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const formatCurrency = (value, currency = "RON") => {
-  if (!value && value !== 0) return `0,00 ${currency}`;
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState(1);
+  const [isDownloading, setIsDownloading] = useState(false);
 
-  return new Intl.NumberFormat("ro-RO", {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 2,
-  })
-    .format(value)
-    .replace(/\s/g, " ");
-  };
-  
-  const hexToRgb = (hex) => {
-    hex = hex.replace("#", "");
-    if (hex.length === 3) {
-      hex = hex.split("").map(ch => ch + ch).join("");
-    }
-    const bigint = parseInt(hex, 16);
-    return [
-      (bigint >> 16) & 255,
-      (bigint >> 8) & 255,
-      bigint & 255,
-    ];
-  };
-
+  // Ref către hidden div-ul folosit pentru generarea PDF-ului
+  const hiddenRef = useRef(null);
 
   const { query } = useSearchStore();
+
+  const formatCurrency = (value, currency = "RON") => {
+    if (!value && value !== 0) return `0,00 ${currency}`;
+    return new Intl.NumberFormat("ro-RO", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 2,
+    })
+      .format(value)
+      .replace(/\s/g, " ");
+  };
 
   const fetchInvoices = async () => {
     try {
@@ -61,7 +90,6 @@ const Invoices = () => {
       setInvoices(invRes.data);
       setFilteredInvoices(invRes.data);
       if (billRes.data) setBillingProfile(billRes.data);
-
     } catch (err) {
       console.error("Fetch error:", err);
       toast.error("Failed to load invoices or billing profile");
@@ -74,25 +102,24 @@ const Invoices = () => {
     fetchInvoices();
   }, []);
 
-
   // FILTER
   useEffect(() => {
     let temp = invoices;
 
-    if (filterStatus !== "all") temp = temp.filter(i => i.status === filterStatus);
+    if (filterStatus !== "all") temp = temp.filter((i) => i.status === filterStatus);
 
     if (query.trim() !== "") {
       const q = query.toLowerCase();
-      temp = temp.filter(inv =>
-        inv.invoice_number.toLowerCase().includes(q) ||
-        inv.client?.name?.toLowerCase().includes(q) ||
-        String(inv.total).includes(q)
+      temp = temp.filter(
+        (inv) =>
+          inv.invoice_number.toLowerCase().includes(q) ||
+          inv.client?.name?.toLowerCase().includes(q) ||
+          String(inv.total).includes(q)
       );
     }
 
     setFilteredInvoices(temp);
   }, [filterStatus, invoices, query]);
-
 
   const handleDelete = async (id) => {
     try {
@@ -107,164 +134,55 @@ const Invoices = () => {
     }
   };
 
-  const handleDownloadPDF = async (invoice) => {
-  if (!billingProfile) {
-    toast.error("Billing profile missing!");
-    return;
-  }
+  // ── Download PDF — apelat DOAR la click pe butonul Download ─────────────────
+  const handleDownloadPDF = () => {
+    const element = hiddenRef.current;
+    if (!element) {
+      toast.error("Preview not ready, please try again.");
+      return;
+    }
 
-  const b = billingProfile;
-  const cl = invoice.client || {};
-  const currency = b.currency || "GBP";
+    setIsDownloading(true);
 
-  const BG    = [245, 242, 236]; // #F5F2EC cream
-  const TEXT  = [26, 26, 26];
-  const MUTED = [102, 102, 102];
+    const opt = {
+      margin: 0,
+      filename: `invoice_${selectedInvoice.invoice_number}.pdf`,
+      image: { type: "jpeg", quality: 1 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    };
 
-  const fmt = (d) => {
-    if (!d) return "-";
-    return new Date(d).toLocaleDateString("en-GB", {
-      day: "2-digit", month: "short", year: "numeric"
-    }).toLowerCase();
+    html2pdf()
+      .set(opt)
+      .from(element)
+      .save()
+      .then(() => {
+        setIsDownloading(false);
+        setShowTemplateModal(false);
+        setSelectedInvoice(null);
+      })
+      .catch(() => {
+        setIsDownloading(false);
+        toast.error("Failed to generate PDF");
+      });
   };
 
-  const doc = new jsPDF("p", "mm", "a4");
-  const W = 210;
-  const M = 20;   // left margin
-  const R = W - M; // right edge
-
-  // ── BACKGROUND ─────────────────────────────────────────
-  doc.setFillColor(...BG);
-  doc.rect(0, 0, 210, 297, "F");
-
-  const t = (x, y, text, { size = 9, bold = false, color = TEXT, align = "left" } = {}) => {
-    doc.setFillColor(...color);
-    doc.setTextColor(...color);
-    doc.setFont("helvetica", bold ? "bold" : "normal");
-    doc.setFontSize(size);
-    if (align === "right")       doc.text(text, x, y, { align: "right" });
-    else if (align === "center") doc.text(text, x, y, { align: "center" });
-    else                         doc.text(text, x, y);
+  const handleOpenModal = (inv) => {
+    setSelectedInvoice(inv);
+    setSelectedTemplate(1);
+    setShowTemplateModal(true);
   };
 
-  const hline = (y, x1 = M, x2 = R, lw = 0.3) => {
-    doc.setDrawColor(...TEXT);
-    doc.setLineWidth(lw);
-    doc.line(x1, y, x2, y);
+  const handleCloseModal = () => {
+    setShowTemplateModal(false);
+    setSelectedInvoice(null);
   };
-
-  // ── HEADER ─────────────────────────────────────────────
-  t(M, 18, "invoice", { size: 28, bold: true });
-
-  const lx = W - 65;
-  t(lx, 12, "invoice no:", { color: MUTED, align: "right" });
-  t(lx, 19, "date:",        { color: MUTED, align: "right" });
-  t(lx, 26, "due date:",    { color: MUTED, align: "right" });
-
-  t(R, 12, `INV-${invoice.invoice_number}`, { align: "right" });
-  t(R, 19, fmt(invoice.date),               { align: "right" });
-  t(R, 26, fmt(invoice.due_date),           { align: "right" });
-
-  // ── CUSTOMER ───────────────────────────────────────────
-  const yc = 40;
-  t(M, yc, "customer", { size: 10, bold: true });
-  const cx = M + 22;
-  t(cx, yc,      cl.name    || "Digital Growth Agency Ltd",               { size: 9 });
-  t(cx, yc + 6,  cl.address || "14 King Street, Manchester, M2 6AG, UK",  { size: 9 });
-  t(cx, yc + 12, cl.vat     || "GB987654321",                             { size: 9 });
-
-  hline(yc + 17);
-
-  // ── SUPPLIER ───────────────────────────────────────────
-  const ys = yc + 26;
-  t(M, ys, "supplier", { size: 10, bold: true });
-  const sx = M + 22;
-  [
-    b.business_name || "BrightTech Solutions Ltd",
-    b.phone         || "+44 20 7946 0958",
-    b.address       || "221B Baker Street, London, NW1 6XE, UK",
-    b.fiscal_code   || "GB123456789",
-    b.email         || "contact@brighttech.co.uk",
-  ].forEach((line, i) => t(sx, ys + i * 6, line, { size: 9 }));
-
-  // ── TABLE ──────────────────────────────────────────────
-  const yt = ys + 38;
-
-  const cNo   = M + 2;
-  const cDesc = M + 20;
-  const cPri  = M + 82;
-  const cQty  = M + 110;
-  const cTot  = R;
-
-  hline(yt - 6);
-
-  t(cNo,   yt, "no",               { size: 8, color: MUTED });
-  t(cDesc, yt, "item description", { size: 8, color: MUTED });
-  t(cPri,  yt, "price",            { size: 8, color: MUTED });
-  t(cQty,  yt, "quantity",         { size: 8, color: MUTED });
-  t(cTot,  yt, "total",            { size: 8, color: MUTED, align: "right" });
-
-  hline(yt + 4);
-
-  const items = invoice.items || [];
-  let rowY = yt + 13;
-  items.forEach((item, idx) => {
-    const no    = String(idx + 1).padStart(2, "0");
-    const price = `${(item.unit_price ?? 0).toFixed(2)} ${currency}`;
-    const qty   = String(item.quantity ?? 1);
-    const total = `${(item.total ?? 0).toFixed(2)} ${currency}`;
-
-    t(cNo,   rowY, no,               { size: 9 });
-    t(cDesc, rowY, item.description, { size: 9 });
-    t(cPri,  rowY, price,            { size: 9 });
-    t(cQty,  rowY, qty,              { size: 9 });
-    t(cTot,  rowY, total,            { size: 9, align: "right" });
-    rowY += 13;
-  });
-
-  hline(rowY - 7);
-
-  // Subtotal row
-  t(cNo,  rowY, "subtotal (excl. vat)", { size: 9 });
-  const subtotal = (invoice.subtotal ?? 0).toFixed(2);
-  t(cTot, rowY, `${subtotal} ${currency}`, { size: 9, bold: true, align: "right" });
-
-  // VAT / Discount / Total
-  let sy = rowY + 12;
-  t(cQty + 14, sy,     "vat (" + (b.vat_rate || 20) + "%)",    { size: 9, color: MUTED, align: "right" });
-  t(cTot,      sy,     `${(invoice.tax_amount ?? 0).toFixed(2)} ${currency}`, { size: 9, align: "right" });
-
-  t(cQty + 14, sy + 7, "discount (" + (b.discount_rate || 10) + "%)", { size: 9, color: MUTED, align: "right" });
-  t(cTot,      sy + 7, `${(invoice.discount_amount ?? 0).toFixed(2)} ${currency}`, { size: 9, align: "right" });
-
-  t(cQty + 14, sy + 16, "total (incl. VAT)", { size: 10, bold: true, align: "right" });
-  t(cTot,      sy + 16, `${(invoice.total ?? 0).toFixed(2)} ${currency}`, { size: 10, bold: true, align: "right" });
-
-  // ── FOOTER ─────────────────────────────────────────────
-  const yf = 225;
-  t(M, yf, "payment options", { size: 11, bold: true });
-
-  [
-    "Bank Transfer",
-    b.business_name || "BrightTech Solutions Ltd",
-    b.iban          || "GB29NWBK60161331926819",
-    b.bank_name     || "Barclays",
-  ].forEach((line, i) => t(M, yf + 8 + i * 5.5, line, { size: 9 }));
-
-  // Right contact info
-  t(R, yf + 10, `${b.email || "contact@brighttech.co.uk"}  ✉`,  { size: 8, align: "right" });
-  t(R, yf + 18, `${b.address || "221B Baker Street, London"}  ⊞`, { size: 8, align: "right" });
-  t(R, yf + 26, `${b.phone || "+44 20 7946 0958"}  ☎`,           { size: 8, align: "right" });
-
-  doc.save(`invoice_${invoice.invoice_number}.pdf`);
-};
-
 
   const handlePreview = (id) => navigate(`/dashboard/invoices/${id}`);
 
   return (
     <div className="relative p-8 text-white min-h-screen bg-[#0e0e0e]">
-      
+
       {/* HEADER */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <div>
@@ -275,7 +193,10 @@ const Invoices = () => {
           <p className="text-gray-400 text-sm">Manage and track all invoices</p>
         </div>
 
-        <button onClick={() => navigate("/dashboard/invoices/create")} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2" >
+        <button
+          onClick={() => navigate("/dashboard/invoices/create")}
+          className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2"
+        >
           <Plus size={18} />
           Create Invoice
         </button>
@@ -288,7 +209,11 @@ const Invoices = () => {
           <span className="text-gray-300">Filter by status:</span>
         </div>
 
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="cursor-pointer bg-[#1a1a1a] border border-white/10 text-gray-200 px-4 py-2 rounded-md">
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="cursor-pointer bg-[#1a1a1a] border border-white/10 text-gray-200 px-4 py-2 rounded-md"
+        >
           <option value="all">All</option>
           <option value="draft">Draft</option>
           <option value="sent">Sent</option>
@@ -315,10 +240,12 @@ const Invoices = () => {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredInvoices.map((inv) => (
-            <div key={inv._id} className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-6 hover:border-[#80FFF9]/40 transition">
+            <div
+              key={inv._id}
+              className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-6 hover:border-[#80FFF9]/40 transition"
+            >
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-semibold">{inv.invoice_number}</h2>
-
                 <span
                   className={`text-xs px-3 py-1 rounded-full capitalize ${
                     inv.status === "paid"
@@ -334,12 +261,8 @@ const Invoices = () => {
                 </span>
               </div>
 
-              <p className="text-sm text-gray-400 mb-1">
-                {inv.client?.name || "Unknown Client"}
-              </p>
-              <p className="text-xs text-gray-500 mb-2">
-                {inv.client?.email || "no-email@example.com"}
-              </p>
+              <p className="text-sm text-gray-400 mb-1">{inv.client?.name || "Unknown Client"}</p>
+              <p className="text-xs text-gray-500 mb-2">{inv.client?.email || "no-email@example.com"}</p>
 
               <div className="border-t border-white/10 pt-3 flex items-center justify-between">
                 <p className="text-gray-400 text-sm">Total</p>
@@ -348,29 +271,159 @@ const Invoices = () => {
                 </p>
               </div>
 
-              {/* card buttons */}
+              {/* Card buttons */}
               <div className="flex justify-between mt-4">
-                
-                <button onClick={()=> handlePreview(inv._id)} className="p-2 text-gray-400 hover:text-[#80FFF9] transition" title="View">
+                <button
+                  onClick={() => handlePreview(inv._id)}
+                  className="p-2 text-gray-400 hover:text-[#80FFF9] transition"
+                  title="View"
+                >
                   <Eye size={18} />
                 </button>
-                
-                <button onClick={() => navigate(`/dashboard/invoices/${inv._id}/edit`) } className="p-2 text-gray-400 hover:text-indigo-400 transition" >
+                <button
+                  onClick={() => navigate(`/dashboard/invoices/${inv._id}/edit`)}
+                  className="p-2 text-gray-400 hover:text-indigo-400 transition"
+                  title="Edit"
+                >
                   <Edit size={18} />
                 </button>
-
-                <button onClick={() => handleDownloadPDF(inv)} className="p-2 text-gray-400 hover:text-green-400 transition" >
+                <button
+                  onClick={() => handleOpenModal(inv)}
+                  className="p-2 text-gray-400 hover:text-green-400 transition"
+                  title="Download"
+                >
                   <Download size={18} />
                 </button>
-
-                <button onClick={() => handleDelete(inv._id)} className="p-2 text-gray-400 hover:text-red-400 transition" >
+                <button
+                  onClick={() => handleDelete(inv._id)}
+                  className="p-2 text-gray-400 hover:text-red-400 transition"
+                  title="Delete"
+                >
                   <Trash2 size={18} />
                 </button>
-              
               </div>
-
             </div>
           ))}
+        </div>
+      )}
+
+      {/* ── TEMPLATE MODAL ──────────────────────────────────────────────────────── */}
+      {showTemplateModal && selectedInvoice && billingProfile && (
+        <div
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) handleCloseModal(); }}
+        >
+          <div className="bg-[#141414] border border-white/10 rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+
+            {/* Modal header */}
+            <div className="flex items-center justify-between p-6 border-b border-white/10">
+              <div>
+                <h2 className="text-xl font-semibold">Choose Template</h2>
+                <p className="text-gray-400 text-sm mt-1">
+                  Selectează un template, apoi apasă Download PDF.
+                </p>
+              </div>
+              <button
+                onClick={handleCloseModal}
+                className="p-2 text-gray-400 hover:text-white transition rounded-lg hover:bg-white/10"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Template previews */}
+            <div className="p-6 flex gap-6 justify-center flex-wrap">
+              {[1, 2, 3].map((tpl) => (
+                <div
+                  key={tpl}
+                  onClick={() => setSelectedTemplate(tpl)}
+                  className="flex flex-col items-center gap-3 cursor-pointer"
+                >
+                  <div
+                    className={`rounded-xl transition-all duration-200 ${
+                      selectedTemplate === tpl
+                        ? "ring-2 ring-[#80FFF9] ring-offset-2 ring-offset-[#141414]"
+                        : "opacity-60 hover:opacity-90"
+                    }`}
+                  >
+                    <InvoicePreview
+                      invoice={selectedInvoice}
+                      template={tpl}
+                      billingProfile={billingProfile}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-3 h-3 rounded-full border-2 transition-colors ${
+                        selectedTemplate === tpl
+                          ? "border-[#80FFF9] bg-[#80FFF9]"
+                          : "border-gray-500"
+                      }`}
+                    />
+                    <span
+                      className={`text-sm transition-colors ${
+                        selectedTemplate === tpl ? "text-[#80FFF9]" : "text-gray-400"
+                      }`}
+                    >
+                      Template {tpl}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Modal footer */}
+            <div className="flex justify-end gap-3 p-6 border-t border-white/10">
+              <button
+                onClick={handleCloseModal}
+                className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition text-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDownloadPDF}
+                disabled={isDownloading}
+                className="px-5 py-2.5 rounded-xl bg-indigo-600/30 border border-indigo-600/50 hover:bg-indigo-600/40 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDownloading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Download size={16} />
+                    Download PDF
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── HIDDEN DIV pentru generarea PDF — în afara viewport-ului ──────────── */}
+      {selectedInvoice && billingProfile && (
+        <div
+          style={{
+            position: "fixed",
+            top: "-9999px",
+            left: "-9999px",
+            pointerEvents: "none",
+            zIndex: -1,
+          }}
+        >
+          <div ref={hiddenRef}>
+            {selectedTemplate === 1 && (
+              <Template1 invoice={selectedInvoice} billingProfile={billingProfile} />
+            )}
+            {selectedTemplate === 2 && (
+              <Template2 invoice={selectedInvoice} billingProfile={billingProfile} />
+            )}
+            {selectedTemplate === 3 && (
+              <Template3 invoice={selectedInvoice} billingProfile={billingProfile} />
+            )}
+          </div>
         </div>
       )}
     </div>
