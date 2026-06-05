@@ -15,11 +15,9 @@ const Dashboard = () => {
         <Sidebar />
       </div>
 
-      {/* sidebar mobile */}
       <AnimatePresence>
         {sidebarOpen && (
           <>
-            {/* overlay */}
             <motion.div
               onClick={() => setSidebarOpen(false)}
               initial={{ opacity: 0 }}
@@ -28,21 +26,17 @@ const Dashboard = () => {
               className="fixed inset-0 bg-black z-40 md:hidden"
             />
 
-            {/* mobile sidebar */}
             <Sidebar isMobile closeSidebar={() => setSidebarOpen(false)} />
           </>
         )}
       </AnimatePresence>
 
-      {/* main content */}
       <div className="flex-1 flex flex-col relative">
 
-        {/* navbar */}
         <div className="md:ml-64 fixed top-0 left-0 right-0 z-30">
           <Navbar openSidebar={() => setSidebarOpen(true)} />
         </div>
 
-        {/* page content */}
         <main className="pt-24 p-6 overflow-y-auto md:ml-64">
           <Outlet />
         </main>

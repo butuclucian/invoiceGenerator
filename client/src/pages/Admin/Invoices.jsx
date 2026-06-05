@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { FileText, Edit, Trash2, Download, Filter, Plus, Eye, X } from "lucide-react";
+import { FileText, Edit, Trash2, Download, Filter, Plus, Eye, X, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import API from "../../utils/api";
@@ -266,7 +266,7 @@ const Invoices = () => {
 
               <div className="border-t border-white/10 pt-3 flex items-center justify-between">
                 <p className="text-gray-400 text-sm">Total</p>
-                <p className="text-[#80FFF9] font-semibold">
+                <p className={`font-semibold ${inv.total < 0 ? "text-red-400" : "text-[#80FFF9]"}`}>
                   {formatCurrency(inv.total, billingProfile?.currency)}
                 </p>
               </div>
@@ -287,6 +287,20 @@ const Invoices = () => {
                 >
                   <Edit size={18} />
                 </button>
+                
+                {/* Butonul Storno - apare doar dacă factura nu este deja stornată (total pozitiv) și e finalizată */}
+                {inv.total > 0 && (inv.status === "sent" || inv.status === "paid") ? (
+                  <button
+                    onClick={() => navigate(`/dashboard/invoices/storno/${inv._id}`)}
+                    className="p-2 text-gray-400 hover:text-red-400 transition"
+                    title="Storno (Reversal)"
+                  >
+                    <RefreshCw size={18} />
+                  </button>
+                ) : (
+                  <div className="w-[34px] h-[34px]" /> // Spacer gol pentru a menține alinierea fixă a butoanelor
+                )}
+
                 <button
                   onClick={() => handleOpenModal(inv)}
                   className="p-2 text-gray-400 hover:text-green-400 transition"

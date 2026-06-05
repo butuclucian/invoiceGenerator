@@ -1,4 +1,4 @@
-import genAI from "../config/ai.js";
+import ollama from "ollama";
 import Invoice from "../models/Invoice.js";
 import Client from "../models/Client.js";
 import Subscription from "../models/Subscription.js";
@@ -59,8 +59,6 @@ export const generateInvoiceFromText = async (req, res) => {
       .map(([service, price]) => `- ${service}: ${price} EUR`)
       .join("\n");
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
     const prompt = `You are an AI that extracts invoice data from any text (emails, messages, requests).
 
 PRICE LIST (use these prices for matching services):
@@ -79,7 +77,7 @@ RULES:
 7. Generate invoice_number as "DRAFT-001" if not provided.
 8. Use today's date for "date" if not mentioned. Leave "due_date" null if not mentioned.
 
-Return ONLY this JSON, no markdown, no explanation:
+Return ONLY this JSON, no markdown formatting (DO NOT wrap in \`\`\`json), no explanation, just raw JSON:
 {
   "invoice_number": "string",
   "date": "YYYY-MM-DD",
@@ -112,33 +110,29 @@ Return ONLY this JSON, no markdown, no explanation:
 Text to analyze:
 ${text}`;
 
-    // Gemini call
     let outputText = "";
     try {
-      const result = await model.generateContent(prompt);
-      outputText =
-        result?.response?.text?.() ||
-        result?.response?.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "";
+      // Apelul către modelul local Ollama
+      const result = await ollama.generate({
+        model: "llama3.1",
+        prompt: prompt,
+        options: { temperature: 0.1 } // Păstrăm temperatură mică pentru determinism
+      });
+      
+      outputText = result.response || "";
     } catch (aiError) {
-      console.error("Gemini API error:", aiError);
-      if (aiError.message.includes("429")) {
-        return res.status(429).json({
-          message: "AI quota exceeded. Please try again later or upgrade plan.",
-        });
-      }
-
+      console.error("Ollama API error:", aiError);
       return res.status(500).json({
-        message: "AI service error",
+        message: "Local AI service error. Make sure Ollama is running.",
         error: aiError.message,
       });
     }
 
     if (!outputText || !outputText.trim()) {
-      return res.status(400).json({ message: "Gemini returned empty response" });
+      return res.status(400).json({ message: "Ollama returned empty response" });
     }
 
-    // Clean response — strip markdown fences if present
+    // Curățăm răspunsul în caz că modelul adaugă markdown fences
     const cleanOutput = outputText
       .replace(/```json\s*/gi, "")
       .replace(/```\s*/g, "")
@@ -148,15 +142,14 @@ ${text}`;
     try {
       parsedData = JSON.parse(cleanOutput);
     } catch (err) {
-      console.error("Invalid JSON from Gemini:", cleanOutput.substring(0, 300));
+      console.error("Invalid JSON from Ollama:", cleanOutput.substring(0, 300));
       return res.status(400).json({
-        message: "Gemini returned invalid JSON",
+        message: "Ollama returned invalid JSON structural data",
         raw: cleanOutput.substring(0, 500),
       });
     }
 
     // ── Sanitize & compute values ───────────────────────────────────────────
-
     if (!parsedData.client || typeof parsedData.client !== "object") {
       parsedData.client = { name: null, email: null, company: null, address: null };
     }
@@ -169,7 +162,6 @@ ${text}`;
       parsedData.missing_fields = [];
     }
 
-    // Recompute subtotal/total from items to avoid Gemini math errors
     const subtotal = parsedData.items.reduce((sum, item) => {
       const qty = Math.max(1, Number(item.quantity) || 1);
       const price = Number(item.unit_price) || 0;
@@ -207,13 +199,13 @@ ${text}`;
       .filter((i) => i.price_known === false || Number(i.unit_price) === 0)
       .map((i) => i.description);
 
-    // ── Create or reuse client ──────────────────────────────────────────────
+    // ── Create or reuse client (Sincronizat cu câmpul 'user') ─────────────────
     let clientId = null;
 
     if (hasClientName) {
       let client = await Client.findOne({
         name: new RegExp(`^${parsedData.client.name}$`, "i"),
-        createdBy: userId,
+        user: userId,
       });
 
       if (!client) {
@@ -222,19 +214,18 @@ ${text}`;
           email: parsedData.client.email || "",
           company: parsedData.client.company || "",
           address: parsedData.client.address || "",
-          createdBy: userId,
+          user: userId,
         });
       }
       clientId = client._id;
     } else {
       const defaultClient = await Client.create({
         name: "Unknown Client",
-        createdBy: userId,
+        user: userId,
       });
       clientId = defaultClient._id;
     }
 
-    // Strip price_known before saving — not in Invoice schema
     const cleanItems = parsedData.items.map(({ price_known, ...item }) => ({
       description: item.description || "Item",
       quantity: Number(item.quantity) || 1,
@@ -242,14 +233,14 @@ ${text}`;
       total: Number(item.total) || 0,
     }));
 
-    // ── Create invoice — always saved as "draft" in DB ──────────────────────
+    // ── Create invoice — întotdeauna salvat ca "pending" când provine din AI ─────
     const newInvoice = await Invoice.create({
       user: userId,
       client: clientId,
       invoice_number: parsedData.invoice_number || `DRAFT-${Date.now()}`,
       date: parsedData.date ? new Date(parsedData.date) : new Date(),
       due_date: parsedData.due_date ? new Date(parsedData.due_date) : undefined,
-      status: "draft",
+      status: "pending", // Sincronizat cu noul flux de aprobare
       items: cleanItems,
       tax_rate: taxRate,
       discount_rate: discountRate,
@@ -263,7 +254,7 @@ ${text}`;
 
     return res.status(201).json({
       success: true,
-      message: "Invoice generated successfully",
+      message: "Invoice compiled by local AI successfully",
       invoice: populatedInvoice,
       ai_status,
       missing_fields: parsedData.missing_fields,
@@ -275,7 +266,6 @@ ${text}`;
     return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
-
 
 export const aiChat = async (req, res) => {
   try {
@@ -290,12 +280,10 @@ export const aiChat = async (req, res) => {
       .map((m) => `${m.sender === "user" ? "User" : "Assistant"}: ${m.text}`)
       .join("\n");
 
-    const clients = await Client.find({ createdBy: userId }).lean();
+    const clients = await Client.find({ user: userId }).lean();
     const invoices = await Invoice.find({ user: userId }).populate("client").lean();
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
-    const prompt = `You are invoiceGenAI — a smart invoice & client assistant.
+    const prompt = `You are invoiceGenAI — a smart invoice & client assistant running locally via Ollama.
 
 You ALWAYS answer using the real data below:
 
@@ -315,12 +303,13 @@ Rules:
 - If user asks something impossible, say info is not available.
 - Never invent clients or invoices.`;
 
-    const result = await model.generateContent(prompt);
+    // Apelăm Ollama și pentru componenta de Chat Panel general
+    const result = await ollama.generate({
+      model: "llama3.1",
+      prompt: prompt,
+    });
 
-    const reply =
-      result?.response?.text?.() ||
-      result?.response?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "I'm not sure how to answer that.";
+    const reply = result.response || "I'm not sure how to answer that.";
 
     return res.json({ success: true, reply: reply.trim() });
 

@@ -1,5 +1,22 @@
 import React, { useState } from "react";
-import { LayoutDashboard, Users, UserPlus, FileText, FilePlus2, Repeat, Calculator, BarChart3, ChevronDown, ChevronUp, Sparkles, CreditCard, Calendar1Icon, SettingsIcon, X,} from "lucide-react";
+import { 
+  LayoutDashboard, 
+  Users, 
+  UserPlus, 
+  FileText, 
+  FilePlus2, 
+  Repeat, 
+  Calculator, 
+  BarChart3, 
+  FileSpreadsheet, // Importat pentru ANAF Reporting
+  ChevronDown, 
+  ChevronUp, 
+  Sparkles, 
+  CreditCard, 
+  Calendar1Icon, 
+  SettingsIcon, 
+  X
+} from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -15,7 +32,13 @@ const Sidebar = ({ isMobile = false, closeSidebar }) => {
     setOpenMenu((prev) => ({ ...prev, [menu]: !prev[menu] }));
 
   return (
-    <motion.aside initial={{ x: isMobile ? "-100%" : 0 }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ duration: 0.35, ease: "easeOut" }} className={` fixed top-0 left-0  h-screen w-64  bg-[#111111] border-r border-white/10  text-white  flex flex-col justify-between  shadow-xl shadow-black/40  z-20  ${isMobile ? "md:hidden" : ""} `} >
+    <motion.aside 
+      initial={{ x: isMobile ? "-100%" : 0 }} 
+      animate={{ x: 0 }} 
+      exit={{ x: "-100%" }} 
+      transition={{ duration: 0.35, ease: "easeOut" }} 
+      className={` fixed top-0 left-0  h-screen w-64  bg-[#111111] border-r border-white/10  text-white  flex flex-col justify-between  shadow-xl shadow-black/40  z-20  ${isMobile ? "md:hidden" : ""} `} 
+    >
       {/* glow effects */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-10 -left-10 w-40 h-40 bg-indigo-600/10 blur-3xl rounded-full" />
@@ -94,7 +117,6 @@ const Sidebar = ({ isMobile = false, closeSidebar }) => {
           </div>
         )}
 
-
         {/* invoices */}
         <button onClick={() => toggleMenu("invoices")} className="mt-2 flex items-center justify-between w-full px-4 py-2 rounded-md text-gray-300 hover:bg-white/10 hover:text-white relative z-20" >
           <div className="flex items-center gap-3">
@@ -132,7 +154,6 @@ const Sidebar = ({ isMobile = false, closeSidebar }) => {
           </div>
         )}
 
-
         <div className="my-5 border-b border-white/10 relative z-20" />
 
         {/* activity */}
@@ -140,12 +161,17 @@ const Sidebar = ({ isMobile = false, closeSidebar }) => {
           Activity
         </p>
 
-        <NavLink to="/dashboard/accounting" className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md relative z-20 ${ isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }` } >
+        <NavLink to="/dashboard/accounting" className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md mb-1 relative z-20 ${ isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }` } >
           <Calculator size={18} /> Accounting
         </NavLink>
 
-        <NavLink to="/dashboard/reports" className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md relative z-20 ${ isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }` } >
+        <NavLink to="/dashboard/reports" className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md mb-1 relative z-20 ${ isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }` } >
           <BarChart3 size={18} /> Reports
+        </NavLink>
+
+        {/* ANAF Reporting Portal Link */}
+        <NavLink to="/dashboard/anaf-reports" className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md relative z-20 ${ isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }` } >
+          <FileSpreadsheet size={18} /> ANAF Reporting
         </NavLink>
 
         <div className="my-5 border-b border-white/10 relative z-20" />

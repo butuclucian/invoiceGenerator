@@ -26,6 +26,8 @@ import MySubscription from "./pages/Admin/MySubscription";
 import Billing from "./pages/Admin/Billing";
 import Settings from "./pages/Admin/Settings";
 import CalendarPage from "./pages/Admin/CalendarPage";
+import StornoInvoice from "./pages/Admin/StornoInvoice";
+import AnafReporting from "./pages/Admin/AnafReporting";
 
 import About from "./pages/Legal/About";
 import Contact from "./pages/Legal/Contact";
@@ -93,6 +95,8 @@ const App = () => {
           <Route path="billing" element={<Billing />} />
           <Route path="calendar" element={<CalendarPage />}/>
           <Route path="settings" element={<Settings />}/>
+          <Route path="invoices/storno/:id" element={<StornoInvoice />} />
+          <Route path="anaf-reports" element={<AnafReporting />} />
           
 
         </Route>
