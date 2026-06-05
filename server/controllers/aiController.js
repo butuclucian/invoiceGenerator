@@ -41,14 +41,6 @@ export const generateInvoiceFromText = async (req, res) => {
       return res.status(400).json({ message: "Missing 'text' in request body" });
     }
 
-    // Check subscription
-    const sub = await Subscription.findOne({ user: userId });
-    if (sub && sub.status !== "Active") {
-      return res.status(403).json({
-        message: "AI access restricted. Please upgrade your plan.",
-      });
-    }
-
     // Merge prețuri default cu cele custom trimise din frontend
     const activePrices = {
       ...SERVICE_PRICES,
@@ -112,11 +104,12 @@ ${text}`;
 
     let outputText = "";
     try {
-      // Apelul către modelul local Ollama
+      // Apelul securizat către modelul local Ollama cu tag-ul corect și format JSON nativ
       const result = await ollama.generate({
-        model: "llama3.1",
+        model: "llama3.1:latest",
         prompt: prompt,
-        options: { temperature: 0.1 } // Păstrăm temperatură mică pentru determinism
+        format: "json", // Forțează modelul local să scoată exclusiv structură JSON pură
+        options: { temperature: 0.1 } 
       });
       
       outputText = result.response || "";
@@ -240,7 +233,7 @@ ${text}`;
       invoice_number: parsedData.invoice_number || `DRAFT-${Date.now()}`,
       date: parsedData.date ? new Date(parsedData.date) : new Date(),
       due_date: parsedData.due_date ? new Date(parsedData.due_date) : undefined,
-      status: "pending", // Sincronizat cu noul flux de aprobare
+      status: "pending", 
       items: cleanItems,
       tax_rate: taxRate,
       discount_rate: discountRate,
@@ -303,9 +296,8 @@ Rules:
 - If user asks something impossible, say info is not available.
 - Never invent clients or invoices.`;
 
-    // Apelăm Ollama și pentru componenta de Chat Panel general
     const result = await ollama.generate({
-      model: "llama3.1",
+      model: "llama3.1:latest",
       prompt: prompt,
     });
 
