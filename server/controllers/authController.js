@@ -5,11 +5,9 @@ import Client from "../models/Client.js";
 import Subscription from "../models/Subscription.js";
 import Notification from "../models/Notification.js";
 
-
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
 };
-
 
 export const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -35,7 +33,6 @@ export const registerUser = async (req, res) => {
   }
 };
 
-
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -57,7 +54,6 @@ export const loginUser = async (req, res) => {
   }
 };
 
-
 export const getProfile = async (req, res) => {
   try {
     if (!req.user) {
@@ -74,7 +70,6 @@ export const getProfile = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch profile", error: error.message });
   }
 };
-
 
 export const updateProfile = async (req, res) => {
   try {
@@ -108,13 +103,12 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-
 export const deleteAccount = async (req, res) => {
   try {
     const userId = req.user._id;
 
     await Invoice.deleteMany({ user: userId });
-    await Client.deleteMany({ createdBy: userId });
+    await Client.deleteMany({ user: userId });
     await Subscription.deleteMany({ user: userId });
     await Notification.deleteMany({ user: userId });
 
@@ -130,8 +124,6 @@ export const deleteAccount = async (req, res) => {
     res.status(500).json({ message: "Failed to delete account." });
   }
 };
-
-
 
 export const updatePassword = async (req, res) => {
   try {

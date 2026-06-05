@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Ms+Madi&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gluten:wght@100..900&display=swap');
 @import "tailwindcss";
 
 
@@ -21,7 +21,7 @@ body{
 }
 
 .font-handwriting {
-  font-family: 'Ms Madi', cursive;
+  font-family: 'Gluten', cursive;
 }
 
 @font-face {

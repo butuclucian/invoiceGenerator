@@ -15,8 +15,9 @@ import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 import aiChatRoutes from "./routes/aiChatRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
 import calendarRoutes from "./routes/calendarRoutes.js";
-import billingRoutes from "./routes/billingRoutes.js"
+import billingRoutes from "./routes/billingRoutes.js";
 import { generateNearDueNotifications } from "./controllers/notificationController.js";
+import { handleWebhook } from "./controllers/subscriptionController.js";
 import User from "./models/User.js";
 
 dotenv.config();
@@ -24,16 +25,12 @@ connectDB();
 
 const app = express();
 
-// stripe webhook
-import { handleWebhook } from "./controllers/subscriptionController.js";
 app.post(
   "/api/subscription/webhook",
   bodyParser.raw({ type: "application/json" }),
   handleWebhook
 );
 
-
-// middlewares
 app.use(express.json());
 app.use(morgan("dev"));
 
@@ -46,7 +43,6 @@ app.use(
   })
 );
 
-// routes
 app.get("/", (req, res) => {
   res.send("invoiceGenAI is running...");
 });
@@ -63,14 +59,11 @@ app.use("/api/settings", settingsRoutes);
 app.use("/api/calendar", calendarRoutes);
 app.use("/api/billing-profile", billingRoutes);
 
-
-// server
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, "0.0.0.0", () =>
   console.log(`🚀 Server running on port ${PORT}`)
 );
 
-// cron job to check for near due invoices every hour
 cron.schedule("0 * * * *", async () => {
   try {
     const users = await User.find();

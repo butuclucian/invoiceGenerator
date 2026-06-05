@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Loader from "./components/Loader";
 import ScrollToTop from "./components/ScrollToTop";
+import Footer from "./components/Home/Footer";
 
 import Home from "./pages/Home";
 import Dashboard from "./pages/Admin/Dashboard";
@@ -30,14 +31,13 @@ import About from "./pages/Legal/About";
 import Contact from "./pages/Legal/Contact";
 import Terms from "./pages/Legal/Terms";
 import Privacy from "./pages/Legal/Privacy";
-import Careers from "./pages/Legal/Careers";
-import Pricing from "./pages/Legal/Pricing";
-import EULA from "./pages/Legal/EULA";
-import DataProcessingAgreement from "./pages/Legal/DataProcessingAgreement";
 import CookiePolicy from "./pages/Legal/Cookies";
-import Blog from "./pages/Legal/Blog";
 import ConsentBanner from "./components/ConsentBanner";
-import InvoicesTemplates from "./pages/InvoicesTemplates";
+import Templates from "./pages/Templates";
+import HowItWorks from "./pages/HowItWorks";
+import Pricing from "./pages/Pricing";
+import Blog from "./pages/Blog";
+
 
 const App = () => {
   const location = useLocation();
@@ -64,16 +64,15 @@ const App = () => {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/blog" element={<Blog />} />
-        <Route path="/careers" element={<Careers />} />
         <Route path="/pricing" element={<Pricing />} />
-        <Route path="/invoice-template" element={<InvoicesTemplates />} />
+        <Route path="/templates" element={<Templates />} />
+        <Route path="/how-it-works" element={<HowItWorks />} />
+        <Route path="/blog" element={<Blog />} />
 
         {/* Legal */}
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/cookies" element={<CookiePolicy />} />
-        <Route path="/dpa" element={<DataProcessingAgreement />} />
-        <Route path="/eula" element={<EULA />} />
 
 
         {/* Protected admin routes */}
@@ -94,6 +93,7 @@ const App = () => {
           <Route path="billing" element={<Billing />} />
           <Route path="calendar" element={<CalendarPage />}/>
           <Route path="settings" element={<Settings />}/>
+          
 
         </Route>
       </Routes>
