@@ -1,35 +1,15 @@
 import mongoose from "mongoose";
 
-const itemSchema = new mongoose.Schema({
-  description: { 
-    type: String, 
-    required: true 
-  },
-  quantity: { 
-    type: Number, 
-    required: true, 
-    default: 1 
-  },
-  unit_price: { 
-    type: Number, 
-    required: true, 
-    default: 0 
-  },
-  total: { 
-    type: Number, 
-    required: true, 
-    default: 0 
-  },
-});
-
 const invoiceSchema = new mongoose.Schema(
   {
+    // Legătura cu utilizatorul (Freelancerul logat)
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
     
+    // Legătura cu clientul din baza de date
     client: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Client",
@@ -57,7 +37,15 @@ const invoiceSchema = new mongoose.Schema(
       default: "draft",
     },
     
-    items: [itemSchema],
+    // Produsele sau serviciile facturate (Structură inline curată)
+    items: [
+      {
+        description: { type: String, required: true },
+        quantity: { type: Number, required: true, default: 1 },
+        unit_price: { type: Number, required: true, default: 0 },
+        total: { type: Number, required: true, default: 0 }
+      }
+    ],
     
     tax_rate: { 
       type: Number, 
@@ -71,22 +59,33 @@ const invoiceSchema = new mongoose.Schema(
     
     subtotal: { 
       type: Number, 
+      required: true,
       default: 0 
     },
     
     total: { 
       type: Number, 
+      required: true,
       default: 0 
+    },
+
+    // ADAUGAT: Valuta la nivel global de factură (Cerută de aiController)
+    currency: {
+      type: String,
+      default: "RON"
     },
     
     notes: { 
-      type: String 
+      type: String,
+      default: ""
     },
     
     payment_terms: { 
-      type: String 
+      type: String,
+      default: ""
     },
 
+    // Zona dedicată entităților extrase de Llama 3.1 rulate edge
     ai_extracted_data: {
       cumparator: { type: String, default: "" },
       cui: { type: String, default: "" },
@@ -97,6 +96,7 @@ const invoiceSchema = new mongoose.Schema(
       mesaj_notificare: { type: String, default: "" }
     },
 
+    // Zona dedicată automatizării facturilor recurente (Sincronizat cu Rezumatul)
     recurring: {
       type: Boolean,
       default: false,
@@ -111,7 +111,7 @@ const invoiceSchema = new mongoose.Schema(
     },
   },
   { 
-    timestamps: true
+    timestamps: true // Generează automat createdAt și updatedAt
   }
 );
 

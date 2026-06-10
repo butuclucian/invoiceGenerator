@@ -1,6 +1,5 @@
 import Notification from "../models/Notification.js";
 import Invoice from "../models/Invoice.js";
-import { sendPush } from "../utils/push.js";
 
 
 export const generateNearDueNotifications = async (req, res) => {
@@ -48,14 +47,6 @@ export const generateNearDueNotifications = async (req, res) => {
 
         created.push(note);
 
-        // SEND PUSH NOTIFICATION TO MOBILE
-        if (req.user.pushToken) {
-          await sendPush(
-            req.user.pushToken,
-            "Invoice Reminder",
-            message
-          );
-        }
       }
     }
 
@@ -94,28 +85,3 @@ export const markAllAsRead = async (req, res) => {
   }
 };
 
-
-// for mobile
-export const testPushNotification = async (req, res) => {
-  try {
-    const token = req.user.pushToken;
-
-    if (!token) {
-      return res.status(400).json({
-        success: false,
-        message: "User does not have a push token saved.",
-      });
-    }
-
-    await sendPush(
-      token,
-      "Push Test",
-      "Your mobile push notifications are working!"
-    );
-
-    res.status(200).json({ success: true, message: "Push sent!" });
-  } catch (error) {
-    console.error("Error sending test push:", error);
-    res.status(500).json({ success: false, message: "Failed to send push" });
-  }
-};

@@ -15,7 +15,8 @@ import {
   CreditCard, 
   Calendar1Icon, 
   SettingsIcon, 
-  X
+  X,
+  BarChart4
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -183,6 +184,10 @@ const Sidebar = ({ isMobile = false, closeSidebar }) => {
 
         <NavLink to="/dashboard/ai-generator" className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md relative z ${isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }`} >
           <Sparkles size={18} /> AI Generator
+        </NavLink>
+
+        <NavLink to="/dashboard/ai-insights" className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md relative z ${isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }`} >
+          <BarChart4 size={18} /> AI Insights
         </NavLink>
 
         <NavLink to="/dashboard/subscription" className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md relative z ${isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }`} >

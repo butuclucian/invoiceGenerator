@@ -1,6 +1,7 @@
 import Invoice from "../models/Invoice.js";
 import Client from "../models/Client.js";
 import { sendInvoiceEmail } from "../utils/emailService.js";
+import axios from "axios";
 
 export const getInvoices = async (req, res) => {
   try {
@@ -200,5 +201,74 @@ export const getNearDueInvoices = async (req, res) => {
   } catch (err) {
     console.error("Error fetching near-due invoices:", err);
     res.status(500).json({ message: "Error fetching near-due invoices" });
+  }
+};
+
+export const getAiFinancialAnalytics = async (req, res) => {
+  try {
+    // 1. Extragem toate facturile utilizatorului logat
+    const invoices = await Invoice.find({ user: req.user._id }).populate("client", "name company");
+
+    if (!invoices || invoices.length === 0) {
+      return res.json({
+        success: true,
+        report: "Nu am găsit suficiente date fiscale în contul tău pentru a genera o analiză. Emite sau încasează câteva facturi mai întâi!"
+      });
+    }
+
+    // 2. Formatăm datele într-un JSON minimalist pentru a nu supraîncărca contextul LLM-ului
+    const compactInvoicesData = invoices.map(inv => ({
+      numar: inv.invoice_number,
+      client: inv.client?.name || "Client Necunoscut",
+      suma: inv.total,
+      valuta: "EUR", // sau câmpul tău de valută dacă ai unul dinamic
+      status: inv.status,
+      data_creare: inv.createdAt ? inv.createdAt.toISOString().split('T')[0] : "N/A"
+    }));
+
+    // 3. Construim un prompt algoritmic strâns pentru Llama 3.1
+    const prompt = `
+Ești un analist financiar expert și asistent executiv de Business Intelligence pentru freelanceri și IMM-uri.
+Analizează următorul set de date fiscale transmise în format JSON reprezentând facturile utilizatorului:
+
+${JSON.stringify(compactInvoicesData, null, 2)}
+
+Generează un raport financiar strategic, structurat strict sub formă de text curat cu Markdown, respectând următoarele 3 secțiuni relevante:
+
+📊 **1. Predicție Cashflow & Rulaj**
+(Oferă o estimare sau o concluzie privind volumul total al încasărilor pe baza facturilor plătite versus cele pending/overdue și o prognoză scurtă).
+
+👥 **2. Analiza Comportamentului Clienților**
+(Identifică pe nume dacă există clienți cu facturi restante sau care reprezintă un procent prea mare din venituri - risc de concentrare).
+
+💡 **3. Recomandări Strategice Active**
+(Oferă 2-3 sfaturi clare: ex. reducerea termenelor de plată, trimiterea de remindere, diversificare).
+
+Răspunde direct în limba română. Fii concis, profesional și folosește un ton analitic premium. Nu adăuga introduceri inutile sau text în afara structurii cerute.
+`;
+
+    // 4. Trimitem cererea către instanța locală de Ollama din container
+    // Folosim numele containerului 'ollama' sau 'host.docker.internal' în funcție de configurarea ta. 
+    // Dacă rulează pe același sistem, http://ollama:11434 sau http://host.docker.internal:11434 este ruta.
+    const ollamaResponse = await axios.post("http://host.docker.internal:11434/api/generate", {
+      model: "llama3.1",
+      prompt: prompt,
+      stream: false
+    });
+
+    const aiReport = ollamaResponse.data.response;
+
+    // 5. Trimitem raportul generat înapoi la Frontend
+    res.json({
+      success: true,
+      report: aiReport
+    });
+
+  } catch (error) {
+    console.error("Eroare la generarea raportului AI Analytics:", error);
+    res.status(500).json({ 
+      message: "Eroare la procesarea analizei financiare de către AI-ul local", 
+      error: error.message 
+    });
   }
 };

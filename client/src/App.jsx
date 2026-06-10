@@ -39,6 +39,7 @@ import Templates from "./pages/Templates";
 import HowItWorks from "./pages/HowItWorks";
 import Pricing from "./pages/Pricing";
 import Blog from "./pages/Blog";
+import AiInsights from "./pages/Admin/AiInsights";
 
 
 const App = () => {
@@ -97,6 +98,7 @@ const App = () => {
           <Route path="settings" element={<Settings />}/>
           <Route path="invoices/storno/:id" element={<StornoInvoice />} />
           <Route path="anaf-reports" element={<AnafReporting />} />
+          <Route path="ai-insights" element={<AiInsights />} />
           
 
         </Route>

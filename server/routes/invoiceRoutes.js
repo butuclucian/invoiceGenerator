@@ -6,7 +6,8 @@ import {
   deleteInvoice, 
   getInvoiceById, 
   getNearDueInvoices,
-  approveAndIssueInvoice
+  approveAndIssueInvoice,
+  getAiFinancialAnalytics,
 } from "../controllers/invoiceController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
@@ -28,5 +29,7 @@ router.route("/:id")
   .get(protect, getInvoiceById)
   .put(protect, updateInvoice)
   .delete(protect, deleteInvoice);
+
+router.get("/analytics/ai", protect, getAiFinancialAnalytics);
 
 export default router;

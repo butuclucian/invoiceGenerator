@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Bell, X, Check, LogOut, ArrowLeft, Settings, Search, User2, MessageSquare, Menu} from "lucide-react";
+import { Bell, X, Check, LogOut, ArrowLeft, Settings, Search, User2, MessageSquare, Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import API from "../../utils/api";
-import { useAIChatStore } from "../../store/useAIChatStore";
-import { useSearchStore } from "../../store/useSearchStore";
+import API from "../../utils/api"; // Ajustat: ieșire corectă din components/Admin/ către utils
+import { useAIChatStore } from "../../store/useAIChatStore"; // Ajustat: către store
+import { useSearchStore } from "../../store/useSearchStore"; // Ajustat: către store
 import { useNavigate } from "react-router-dom";
 
 const Navbar = ({ openSidebar }) => {
@@ -22,7 +22,6 @@ const Navbar = ({ openSidebar }) => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [userData, setUserData] = useState(null);
   const [subscription, setSubscription] = useState(null);
-  
 
   const currentPlan = subscription?.plan || "Free";
 
@@ -32,10 +31,7 @@ const Navbar = ({ openSidebar }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const { data } = await API.get("/auth/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const { data } = await API.get("/auth/profile");
         setUserData(data);
       } catch {}
     };
@@ -48,10 +44,7 @@ const Navbar = ({ openSidebar }) => {
   useEffect(() => {
     const fetchSub = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const { data } = await API.get("/subscription/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const { data } = await API.get("/subscription/me");
         setSubscription(data);
       } catch {}
     };
@@ -59,29 +52,48 @@ const Navbar = ({ openSidebar }) => {
   }, []);
 
   // ================================
-  // FETCH NOTIFICATIONS
+  // FETCH NOTIFICATIONS + AI INVOICES (Sincronizare fluidă)
   // ================================
   const fetchNotifications = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      await API.get("/notifications/generate", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // 1. Preluăm notificările standard din sistem
+      try {
+        await API.get("/notifications/generate");
+      } catch (e) {}
 
-      const { data } = await API.get("/notifications", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const sysRes = await API.get("/notifications");
+      let allNotifications = Array.isArray(sysRes.data) ? [...sysRes.data] : [];
 
-      setNotifications(data);
-      setHasUnread(data.some((n) => !n.read));
-    } catch {}
+      // 2. LOGICĂ EMAIL AI: Preluăm facturile pending din MongoDB
+      const invRes = await API.get("/invoices");
+      const invoicesList = Array.isArray(invRes.data) ? invRes.data : [];
+      
+      const aiPendingInvoices = invoicesList.filter(inv => inv.status === 'pending');
+
+      const aiNotifications = aiPendingInvoices.map(inv => ({
+        _id: `ai-${inv._id}`,
+        isAiGenerated: true,
+        read: false,
+        message: "Factură nouă extrasă automat din email",
+        invoice: inv
+      }));
+
+      // Combinăm notificările (Cele AI apar primele în listă)
+      const combined = [...aiNotifications, ...allNotifications];
+
+      setNotifications(combined);
+      setHasUnread(combined.some((n) => !n.read));
+    } catch (error) {
+      console.error("Eroare la sincronizarea notificărilor în Navbar:", error);
+    }
   };
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 3600000);
+    const interval = setInterval(fetchNotifications, 15000); // Polling la 15 secunde
     return () => clearInterval(interval);
   }, []);
 
@@ -99,16 +111,10 @@ const Navbar = ({ openSidebar }) => {
 
   const handleMarkAsRead = async () => {
     try {
-      const token = localStorage.getItem("token");
-      await API.put(
-        "/notifications/mark-read",
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
+      await API.put("/notifications/mark-read", {});
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       setHasUnread(false);
-      toast.success("All notifications marked as read!");
+      toast.success("Toate notificările au fost marcate ca citite!");
     } catch {}
   };
 
@@ -206,7 +212,10 @@ const Navbar = ({ openSidebar }) => {
             >
               <Bell size={20} className="text-[#80FFF9]" />
               {hasUnread && (
-                <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                <span className="absolute top-0 right-0 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
               )}
             </button>
 
@@ -220,60 +229,77 @@ const Navbar = ({ openSidebar }) => {
                     absolute mt-3
                     sm:right-0 right-1/2 sm:left-auto left-1/2
                     -translate-x-1/2 sm:translate-x-0
-                    w-[85vw] sm:w-80
-                    bg-[#151515]/95 border border-white/10 rounded-xl
-                    backdrop-blur-xl shadow-xl z-50
+                    w-[85vw] sm:w-85
+                    bg-[#151515]/95 border border-white/10 rounded-2xl
+                    backdrop-blur-xl shadow-2xl z-50 p-1
                   "
                 >
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-                    <h3 className="text-sm font-medium text-white">Notifications</h3>
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-medium text-white">Notifications</h3>
+                      <span className="text-[10px] bg-teal-500/10 text-teal-400 px-2 py-0.5 rounded-full font-medium">
+                        {notifications.length} active
+                      </span>
+                    </div>
 
-                    {notifications.some((n) => !n.read) && (
+                    {notifications.some((n) => !n.read && !n.isAiGenerated) && (
                       <button
                         onClick={handleMarkAsRead}
-                        className="flex items-center gap-1 text-[12px] text-gray-400 hover:text-[#80FFF9]"
+                        className="flex items-center gap-1 text-[12px] text-gray-400 hover:text-[#80FFF9] transition"
                       >
-                        <Check size={14} /> Read
+                        <Check size={14} /> Mark all read
                       </button>
                     )}
 
                     <button
                       onClick={() => setShowPopup(false)}
-                      className="text-gray-400 hover:text-white"
+                      className="text-gray-400 hover:text-white transition"
                     >
                       <X size={16} />
                     </button>
                   </div>
 
-                  <div className="max-h-56 overflow-y-auto">
+                  <div className="max-h-64 overflow-y-auto mt-1 space-y-0.5">
                     {notifications.length === 0 ? (
-                      <div className="p-4 text-center text-gray-500 text-sm">
+                      <div className="p-6 text-center text-gray-500 text-xs">
                         No notifications yet.
                       </div>
                     ) : (
                       notifications.map((note) => (
-                        <button key={note._id} onClick={() => {
+                        <button
+                          key={note._id}
+                          onClick={() => {
                             if (note.invoice?._id) {
+                              // Ruta corectă de dashboard folosită în aplicația ta
                               navigate(`/dashboard/invoices/${note.invoice._id}`);
                               setShowPopup(false);
                             }
-                          }} className={`w-full text-left p-4 border-b border-white/10 hover:bg-white/10 transition ${!note.read && "bg-white/5"}`} >
+                          }}
+                          className={`w-full text-left p-4 border-b border-white/5 hover:bg-white/5 rounded-xl transition flex flex-col gap-1 ${
+                            note.isAiGenerated ? "border-l-2 border-l-amber-500 bg-amber-500/5" : (!note.read && "bg-white/5")
+                          }`}
+                        >
+                          <div className="flex justify-between items-start w-full">
+                            <p className={`text-sm font-medium ${note.isAiGenerated ? "text-amber-400" : "text-[#80FFF9]"}`}>
+                              {note.message}
+                            </p>
+                            {note.isAiGenerated && (
+                              <span className="text-[9px] font-mono uppercase bg-amber-400/10 text-amber-400 px-1.5 py-0.5 rounded border border-amber-400/20 tracking-wider">
+                                Review AI
+                              </span>
+                            )}
+                          </div>
 
-                          <p className="text-sm text-[#80FFF9] font-medium">
-                            {note.message}
-                          </p>
                           {note.invoice && (
-                            <>
-                              <p className="text-xs text-gray-400">
-                                Invoice: {note.invoice.invoice_number}
-                              </p>
-                              <p className="text-xs text-gray-400">
-                                Client: {note.invoice.client?.name || "Unknown"}
-                              </p>
-                              <p className="text-xs text-gray-400">
-                                Amount: ${Number(note.invoice.total).toFixed(2)}
-                              </p>
-                            </>
+                            <div className="mt-1 space-y-0.5 text-xs text-gray-400">
+                              <p>Invoice: <span className="text-gray-200 font-mono">{note.invoice.invoice_number}</span></p>
+                              <p>Client: <span className="text-gray-200 font-medium">{note.invoice.client?.name || "Unknown"}</span></p>
+                              <p>Amount: <span className="text-teal-400 font-medium">${Number(note.invoice.total).toFixed(2)}</span></p>
+                            </div>
+                          )}
+                          
+                          {note.isAiGenerated && (
+                            <span className="text-[10px] text-gray-500 mt-1 italic">Click pentru a verifica și aproba datele fiscale</span>
                           )}
                         </button>
                       ))

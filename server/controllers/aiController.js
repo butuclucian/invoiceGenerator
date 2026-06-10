@@ -1,4 +1,10 @@
-import ollama from "ollama";
+import { Ollama } from "ollama";
+
+// Inițializăm instanța locală a clasei Ollama.
+const ollama = new Ollama({ 
+  host: process.env.OLLAMA_HOST || "http://host.docker.internal:11434" 
+});
+
 import Invoice from "../models/Invoice.js";
 import Client from "../models/Client.js";
 import Subscription from "../models/Subscription.js";
@@ -32,6 +38,7 @@ const SERVICE_PRICES = {
   "editare video": 300,
 };
 
+// ── 1. FUNCTIA PENTRU INTERFAȚĂ (Ruta HTTP POST /api/ai/generate) ────────────
 export const generateInvoiceFromText = async (req, res) => {
   try {
     const { text, customPrices } = req.body;
@@ -41,7 +48,6 @@ export const generateInvoiceFromText = async (req, res) => {
       return res.status(400).json({ message: "Missing 'text' in request body" });
     }
 
-    // Merge prețuri default cu cele custom trimise din frontend
     const activePrices = {
       ...SERVICE_PRICES,
       ...(customPrices && typeof customPrices === "object" ? customPrices : {}),
@@ -65,7 +71,7 @@ RULES:
    - "draft" if client name is missing OR no items found OR no contact info (email or address)
    - "pending_review" if all required fields exist but some item has unit_price = 0
    - "ready" if all fields present and all prices known
-6. Fill missing_fields array with any of: "client_name", "client_email", "client_address", "items", "due_date" that are absent.
+6. IMPORTANT: Fill the missing_fields array ONLY with fields that are genuinely completely absent from the text. Choose ONLY from: "client_name", "client_email", "client_address", "items", "due_date". If you found items, DO NOT put "items" in this array!
 7. Generate invoice_number as "DRAFT-001" if not provided.
 8. Use today's date for "date" if not mentioned. Leave "due_date" null if not mentioned.
 
@@ -103,56 +109,35 @@ Text to analyze:
 ${text}`;
 
     let outputText = "";
-    try {
-      // Apelul securizat către modelul local Ollama cu tag-ul corect și format JSON nativ
-      const result = await ollama.generate({
-        model: "llama3.1:latest",
-        prompt: prompt,
-        format: "json", // Forțează modelul local să scoată exclusiv structură JSON pură
-        options: { temperature: 0.1 } 
-      });
-      
-      outputText = result.response || "";
-    } catch (aiError) {
-      console.error("Ollama API error:", aiError);
-      return res.status(500).json({
-        message: "Local AI service error. Make sure Ollama is running.",
-        error: aiError.message,
-      });
-    }
+    const result = await ollama.generate({
+      model: "llama3.1:latest",
+      prompt: prompt,
+      format: "json",
+      options: { temperature: 0.1 }
+    });
+    
+    outputText = result.response || "";
 
     if (!outputText || !outputText.trim()) {
       return res.status(400).json({ message: "Ollama returned empty response" });
     }
 
-    // Curățăm răspunsul în caz că modelul adaugă markdown fences
     const cleanOutput = outputText
       .replace(/```json\s*/gi, "")
       .replace(/```\s*/g, "")
       .trim();
 
-    let parsedData;
-    try {
-      parsedData = JSON.parse(cleanOutput);
-    } catch (err) {
-      console.error("Invalid JSON from Ollama:", cleanOutput.substring(0, 300));
-      return res.status(400).json({
-        message: "Ollama returned invalid JSON structural data",
-        raw: cleanOutput.substring(0, 500),
-      });
-    }
+    const parsedData = JSON.parse(cleanOutput);
 
-    // ── Sanitize & compute values ───────────────────────────────────────────
-    if (!parsedData.client || typeof parsedData.client !== "object") {
-      parsedData.client = { name: null, email: null, company: null, address: null };
-    }
+    if (!parsedData.client) parsedData.client = { name: null, email: null, company: null, address: null };
+    if (!Array.isArray(parsedData.items)) parsedData.items = [];
+    if (!Array.isArray(parsedData.missing_fields)) parsedData.missing_fields = [];
 
-    if (!Array.isArray(parsedData.items)) {
-      parsedData.items = [];
+    if (parsedData.items.length > 0) {
+      parsedData.missing_fields = parsedData.missing_fields.filter(f => f !== "items");
     }
-
-    if (!Array.isArray(parsedData.missing_fields)) {
-      parsedData.missing_fields = [];
+    if (parsedData.due_date) {
+      parsedData.missing_fields = parsedData.missing_fields.filter(f => f !== "due_date");
     }
 
     const subtotal = parsedData.items.reduce((sum, item) => {
@@ -171,17 +156,10 @@ ${text}`;
     parsedData.subtotal = Number(subtotal.toFixed(2));
     parsedData.total = Number(total.toFixed(2));
 
-    // ── Determine final ai_status ───────────────────────────────────────────
-    const hasClientName = !!(
-      parsedData.client?.name &&
-      parsedData.client.name !== "null" &&
-      parsedData.client.name.toLowerCase() !== "null"
-    );
+    const hasClientName = !!(parsedData.client?.name && parsedData.client.name.toLowerCase() !== "null");
     const hasItems = parsedData.items.length > 0;
     const hasContact = !!(parsedData.client?.email || parsedData.client?.address);
-    const allPricesKnown = parsedData.items.every(
-      (i) => i.price_known !== false && Number(i.unit_price) > 0
-    );
+    const allPricesKnown = parsedData.items.every(i => i.price_known !== false && Number(i.unit_price) > 0);
 
     let ai_status = "draft";
     if (hasClientName && hasItems && hasContact) {
@@ -189,33 +167,28 @@ ${text}`;
     }
 
     const items_with_unknown_price = parsedData.items
-      .filter((i) => i.price_known === false || Number(i.unit_price) === 0)
-      .map((i) => i.description);
+      .filter(i => i.price_known === false || Number(i.unit_price) === 0)
+      .map(i => i.description);
 
-    // ── Create or reuse client (Sincronizat cu câmpul 'user') ─────────────────
     let clientId = null;
-
     if (hasClientName) {
-      let client = await Client.findOne({
-        name: new RegExp(`^${parsedData.client.name}$`, "i"),
-        user: userId,
-      });
-
+      let client = await Client.findOne({ name: new RegExp(`^${parsedData.client.name}$`, "i"), user: userId });
       if (!client) {
+        // În aiController.js în interiorul funcției de generare, modifică la block-ul Client.create:
         client = await Client.create({
           name: parsedData.client.name,
           email: parsedData.client.email || "",
           company: parsedData.client.company || "",
           address: parsedData.client.address || "",
+          cui: parsedData.client.cui || "",     // Valoare de siguranță pentru Mongoose
+          city: parsedData.client.city || "",   // Valoare de siguranță pentru Mongoose
+          county: parsedData.client.county || "", // Valoare de siguranță pentru Mongoose
           user: userId,
         });
       }
       clientId = client._id;
     } else {
-      const defaultClient = await Client.create({
-        name: "Unknown Client",
-        user: userId,
-      });
+      const defaultClient = await Client.create({ name: "Unknown Client", user: userId });
       clientId = defaultClient._id;
     }
 
@@ -226,7 +199,6 @@ ${text}`;
       total: Number(item.total) || 0,
     }));
 
-    // ── Create invoice — întotdeauna salvat ca "pending" când provine din AI ─────
     const newInvoice = await Invoice.create({
       user: userId,
       client: clientId,
@@ -253,13 +225,178 @@ ${text}`;
       missing_fields: parsedData.missing_fields,
       items_with_unknown_price,
     });
-
   } catch (error) {
     console.error("Invoice Generation Error:", error);
     return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 
+// ── 2. FUNCTIA INTERNĂ PENTRU BACKGROUND EMAIL WORKER ───────────────────────
+export const generateInvoiceFromTextInternal = async (text, fallbackEmail = null, userId = null) => {
+  try {
+    const priceListText = Object.entries(SERVICE_PRICES)
+      .map(([service, price]) => `- ${service}: ${price} EUR`)
+      .join("\n");
+
+    const prompt = `You are an AI that extracts invoice data from any text (emails, messages, requests).
+
+PRICE LIST (use these prices for matching services):
+${priceListText}
+
+RULES:
+1. Extract client name, email, company, address from the text if present.
+2. Identify ALL services/products mentioned and match them to the price list above (case-insensitive, partial match allowed).
+3. If a service is not in the price list, set unit_price to 0 and price_known to false.
+4. If quantity is mentioned (e.g. "7 pages"), use it. Otherwise quantity = 1.
+5. Set status based on completeness:
+   - "draft" if client name is missing OR no items found OR no contact info (email or address)
+   - "pending_review" if all required fields exist but some item has unit_price = 0
+   - "ready" if all fields present and all prices known
+6. IMPORTANT: Fill the missing_fields array ONLY with fields that are genuinely completely absent from the text. Choose ONLY from: "client_name", "client_email", "client_address", "items", "due_date". If you found items, DO NOT put "items" in this array!
+7. Generate invoice_number as "DRAFT-001" if not provided.
+8. Use today's date for "date" if not mentioned. Leave "due_date" null if not mentioned.
+
+Return ONLY this JSON, no markdown formatting (DO NOT wrap in \`\`\`json), no explanation, just raw JSON:
+{
+  "invoice_number": "string",
+  "date": "YYYY-MM-DD",
+  "due_date": "YYYY-MM-DD or null",
+  "status": "draft or pending_review or ready",
+  "missing_fields": [],
+  "client": {
+    "name": "string or null",
+    "email": "string or null",
+    "company": "string or null",
+    "address": "string or null"
+  },
+  "items": [
+    {
+      "description": "string",
+      "quantity": 1,
+      "unit_price": 0,
+      "total": 0,
+      "price_known": true
+    }
+  ],
+  "tax_rate": 0,
+  "discount_rate": 0,
+  "subtotal": 0,
+  "total": 0,
+  "notes": "",
+  "payment_terms": ""
+}
+
+Text to analyze:
+${text}`;
+
+    let outputText = "";
+    const result = await ollama.generate({
+      model: "llama3.1:latest",
+      prompt: prompt,
+      format: "json",
+      options: { temperature: 0.1 }
+    });
+    
+    outputText = result.response || "";
+
+    if (!outputText || !outputText.trim()) {
+      console.log("Ollama a întors un răspuns gol pentru email.");
+      return null;
+    }
+
+    const cleanOutput = outputText
+      .replace(/```json\s*/gi, "")
+      .replace(/```\s*/g, "")
+      .trim();
+
+    const parsedData = JSON.parse(cleanOutput);
+
+    if (!parsedData.client) parsedData.client = {};
+    if (!parsedData.client.email && fallbackEmail) {
+      parsedData.client.email = fallbackEmail;
+    }
+
+    if (!Array.isArray(parsedData.items)) parsedData.items = [];
+    if (!Array.isArray(parsedData.missing_fields)) parsedData.missing_fields = [];
+
+    if (parsedData.items.length > 0) {
+      parsedData.missing_fields = parsedData.missing_fields.filter(f => f !== "items");
+    }
+    if (parsedData.due_date) {
+      parsedData.missing_fields = parsedData.missing_fields.filter(f => f !== "due_date");
+    }
+
+    const subtotal = parsedData.items.reduce((sum, item) => {
+      const qty = Math.max(1, Number(item.quantity) || 1);
+      const price = Number(item.unit_price) || 0;
+      item.quantity = qty;
+      item.unit_price = price;
+      item.total = qty * price;
+      return sum + item.total;
+    }, 0);
+
+    const taxRate = Number(parsedData.tax_rate) || 0;
+    const discountRate = Number(parsedData.discount_rate) || 0;
+    const total = subtotal + subtotal * (taxRate / 100) - subtotal * (discountRate / 100);
+
+    parsedData.subtotal = Number(subtotal.toFixed(2));
+    parsedData.total = Number(total.toFixed(2));
+
+    let clientId = null;
+    const hasClientName = !!parsedData.client?.name && parsedData.client.name.toLowerCase() !== "null";
+
+    if (hasClientName) {
+      let client = await Client.findOne({ name: new RegExp(`^${parsedData.client.name}$`, "i"), user: userId });
+      if (!client) {
+        client = await Client.create({
+          name: parsedData.client.name,
+          email: parsedData.client.email || "",
+          company: parsedData.client.company || "",
+          address: parsedData.client.address || "",
+          user: userId
+        });
+      }
+      clientId = client._id;
+    } else {
+      let defaultClient = await Client.findOne({ name: "Unknown Client", user: userId });
+      if (!defaultClient) {
+        defaultClient = await Client.create({ name: "Unknown Client", user: userId });
+      }
+      clientId = defaultClient._id;
+    }
+
+    const cleanItems = parsedData.items.map(item => ({
+      description: item.description || "Item",
+      quantity: Number(item.quantity) || 1,
+      unit_price: Number(item.unit_price) || 0,
+      total: Number(item.total) || 0,
+    }));
+
+    const newInvoice = await Invoice.create({
+      user: userId, 
+      client: clientId,
+      invoice_number: parsedData.invoice_number || `EMAIL-${Date.now()}`,
+      date: parsedData.date ? new Date(parsedData.date) : new Date(),
+      due_date: parsedData.due_date ? new Date(parsedData.due_date) : undefined,
+      status: "pending", 
+      items: cleanItems,
+      tax_rate: taxRate,
+      discount_rate: discountRate,
+      subtotal: parsedData.subtotal,
+      total: parsedData.total,
+      notes: parsedData.notes || "Generat automat din email.",
+      payment_terms: parsedData.payment_terms || "",
+    });
+
+    console.log(`\x1b[32m[AI Worker] Factură salvată cu succes din email! ID: ${newInvoice._id}\x1b[0m`);
+    return newInvoice;
+
+  } catch (err) {
+    console.error("Eroare gravă în funcția internă AI Worker:", err);
+  }
+};
+
+// ── 3. FUNCTIA PENTRU MODULUL DE CHAT ASISTENT ────────────────────────────────
 export const aiChat = async (req, res) => {
   try {
     const userId = req.user._id;
