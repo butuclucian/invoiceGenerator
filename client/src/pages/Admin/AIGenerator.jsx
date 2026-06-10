@@ -11,6 +11,7 @@ import autoTable from "jspdf-autotable";
 import QRCode from "qrcode";
 import API from "../../utils/api";
 import logo from "../../assets/invoicelogo.png";
+import AiHistoryLog from "./AiHistoryLog";
 
 // ── Prețuri default (sincronizate cu backend-ul) ──────────────────────────────
 const DEFAULT_PRICES = [
@@ -454,6 +455,7 @@ const AIGenerator = () => {
           </p>
         </div>
       )}
+      <AiHistoryLog />
     </div>
   );
 };

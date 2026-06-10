@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs"; // 🔥 IMPORTĂ BCRYPT PENTRU VALIDARE DIRECTĂ
 import User from "../models/User.js";
 import Invoice from "../models/Invoice.js";
 import Client from "../models/Client.js";
@@ -6,7 +7,7 @@ import Subscription from "../models/Subscription.js";
 import Notification from "../models/Notification.js";
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+  return jwt.sign({ id }, process.env.JWT_SECRET || "CheiaTaSecretaDeRezerva2026", { expiresIn: "30d" });
 };
 
 export const registerUser = async (req, res) => {
@@ -20,7 +21,13 @@ export const registerUser = async (req, res) => {
     if (userExists)
       return res.status(400).json({ message: "User already exists" });
 
-    const user = await User.create({ name, email, password });
+    // 🛑 MODIFICARE: Trimitem password direct brută. 
+    // Modelul User.js se va ocupa singur de criptare prin hook-ul pre('save')
+    const user = await User.create({ 
+      name, 
+      email, 
+      password // trimis exact cum vine din frontend
+    });
 
     res.status(201).json({
       _id: user._id,
@@ -29,6 +36,7 @@ export const registerUser = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (err) {
+    console.error("❌ Eroare critică la Înregistrare:", err.message);
     res.status(500).json({ message: "Registration failed", error: err.message });
   }
 };
@@ -37,9 +45,29 @@ export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    // 🛑 MODIFICARE CRITICĂ: Adăugăm .select("+password") la căutare
+    const user = await User.findOne({ email }).select("+password");
 
-    if (user && (await user.matchPassword(password))) {
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // Verificăm ce primește bcrypt (pentru logurile tale din Docker)
+    console.log("Parolă trimisă:", !!password, "Hash din bază:", !!user.password);
+
+    // Dacă din vreo eroare de schemă câmpul se numește altfel (ex: user.parola), 
+    // verificăm și variantele alternative ca să nu mai dea niciodată crash 500
+    const actualHash = user.password || user.parola; 
+
+    if (!actualHash) {
+      console.error("❌ Câmpul password este încă undefined în obiectul User!");
+      return res.status(500).json({ message: "Database schema mismatch for password field." });
+    }
+
+    // Validare directă
+    const isMatch = await bcrypt.compare(password, actualHash);
+
+    if (isMatch) {
       res.json({
         _id: user._id,
         name: user.name,
@@ -50,10 +78,12 @@ export const loginUser = async (req, res) => {
       res.status(401).json({ message: "Invalid email or password" });
     }
   } catch (err) {
+    console.error("❌ Eroare critică la Login:", err.message);
     res.status(500).json({ message: "Login failed", error: err.message });
   }
 };
 
+// ── 3. PRELUARE PROFIL ───────────────────────────────────────────────────────
 export const getProfile = async (req, res) => {
   try {
     if (!req.user) {
@@ -71,6 +101,7 @@ export const getProfile = async (req, res) => {
   }
 };
 
+// ── 4. ACTUALIZARE PROFIL ────────────────────────────────────────────────────
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -103,6 +134,7 @@ export const updateProfile = async (req, res) => {
   }
 };
 
+// ── 5. ȘTERGERE CONT ȘI DATE ASOCIATE ────────────────────────────────────────
 export const deleteAccount = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -125,6 +157,7 @@ export const deleteAccount = async (req, res) => {
   }
 };
 
+// ── 6. ACTUALIZARE PAROLĂ (FIXĂ) ─────────────────────────────────────────────
 export const updatePassword = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -138,7 +171,8 @@ export const updatePassword = async (req, res) => {
     if (!user)
       return res.status(404).json({ message: "User not found." });
 
-    const isMatch = await user.matchPassword(oldPassword);
+    // 🔥 Sincronizare și aici cu bcrypt direct
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
     if (!isMatch)
       return res.status(400).json({ message: "Old password is incorrect." });
 

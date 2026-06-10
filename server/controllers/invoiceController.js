@@ -1,6 +1,6 @@
 import Invoice from "../models/Invoice.js";
 import Client from "../models/Client.js";
-import { sendInvoiceEmail } from "../utils/emailService.js";
+import { sendInvoiceEmail } from "../utils/pdfEmailSender.js";
 import axios from "axios";
 
 export const getInvoices = async (req, res) => {

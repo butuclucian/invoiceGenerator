@@ -1,7 +1,7 @@
 import imaps from 'imap-simple';
 import { simpleParser } from 'mailparser';
 import { generateInvoiceFromTextInternal } from '../controllers/aiController.js'; // O vom exporta imediat
-import User from '../models/userModel.js';
+import User from '../models/User.js';
 
 const config = {
     imap: {

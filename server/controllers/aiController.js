@@ -1,4 +1,5 @@
 import { Ollama } from "ollama";
+import { sendInvoiceEmail } from "../utils/pdfEmailSender.js"; // Importul tău premium de trimitere PDF
 
 // Inițializăm instanța locală a clasei Ollama.
 const ollama = new Ollama({ 
@@ -127,7 +128,14 @@ ${text}`;
       .replace(/```\s*/g, "")
       .trim();
 
-    const parsedData = JSON.parse(cleanOutput);
+    // Bloc de siguranță la parsare JSON pentru stabilitatea containerului
+    let parsedData;
+    try {
+      parsedData = JSON.parse(cleanOutput);
+    } catch (parseError) {
+      console.error("Eroare parsare JSON de la AI:", cleanOutput);
+      return res.status(422).json({ message: "AI generated an invalid JSON syntax structure. Try again." });
+    }
 
     if (!parsedData.client) parsedData.client = { name: null, email: null, company: null, address: null };
     if (!Array.isArray(parsedData.items)) parsedData.items = [];
@@ -174,15 +182,14 @@ ${text}`;
     if (hasClientName) {
       let client = await Client.findOne({ name: new RegExp(`^${parsedData.client.name}$`, "i"), user: userId });
       if (!client) {
-        // În aiController.js în interiorul funcției de generare, modifică la block-ul Client.create:
         client = await Client.create({
           name: parsedData.client.name,
           email: parsedData.client.email || "",
           company: parsedData.client.company || "",
           address: parsedData.client.address || "",
-          cui: parsedData.client.cui || "",     // Valoare de siguranță pentru Mongoose
-          city: parsedData.client.city || "",   // Valoare de siguranță pentru Mongoose
-          county: parsedData.client.county || "", // Valoare de siguranță pentru Mongoose
+          cui: parsedData.client.cui || "",     
+          city: parsedData.client.city || "",   
+          county: parsedData.client.county || "", 
           user: userId,
         });
       }
@@ -216,6 +223,13 @@ ${text}`;
     });
 
     const populatedInvoice = await Invoice.findById(newInvoice._id).populate("client");
+
+    // 🔥 DISPATCH AUTOMAT EMAIL + PDF ACUM (Ruta Interfață)
+    if (populatedInvoice && populatedInvoice.client && populatedInvoice.client.email) {
+      sendInvoiceEmail(populatedInvoice, populatedInvoice.client)
+        .then(() => console.log(`[Resend] Mail dispatch success to ${populatedInvoice.client.email}`))
+        .catch(err => console.error("[Resend Error] Failed to send invoice pdf:", err));
+    }
 
     return res.status(201).json({
       success: true,
@@ -304,12 +318,11 @@ ${text}`;
       return null;
     }
 
-    const cleanOutput = outputText
-      .replace(/```json\s*/gi, "")
-      .replace(/```\s*/g, "")
-      .trim();
+    const cleanOutput = textResponse => {
+      return textResponse.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+    };
 
-    const parsedData = JSON.parse(cleanOutput);
+    const parsedData = JSON.parse(cleanOutput(outputText));
 
     if (!parsedData.client) parsedData.client = {};
     if (!parsedData.client.email && fallbackEmail) {
@@ -388,6 +401,15 @@ ${text}`;
       payment_terms: parsedData.payment_terms || "",
     });
 
+    const populatedWorkerInvoice = await Invoice.findById(newInvoice._id).populate("client");
+
+    // 🔥 DISPATCH AUTOMAT EMAIL + PDF ACUM (Background IMAP Worker)
+    if (populatedWorkerInvoice && populatedWorkerInvoice.client && populatedWorkerInvoice.client.email) {
+      sendInvoiceEmail(populatedWorkerInvoice, populatedWorkerInvoice.client)
+        .then(() => console.log(`[Worker Resend] Automated dispatch success to ${populatedWorkerInvoice.client.email}`))
+        .catch(err => console.error("[Worker Resend Error] Failed to send document:", err));
+    }
+
     console.log(`\x1b[32m[AI Worker] Factură salvată cu succes din email! ID: ${newInvoice._id}\x1b[0m`);
     return newInvoice;
 
@@ -445,5 +467,50 @@ Rules:
   } catch (error) {
     console.error("AI Chat error:", error);
     return res.status(500).json({ message: "AI chat failed" });
+  }
+};
+
+// ── EXTRAGERE ISTORIC FACTURI AI ─────────────────────────────────────────────
+export const getAiGenerationHistory = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const history = await Invoice.find({
+      user: userId,
+      status: { $in: ["pending", "draft"] }
+    })
+    .populate("client", "name company email")
+    .sort({ createdAt: -1 });
+
+    return res.json({
+      success: true,
+      count: history.length,
+      history
+    });
+  } catch (error) {
+    console.error("Error fetching AI history:", error);
+    return res.status(500).json({ message: "Nu s-a putut prelua istoricul AI." });
+  }
+};
+
+// ── ȘTERGERE FACTURĂ DIN ISTORIC ─────────────────────────────────────────────
+export const deleteAiInvoice = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { id } = req.params;
+
+    const invoice = await Invoice.findOneAndDelete({ _id: id, user: userId });
+
+    if (!invoice) {
+      return res.status(404).json({ success: false, message: "Documentul nu a fost găsit sau nu aveți permisiunea." });
+    }
+
+    return res.json({
+      success: true,
+      message: "Documentul preliminar a fost eliminat din istoric cu succes."
+    });
+  } catch (error) {
+    console.error("Error deleting AI invoice:", error);
+    return res.status(500).json({ message: "Eroare la ștergerea documentului." });
   }
 };

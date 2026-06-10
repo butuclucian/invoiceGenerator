@@ -165,7 +165,7 @@ export const sendInvoiceEmail = async (invoice, client) => {
 
     const response = await resend.emails.send({
       from: process.env.RESEND_FROM,
-      to: client.email,
+      to: "lucianbutuc16@gmail.com",
       subject: `🧾 Invoice ${invoice.invoice_number} from invoiceGenAI`,
       html: `
       <div style="font-family:Arial,sans-serif;padding:20px;color:#333;">

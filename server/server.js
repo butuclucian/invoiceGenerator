@@ -5,6 +5,7 @@ import morgan from "morgan";
 import cron from "node-cron";
 import bodyParser from "body-parser";
 import connectDB from "./config/db.js";
+import {startEmailWorker} from "./services/emailWorker.js";
 
 // Import Rute
 import authRoutes from "./routes/authRoutes.js";
@@ -69,9 +70,11 @@ app.use("/api/billing-profile", billingRoutes);
 
 // ── 4. PORNIRE SERVER (0.0.0.0 este obligatoriu pentru maparea Docker) ───────
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, "0.0.0.0", () =>
-  console.log(`\x1b[36m🚀 [Backend] Server running on port ${PORT}\x1b[0m`)
-);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`\x1b[36m🚀 [Backend] Server running on port ${PORT}\x1b[0m`);
+
+  startEmailWorker(); // Pornește worker-ul de emailuri asincron imediat după pornirea serverului
+});
 
 // ── 5. CRON JOB ASINCRON (Rulează la fiecare oră fixă) ───────────────────────
 cron.schedule("0 * * * *", async () => {
