@@ -44,10 +44,7 @@ export const startEmailWorker = () => {
 
                     console.log(`[Email Nou] Sosit de la: ${emailSender}. Se trimite către AI...`);
 
-                    // Trimitem textul direct în motorul tău AI (simulând request-ul)
-                    // Pasăm un obiect simulat în loc de req/res
-                    // Adăugăm ID-ul utilizatorului tău ca al treilea parametru
-                    await generateInvoiceFromTextInternal(emailBody, parsed.from?.value[0]?.address, "6a23f72e35c86bdada234dc9");
+                    await generateInvoiceFromTextInternal(emailBody, parsed.from?.value[0]?.address, "6a291f417845124b816c688f"); //trebuie modificat!
                 }
             }
 

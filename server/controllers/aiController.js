@@ -355,6 +355,8 @@ ${text}`;
     parsedData.subtotal = Number(subtotal.toFixed(2));
     parsedData.total = Number(total.toFixed(2));
 
+    const activeUserId = userId || "6a291f417845124b816c688f";
+
     let clientId = null;
     const hasClientName = !!parsedData.client?.name && parsedData.client.name.toLowerCase() !== "null";
 
@@ -366,7 +368,7 @@ ${text}`;
           email: parsedData.client.email || "",
           company: parsedData.client.company || "",
           address: parsedData.client.address || "",
-          user: userId
+          user: activeUserId
         });
       }
       clientId = client._id;
@@ -385,8 +387,9 @@ ${text}`;
       total: Number(item.total) || 0,
     }));
 
+
     const newInvoice = await Invoice.create({
-      user: userId, 
+      user: activeUserId, 
       client: clientId,
       invoice_number: parsedData.invoice_number || `EMAIL-${Date.now()}`,
       date: parsedData.date ? new Date(parsedData.date) : new Date(),

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Trash2, History, Calendar, User, ArrowUpRight, Loader2 } from "lucide-react";
+import { Trash2, History, Calendar, User, Loader2, Edit } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom"; // 🔥 Adăugat pentru navigare
 import API from "../../utils/api";
 import { toast } from "sonner";
 
 const AiHistoryLog = () => {
   const [historyItems, setHistoryItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate(); // 🔥 Inițializare hook de navigare
 
   const fetchHistory = async () => {
     setLoading(true);
@@ -27,7 +29,6 @@ const AiHistoryLog = () => {
       const { data } = await API.delete(`/ai/history/${id}`);
       if (data.success) {
         toast.success("Factura a fost ștearsă din istoric.");
-        // Actualizăm starea local instant cu efect vizual fluid
         setHistoryItems((prev) => prev.filter((item) => item._id !== id));
       }
     } catch (error) {
@@ -35,7 +36,6 @@ const AiHistoryLog = () => {
     }
   };
 
-  // Încărcăm istoricul automat la montarea componentei
   useEffect(() => {
     fetchHistory();
   }, []);
@@ -95,6 +95,21 @@ const AiHistoryLog = () => {
                   <p className="text-[11px] text-gray-500 mt-1 truncate">
                     {item.notes || "Generat prin analiză de text automatizată."}
                   </p>
+
+                  <div className="mt-3 text-xs text-gray-400">
+                    <span className="text-[10px] font-mono text-gray-500 block mb-1 uppercase tracking-wider">Servicii extrase:</span>
+                    <ul className="list-disc pl-4 space-y-0.5 text-[11px]">
+                      {item.items && item.items.length > 0 ? (
+                        item.items.map((srv, idx) => (
+                          <li key={idx} className="text-gray-300">
+                            {srv.description} <span className="text-gray-500">({srv.quantity} x {srv.unit_price} {item.currency || "RON"})</span>
+                          </li>
+                        ))
+                      ) : (
+                        <span className="text-red-400/80 italic">Niciun serviciu mapat</span>
+                      )}
+                    </ul>
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-4 mt-4 border-t border-white/5">
@@ -105,18 +120,24 @@ const AiHistoryLog = () => {
                     </span>
                   </div>
 
-                  <button
-                    onClick={() => handleDelete(item._id)}
-                    className="
-                      p-2 bg-red-500/10 hover:bg-red-500/20 
-                      border border-red-500/20 hover:border-red-500/40 
-                      text-red-400 rounded-lg transition duration-300
-                      opacity-80 group-hover:opacity-100
-                    "
-                    title="Șterge din istoric"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    {/* 🔥 MODIFICARE: Butonul tău perfect de Editare cu navigare dinamică */}
+                    <button
+                      onClick={() => navigate(`/dashboard/invoices/${item._id}/edit`)}
+                      className="p-2 text-gray-400 hover:text-indigo-400 transition"
+                      title="Edit"
+                    >
+                      <Edit size={18} />
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(item._id)}
+                      className="p-2 text-gray-400 hover:text-red-400 transition"
+                      title="Șterge din istoric"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             ))}

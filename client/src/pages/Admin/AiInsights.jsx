@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { Brain, Sparkles, RefreshCw, BarChart2, ShieldCheck, FileText } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Brain, Sparkles, RefreshCw, BarChart2, ShieldCheck, FileText, Trash2, Eye, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import API from "../../utils/api"; // Ajustează calea către utilitarul tău API dacă e cazul
+import API from "../../utils/api";
 import { toast } from "sonner";
 
 // Componentă internă pentru efectul de scriere la mașină (Typing Effect)
@@ -18,7 +18,7 @@ const TypewriterText = ({ text }) => {
       } else {
         clearInterval(interval);
       }
-    }, 5); // Viteza de scriere (mai mic = mai rapid)
+    }, 2); // Viteza de scriere optimizată pentru rapoarte lungi
     return () => clearInterval(interval);
   }, [text]);
 
@@ -28,16 +28,37 @@ const TypewriterText = ({ text }) => {
 const AiInsights = () => {
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState("");
+  
+  // ── STATE-URI PENTRU ISTORIC RAPOARTE ───────────────────────
+  const [reportHistory, setReportHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  // Încarcă istoricul rapoartelor din backend
+  const fetchReportHistory = async () => {
+    setHistoryLoading(true);
+    try {
+      // Modifică endpoint-ul dacă ai o rută specifică (ex: /invoices/analytics/ai/history)
+      const { data } = await API.get("/invoices/analytics/ai/history");
+      if (data.success) {
+        setReportHistory(data.history || []);
+      }
+    } catch (error) {
+      console.error("Eroare la încărcarea istoricului de rapoarte:", error);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
 
   const generateReport = async () => {
     setLoading(true);
     setReport("");
     try {
-      // Apelăm endpoint-ul nou creat în backend
       const { data } = await API.get("/invoices/analytics/ai");
       if (data.success) {
         setReport(data.report);
         toast.success("Analiza financiară a fost generată cu succes!");
+        // Reîmprospătăm istoricul ca să apară noul raport în listă imediat
+        fetchReportHistory();
       } else {
         toast.error("Nu s-a putut genera raportul.");
       }
@@ -49,8 +70,33 @@ const AiInsights = () => {
     }
   };
 
+  // Ștergerea unui raport din istoric
+  const handleDeleteHistory = async (id) => {
+    try {
+      const { data } = await API.delete(`/invoices/analytics/ai/history/${id}`);
+      if (data.success) {
+        toast.success("Raportul a fost eliminat din istoric.");
+        setReportHistory((prev) => prev.filter((item) => item._id !== id));
+      }
+    } catch (error) {
+      toast.error("Nu s-a putut șterge raportul.");
+    }
+  };
+
+  // Vizualizarea unui raport vechi în zona principală
+  const handleViewReport = (savedReportText) => {
+    setReport(savedReportText);
+    window.scrollTo({ top: 400, behavior: "smooth" }); // Autoscroll lin către raport
+    toast.info("S-a încărcat raportul selectat din istoric.");
+  };
+
+  // Încărcăm istoricul la montarea componentei
+  useEffect(() => {
+    fetchReportHistory();
+  }, []);
+
   return (
-    <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-[#0d0d0d] text-white pt-24">
+    <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-[#0d0d0d] text-white pt-24 relative overflow-hidden">
       {/* Background Glows decorative */}
       <div className="absolute top-20 right-10 w-72 h-72 bg-teal-500/10 blur-3xl rounded-full pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600/10 blur-3xl rounded-full pointer-events-none" />
@@ -131,7 +177,7 @@ const AiInsights = () => {
       </div>
 
       {/* MAIN REPORT AREA */}
-      <div className="relative z-10">
+      <div className="relative z-10 mb-12">
         <AnimatePresence mode="wait">
           {!loading && !report && (
             <motion.div
@@ -157,7 +203,6 @@ const AiInsights = () => {
               exit={{ opacity: 0 }}
               className="space-y-4 max-w-3xl mx-auto"
             >
-              {/* Skeletone loaders animate-pulse cu glassmorphic style */}
               <div className="h-6 bg-white/5 border border-white/5 rounded-full w-1/3 animate-pulse" />
               <div className="h-24 bg-white/5 border border-white/5 rounded-2xl animate-pulse" />
               <div className="h-6 bg-white/5 border border-white/5 rounded-full w-1/4 animate-pulse pt-4" />
@@ -186,11 +231,90 @@ const AiInsights = () => {
                 </span>
               </div>
 
-              {/* Randăm raportul cu efectul de mașină de scris */}
               <TypewriterText text={report} />
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
+      {/* ── SECTION: REPORT HISTORY LOG (Adăugată Nou) ─────────────────────── */}
+      <div className="relative z-10 max-w-3xl mx-auto mt-16 border-t border-white/5 pt-10">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <FileText className="text-purple-400" size={18} />
+            <h2 className="text-base font-bold text-gray-200">Jurnalul Rapoartelor Salvate</h2>
+          </div>
+          <span className="text-xs font-mono text-gray-500 bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
+            {reportHistory.length} analize salvate
+          </span>
+        </div>
+
+        {historyLoading ? (
+          <div className="flex items-center justify-center py-6 text-gray-500 gap-2">
+            <RefreshCw className="animate-spin text-purple-400" size={16} />
+            <span className="text-xs font-mono uppercase tracking-wider">Se încarcă istoricul...</span>
+          </div>
+        ) : reportHistory.length === 0 ? (
+          <p className="text-sm text-gray-500 text-center py-8 border border-dashed border-white/5 rounded-2xl bg-[#121212]/20">
+            Nu există rapoarte anterioare stocate. Generează o analiză nouă pentru a începe istoricul.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            <AnimatePresence>
+              {reportHistory.map((hist) => (
+                <motion.div
+                  key={hist._id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="bg-[#141414]/80 border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-white/10 transition group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-2 bg-purple-500/10 border border-purple-500/20 rounded-lg text-purple-400">
+                      <Brain size={16} />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-white group-hover:text-purple-400 transition">
+                        {hist.title || `Analiză Financiară #${hist._id.substring(hist._id.length - 6)}`}
+                      </h4>
+                      <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5 font-mono">
+                        <span className="flex items-center gap-1">
+                          <Calendar size={12} />
+                          {new Date(hist.createdAt).toLocaleDateString("ro-RO")} 
+                          <span className="ml-1 text-[10px] text-gray-600">
+                            {new Date(hist.createdAt).toLocaleTimeString("ro-RO", { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </span>
+                        <span>•</span>
+                        <span className="text-teal-500/80">Llama 3.1 Verified</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {/* Buton vizualizare raport */}
+                    <button
+                      onClick={() => handleViewReport(hist.report || hist.content)}
+                      className="p-2 text-gray-400 hover:text-[#80FFF9] bg-white/5 hover:bg-white/10 border border-white/5 rounded-lg transition"
+                      title="Încarcă Raportul"
+                    >
+                      <Eye size={14} />
+                    </button>
+
+                    {/* Buton ștergere raport */}
+                    <button
+                      onClick={() => handleDeleteHistory(hist._id)}
+                      className="p-2 text-gray-500 hover:text-red-400 bg-red-500/5 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 rounded-lg transition"
+                      title="Șterge Raport"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
       </div>
     </div>
   );

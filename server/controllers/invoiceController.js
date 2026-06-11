@@ -2,6 +2,7 @@ import Invoice from "../models/Invoice.js";
 import Client from "../models/Client.js";
 import { sendInvoiceEmail } from "../utils/pdfEmailSender.js";
 import axios from "axios";
+import Report from "../models/Report.js";
 
 export const getInvoices = async (req, res) => {
   try {
@@ -42,8 +43,13 @@ export const getInvoiceById = async (req, res) => {
 
 export const createInvoice = async (req, res) => {
   try {
+    // 🕵️ Log de debug: Vedem exact ce vine din Frontend în terminalul Docker
+    console.log("[HTTP Frontend Request Body]:", req.body);
+    console.log("[HTTP Frontend User ID din Token]:", req.user?._id);
+
     const { client, invoice_number, date, due_date, status, ai_extracted_data, ...rest } = req.body;
 
+    // Asigurăm legătura cu utilizatorul logat curent (forțat ObjectId dacă e nevoie)
     const invoiceData = {
       user: req.user._id,
       date: date ? new Date(date) : new Date(),
@@ -52,47 +58,57 @@ export const createInvoice = async (req, res) => {
       ...rest,
     };
 
+    // 🤖 CASUL 1: Factură venită din procesarea AI Background
     if (status === "pending") {
       if (client) invoiceData.client = client;
-      
       invoiceData.invoice_number = invoice_number || `AI-PENDING-${Date.now()}`;
-      
       invoiceData.ai_extracted_data = ai_extracted_data;
     } 
+    // ✍️ CASUL 2: Factură creată manual de tine din interfața grafică
     else {
-      if (!client || !invoice_number) {
-        return res.status(400).json({ message: "Client and invoice number are required for manual invoices" });
+      // Dacă clientul lipsește, dăm o eroare clară
+      if (!client) {
+        return res.status(400).json({ message: "Client selection is required for manual invoices." });
       }
+
+      // 💡 REPARARE: Dacă ai uitat să pui număr de factură în formular, 
+      // generăm noi unul automat ca să NU mai blocheze salvarea în bază!
+      invoiceData.invoice_number = invoice_number || `INV-MANUAL-${Date.now()}`;
 
       const existingClient = await Client.findById(client);
       if (!existingClient) {
-        return res.status(404).json({ message: "Selected client not found" });
+        return res.status(404).json({ message: "Selected client not found in database." });
       }
 
       invoiceData.client = existingClient._id;
-      invoiceData.invoice_number = invoice_number;
     }
 
+    // 💾 Salvarea sigură în baza de date
     const newInvoice = await Invoice.create(invoiceData);
+    console.log("✅ Factură salvată cu succes în MongoDB! ID:", newInvoice._id);
 
+    // ✉️ Trimitere automată prin Resend dacă statusul e "sent"
     if (newInvoice.status === "sent" && newInvoice.client) {
       const existingClient = await Client.findById(newInvoice.client);
       if (existingClient) {
         try {
+          // Rulează funcția ta pe care am securizat-o pe adresa ta de mail
           await sendInvoiceEmail(newInvoice, existingClient);
+          console.log("✉️ Factura manuală a fost expediată prin Resend!");
         } catch (mailErr) {
           console.error("Failed to send invoice email:", mailErr);
         }
       }
     }
 
+    // Răspunsul către Frontend
     res.status(201).json({
       success: true,
       message: status === "pending" ? "AI request saved as pending" : "Invoice created successfully",
       invoice: newInvoice,
     });
   } catch (err) {
-    console.error("Invoice create error:", err);
+    console.error("❌ Invoice create error:", err);
     res.status(500).json({ message: "Failed to create invoice", error: err.message });
   }
 };
@@ -216,17 +232,15 @@ export const getAiFinancialAnalytics = async (req, res) => {
       });
     }
 
-    // 2. Formatăm datele într-un JSON minimalist pentru a nu supraîncărca contextul LLM-ului
     const compactInvoicesData = invoices.map(inv => ({
       numar: inv.invoice_number,
       client: inv.client?.name || "Client Necunoscut",
       suma: inv.total,
-      valuta: "EUR", // sau câmpul tău de valută dacă ai unul dinamic
+      valuta: "EUR",
       status: inv.status,
       data_creare: inv.createdAt ? inv.createdAt.toISOString().split('T')[0] : "N/A"
     }));
 
-    // 3. Construim un prompt algoritmic strâns pentru Llama 3.1
     const prompt = `
 Ești un analist financiar expert și asistent executiv de Business Intelligence pentru freelanceri și IMM-uri.
 Analizează următorul set de date fiscale transmise în format JSON reprezentând facturile utilizatorului:
@@ -247,9 +261,6 @@ Generează un raport financiar strategic, structurat strict sub formă de text c
 Răspunde direct în limba română. Fii concis, profesional și folosește un ton analitic premium. Nu adăuga introduceri inutile sau text în afara structurii cerute.
 `;
 
-    // 4. Trimitem cererea către instanța locală de Ollama din container
-    // Folosim numele containerului 'ollama' sau 'host.docker.internal' în funcție de configurarea ta. 
-    // Dacă rulează pe același sistem, http://ollama:11434 sau http://host.docker.internal:11434 este ruta.
     const ollamaResponse = await axios.post("http://host.docker.internal:11434/api/generate", {
       model: "llama3.1",
       prompt: prompt,
@@ -258,7 +269,14 @@ Răspunde direct în limba română. Fii concis, profesional și folosește un t
 
     const aiReport = ollamaResponse.data.response;
 
-    // 5. Trimitem raportul generat înapoi la Frontend
+    const savedReport = await Report.create({
+      user: req.user._id,
+      title: `Analiză Financiară — ${new Date().toLocaleDateString("ro-RO")}`,
+      report: aiReport
+    });
+
+    console.log(`📊 [BI Analytics] Raport salvat cu succes în MongoDB! ID: ${savedReport._id}`);
+
     res.json({
       success: true,
       report: aiReport
@@ -270,5 +288,17 @@ Răspunde direct în limba română. Fii concis, profesional și folosește un t
       message: "Eroare la procesarea analizei financiare de către AI-ul local", 
       error: error.message 
     });
+  }
+};
+
+export const getAiReportHistory = async (req, res) => {
+  try {
+    const history = await Report.find({ user: req.user._id }).sort({ createdAt: -1 });
+    return res.status(200).json({
+      success: true,
+      history
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
