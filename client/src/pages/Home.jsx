@@ -1,14 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Home/Navbar';
 import ScrollDownPopup from '../components/ScrollDownPopup';
 import Footer from '../components/Home/Footer';
 import Navbar2 from '../components/Home/Navbar2';
+import API from '../utils/api';
 
 const Home = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeCard, setActiveCard] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    API.get("/users/me") 
+      .then((res) => {
+        setIsLoggedIn(true);
+        
+      })
+      .catch((err) => {
+        setIsLoggedIn(false);
+        console.error("Eroare la verificarea token-ului:", err.response?.data || err.message);
+      });
+  }, []);
 
   const text = [
     { value: "START CREATING YOUR ", transparent: false },
@@ -121,9 +135,16 @@ const Home = () => {
         <div className="w-full h-full bg-[#1E1E1E] rounded-4xl overflow-hidden relative flex flex-col justify-center">
           {/* buttons */}
           <div className="absolute top-8 right-20 flex items-center gap-4 z-50">
-            <Link to="/register" className="text-[#E8E8E8] text-sm border-2 border-[#E8E8E8] px-6 py-2 rounded-full font-bold hover:bg-[#E8E8E8]/20 transition-colors">
+            {isLoggedIn ? (
+              <Link to="/dashboard" className="text-[#E8E8E8] text-sm border-2 border-[#E8E8E8] px-6 py-2 rounded-full font-bold hover:bg-[#E8E8E8]/20 transition-colors">
+              Dashboard
+            </Link>
+            ): (
+              <Link to="/register" className="text-[#E8E8E8] text-sm border-2 border-[#E8E8E8] px-6 py-2 rounded-full font-bold hover:bg-[#E8E8E8]/20 transition-colors">
               Get Started
             </Link>
+            )}
+            
             <img src={menuOpen ? "OpenMenu.png" : "menu.png"} alt="Menu" className="w-7 h-auto cursor-pointer" onClick={() => setMenuOpen(!menuOpen)}/>
           </div>
 

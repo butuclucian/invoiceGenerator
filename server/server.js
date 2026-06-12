@@ -61,7 +61,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/clients", clientRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/ai", aiRoutes); // Gestionează /process-email-ai, /chat-ai și /analytics
+app.use("/api/ai", aiRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/settings", settingsRoutes);

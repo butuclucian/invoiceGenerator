@@ -43,36 +43,31 @@ export const getInvoiceById = async (req, res) => {
 
 export const createInvoice = async (req, res) => {
   try {
-    // 🕵️ Log de debug: Vedem exact ce vine din Frontend în terminalul Docker
     console.log("[HTTP Frontend Request Body]:", req.body);
-    console.log("[HTTP Frontend User ID din Token]:", req.user?._id);
 
-    const { client, invoice_number, date, due_date, status, ai_extracted_data, ...rest } = req.body;
+    // 🚀 MODIFICARE: Am scos ai_extracted_data din destructurare
+    const { client, invoice_number, date, due_date, status, ...rest } = req.body;
 
-    // Asigurăm legătura cu utilizatorul logat curent (forțat ObjectId dacă e nevoie)
     const invoiceData = {
       user: req.user._id,
       date: date ? new Date(date) : new Date(),
       due_date: due_date ? new Date(due_date) : null,
       status: status || "draft",
-      ...rest,
+      ...rest, // Capturează automat: series, payment_method, paid_amount, paid_at
     };
 
-    // 🤖 CASUL 1: Factură venită din procesarea AI Background
+    // 🤖 CAZUL 1: Factură venită din procesarea AI Background
     if (status === "pending") {
       if (client) invoiceData.client = client;
       invoiceData.invoice_number = invoice_number || `AI-PENDING-${Date.now()}`;
-      invoiceData.ai_extracted_data = ai_extracted_data;
+      // 🚀 MODIFICARE: Am șters linia invoiceData.ai_extracted_data = ai_extracted_data;
     } 
-    // ✍️ CASUL 2: Factură creată manual de tine din interfața grafică
+    // ✍️ CAZUL 2: Factură creată manual de tine din interfața grafică
     else {
-      // Dacă clientul lipsește, dăm o eroare clară
       if (!client) {
         return res.status(400).json({ message: "Client selection is required for manual invoices." });
       }
 
-      // 💡 REPARARE: Dacă ai uitat să pui număr de factură în formular, 
-      // generăm noi unul automat ca să NU mai blocheze salvarea în bază!
       invoiceData.invoice_number = invoice_number || `INV-MANUAL-${Date.now()}`;
 
       const existingClient = await Client.findById(client);
@@ -83,16 +78,13 @@ export const createInvoice = async (req, res) => {
       invoiceData.client = existingClient._id;
     }
 
-    // 💾 Salvarea sigură în baza de date
     const newInvoice = await Invoice.create(invoiceData);
     console.log("✅ Factură salvată cu succes în MongoDB! ID:", newInvoice._id);
 
-    // ✉️ Trimitere automată prin Resend dacă statusul e "sent"
     if (newInvoice.status === "sent" && newInvoice.client) {
       const existingClient = await Client.findById(newInvoice.client);
       if (existingClient) {
         try {
-          // Rulează funcția ta pe care am securizat-o pe adresa ta de mail
           await sendInvoiceEmail(newInvoice, existingClient);
           console.log("✉️ Factura manuală a fost expediată prin Resend!");
         } catch (mailErr) {
@@ -101,7 +93,6 @@ export const createInvoice = async (req, res) => {
       }
     }
 
-    // Răspunsul către Frontend
     res.status(201).json({
       success: true,
       message: status === "pending" ? "AI request saved as pending" : "Invoice created successfully",
@@ -116,19 +107,55 @@ export const createInvoice = async (req, res) => {
 export const approveAndIssueInvoice = async (req, res) => {
   try {
     const { id } = req.params;
-    const { final_client_data, invoice_number, date, due_date, items, tax_rate, discount_rate, subtotal, total, notes } = req.body;
+    // 🚀 MODIFICARE: Adăugate noile câmpuri în destructurare pentru a fi salvate la aprobare
+    const { 
+      final_client_data, invoice_number, date, due_date, items, 
+      tax_rate, discount_rate, subtotal, total, notes,
+      series, payment_method, paid_amount, paid_at 
+    } = req.body;
 
     let clientId = req.body.client;
 
+    // În interiorul funcției approveAndIssueInvoice, înlocuiește blocul if cu acesta:
+
     if (!clientId && final_client_data) {
+      console.log("🤖 [AI Approval] Clientul nu există. Se creează un client nou cu profile complet fiscal...");
+      
       const noulClient = await Client.create({
-        user: req.user._id,
-        name: final_client_data.name || final_client_data.company,
-        company: final_client_data.company,
+        user: req.user._id, // Legătura de securitate cu freelancerul logat
+        
+        // 🏢 General & Fiscal Info
+        name: final_client_data.name || final_client_data.brand || "Client Nou AI",
+        brand: final_client_data.brand || "",
+        cui: final_client_data.cui || "",
+        reg_com: final_client_data.reg_com || "",
+        client_code: final_client_data.client_code || "",
+        
+        // Gestionăm inteligent plătitorul de TVA (conversie sigură în Boolean)
+        is_tva_payer: final_client_data.is_tva_payer === true || 
+                      final_client_data.is_tva_payer === 'true' || 
+                      final_client_data.is_tva_payer === 'Da',
+
+        // 📍 Address & Location
+        address: final_client_data.address || "",
+        city: final_client_data.city || "",
+        county: final_client_data.county || "",
+        country: final_client_data.country || "Romania",
+
+        // 🏦 Bank Details
+        iban: final_client_data.iban || "",
+        bank: final_client_data.bank || "",
+
+        // 👥 Contact Persons
+        contact_person: final_client_data.contact_person || "",
         email: final_client_data.email || "contact@client.ro",
-        address: final_client_data.address,
-        cui: final_client_data.cui
+        phone: final_client_data.phone || "",
+        
+        // Păstrat doar pentru compatibilitate cu structurile vechi dacă e cazul
+        company: final_client_data.company || final_client_data.name || ""
       });
+
+      console.log(`✅ [AI Approval] Clientul nou a fost salvat cu succes! ID: ${noulClient._id}`);
       clientId = noulClient._id;
     }
 
@@ -146,7 +173,12 @@ export const approveAndIssueInvoice = async (req, res) => {
         subtotal: subtotal || 0,
         total: total || 0,
         notes: notes || "",
-        ai_extracted_data: null
+        // 🚀 MODIFICARE: Salvăm noile proprietăți financiare la aprobare
+        series: series || "INV",
+        payment_method: payment_method || "not_paid",
+        paid_amount: paid_amount || 0,
+        paid_at: paid_at ? new Date(paid_at) : null
+        // 🚀 MODIFICARE: Am șters linia ai_extracted_data: null
       },
       { new: true }
     ).populate("client");

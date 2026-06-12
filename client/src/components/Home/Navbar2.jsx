@@ -1,30 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
+import API from '../../utils/api'
 
 const Navbar2 = () => {
   const location = useLocation();
-  const isHomePage = location.pathname === '/'; // Verificăm dacă suntem pe Home
+  const isHomePage = location.pathname === '/';
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  // Dacă NU suntem pe Home, e vizibil din start. Altfel, pornește ascuns.
   const [isVisible, setIsVisible] = useState(!isHomePage); 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    API.get("/users/me") 
+      .then((res) => {
+        setIsLoggedIn(true);
+        
+      })
+      .catch((err) => {
+        setIsLoggedIn(false);
+        console.error("Eroare la verificarea token-ului:", err.response?.data || err.message);
+      });
+  }, []);
 
   const { scrollY } = useScroll();
 
-  // Resetăm vizibilitatea automat când utilizatorul schimbă pagina
   useEffect(() => {
     if (isHomePage) {
-      // Dacă se întoarce pe Home, verificăm unde se află cu scroll-ul
       setIsVisible(window.scrollY > window.innerHeight * 0.8);
     } else {
-      // Pe orice altă pagină, arată navbar-ul imediat
       setIsVisible(true);
     }
-    setMobileMenuOpen(false); // Închidem meniul pe mobil la navigare
+    setMobileMenuOpen(false);
   }, [location.pathname, isHomePage]);
 
-  // Logica de scroll se aplică DOAR dacă suntem pe Home page
   useMotionValueEvent(scrollY, "change", (latest) => {
     if (isHomePage) {
       if (latest > window.innerHeight * 0.8) {
@@ -92,12 +101,21 @@ const Navbar2 = () => {
 
         {/* COMPARTIMENT 3: Action Button & Mobile Toggle */}
         <div className="flex-none flex items-center border-l-2 border-[#1E1E1E] h-full ml-auto lg:ml-0">
-          <Link
+          {isLoggedIn ? (
+            <Link
+            to="/dashboard"
+            className="hidden lg:flex items-center justify-center h-full px-10 bg-[#E8E8E8] text-[#1E1E1E] hover:bg-purple-400 hover:text-[#1E1E1E] transition-colors font-black uppercase tracking-widest text-sm"
+          >
+            Dashboard
+          </Link>
+          ):(
+            <Link
             to="/register"
             className="hidden lg:flex items-center justify-center h-full px-10 bg-[#E8E8E8] text-[#1E1E1E] hover:bg-purple-400 hover:text-[#1E1E1E] transition-colors font-black uppercase tracking-widest text-sm"
           >
             Start Free →
           </Link>
+          )}
 
           {/* Hamburger Menu */}
           <button

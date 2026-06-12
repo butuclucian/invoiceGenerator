@@ -3,50 +3,80 @@ import bcrypt from "bcryptjs";
 
 const billingProfileSchema = new mongoose.Schema(
   {
-    business_name: { type: String, default: "" },
+    // Numele oficial (ex: POPESCU ION PFA sau Cabinet de Avocat Popescu)
+    business_name: { 
+      type: String, 
+      default: "",
+      trim: true 
+    },
 
-    // Cod fiscal (RO / CIF / CUI)
-    cif: { type: String, default: "" },
+    // Codul de Identificare Fiscală (CIF / CUI) - include RO doar dacă e înregistrat în scopuri de TVA
+    cif: { 
+      type: String, 
+      default: "", 
+      trim: true 
+    },
 
-    // Cod TVA separat (important în UE)
-    vat_number: { type: String, default: "" },
+    // Nr. de înregistrare la Registrul Comerțului (ex: F35/123/2026 pentru PFA-uri)
+    // Rămâne gol dacă freelancerul este PFI (profesii liberale, traducători, medici etc.)
+    registration_number: { 
+      type: String, 
+      default: "", 
+      trim: true 
+    },
 
-    // Registrul comerțului (J35/123/2025)
-    registration_number: { type: String, default: "" },
+    // Adresa completă a sediului profesional (Sediu social / Domiciliu fiscal)
+    address: { 
+      type: String, 
+      default: "" 
+    },
 
-    address: { type: String, default: "" },
-    city: { type: String, default: "" },
-    county: { type: String, default: "" },
-    country: { type: String, default: "Romania" },
+    // Contul IBAN unde freelancerul își va încasa banii de la clienți
+    iban: { 
+      type: String, 
+      default: "", 
+      uppercase: true, 
+      trim: true 
+    },
 
-    phone: { type: String, default: "" },
-    email: { type: String, default: "" },
+    // Numele băncii la care este deschis contul IBAN
+    bank: { 
+      type: String, 
+      default: "",
+      trim: true
+    },
 
-    website: { type: String, default: "" },
+    // Date de contact rapide care vor fi printate pe factură
+    phone: { 
+      type: String, 
+      default: "" 
+    },
+    email: { 
+      type: String, 
+      default: "",
+      lowercase: true,
+      trim: true
+    },
 
-    iban: { type: String, default: "" },
-    bank: { type: String, default: "" },
-    swift: { type: String, default: "" },
-
-    vat_rate: { type: Number, default: 19 },
-    currency: { type: String, default: "RON" },
-
-    logo: { type: String, default: "" },
-
-    // opțional pentru PDF branding
-    stamp: { type: String, default: "" },
+    // Logo-ul companiei (opțional, pentru branding pe PDF-ul facturii)
+    logo: { 
+      type: String, 
+      default: "" 
+    },
   },
-  { _id: false }
+  { _id: false } // Împiedică Mongoose să creeze un _id separat pentru acest sub-document
 );
 
 const userSchema = new mongoose.Schema(
   {
+    // Numele utilizatorului (folosit în interiorul aplicației/SaaS-ului)
     name: {
       type: String,
       required: true,
       trim: true,
     },
 
+    // Email-ul de logare în aplicație
     email: {
       type: String,
       required: true,
@@ -55,6 +85,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // Parola contului (select: false împiedică trimiterea ei accidentală în API-uri)
     password: {
       type: String,
       required: true,
@@ -62,34 +93,36 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
 
+    // Pentru notificările push din aplicație
     pushToken: {
       type: String,
       default: null,
     },
 
-    // EMBEDDED billing profile (MVP friendly)
+    // Profilul de facturare embedded (structura de mai sus)
     billing_profile: {
       type: billingProfileSchema,
       default: {},
     },
 
-    // FUTURE: roluri (AI / admin / user)
+    // Rolul în platformă (util pentru când vei vrea să adaugi un panou de Admin)
     role: {
       type: String,
       enum: ["user", "admin"],
       default: "user",
     },
 
+    // Permite suspendarea contului dacă este necesar
     isActive: {
       type: Boolean,
       default: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true } // Creează automat câmpurile createdAt și updatedAt
 );
 
 /**
- * Hash password before save
+ * Hash password înainte de salvarea în baza de date
  */
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
@@ -101,7 +134,7 @@ userSchema.pre("save", async function (next) {
 });
 
 /**
- * Compare passwords
+ * Metodă helper pentru verificarea parolei la login
  */
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);

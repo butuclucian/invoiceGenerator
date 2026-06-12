@@ -2,42 +2,42 @@ import mongoose from "mongoose";
 
 const invoiceSchema = new mongoose.Schema(
   {
-    // Legătura cu utilizatorul (Freelancerul logat)
+    // 🔐 Securitate & Relații
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    
-    // Legătura cu clientul din baza de date
     client: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Client",
       required: false, 
     },
 
+    // 🧾 Identificare Factură
+    series: { 
+      type: String, 
+      default: "INV" 
+    },
     invoice_number: { 
       type: String, 
       required: false 
     }, 
-    
     date: { 
       type: Date, 
       required: true, 
       default: Date.now 
     },
-    
     due_date: { 
       type: Date 
     },
-    
     status: {
       type: String,
       enum: ["pending", "draft", "sent", "paid", "overdue"],
       default: "draft",
     },
-    
-    // Produsele sau serviciile facturate (Structură inline curată)
+
+    // 📦 Produse / Servicii Billed Inline
     items: [
       {
         description: { type: String, required: true },
@@ -47,71 +47,69 @@ const invoiceSchema = new mongoose.Schema(
       }
     ],
     
+    // 📊 Valori Fiscale & Calcule
     tax_rate: { 
       type: Number, 
       default: 0 
     },
-    
     discount_rate: { 
       type: Number, 
       default: 0 
     },
-    
     subtotal: { 
       type: Number, 
       required: true,
       default: 0 
     },
-    
     total: { 
       type: Number, 
       required: true,
       default: 0 
     },
-
-    // ADAUGAT: Valuta la nivel global de factură (Cerută de aiController)
     currency: {
       type: String,
       default: "RON"
     },
+
+    // 💳 Status Încasări (Utilizat de AI Insights)
+    payment_method: { 
+      type: String, 
+      enum: ["cash", "card", "bank_transfer", "not_paid", "stripe"], 
+      default: "not_paid" 
+    },
+    paid_amount: { 
+      type: Number, 
+      default: 0 
+    },
+    paid_at: { 
+      type: Date 
+    },
     
+    // 📝 Note adiționale
     notes: { 
       type: String,
       default: ""
     },
-    
     payment_terms: { 
       type: String,
       default: ""
     },
 
-    // Zona dedicată entităților extrase de Llama 3.1 rulate edge
-    ai_extracted_data: {
-      cumparator: { type: String, default: "" },
-      cui: { type: String, default: "" },
-      sediu_social: { type: String, default: "" },
-      serviciu_prestat: { type: String, default: "" },
-      suma: { type: Number, default: 0 },
-      valuta: { type: String, default: "EUR" },
-      mesaj_notificare: { type: String, default: "" }
-    },
-
-    // Zona dedicată automatizării facturilor recurente (Sincronizat cu Rezumatul)
+    // 🤖 Automatizare SaaS: Recurență Facturi
     recurring: {
       type: Boolean,
       default: false,
     },
     frequency: {
       type: String,
-      enum: ["weekly", "monthly", "quarterly", "yearly"],
-      default: "monthly",
+      default: "monthly" // Am scos enum-ul rigid pentru flexibilitatea Llama
     },
     next_billing: {
       type: Date,
     },
   },
   { 
-    timestamps: true // Generează automat createdAt și updatedAt
+    timestamps: true 
   }
 );
 
