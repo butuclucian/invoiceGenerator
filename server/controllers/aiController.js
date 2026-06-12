@@ -1,7 +1,6 @@
 import { Ollama } from "ollama";
-import { sendInvoiceEmail } from "../utils/pdfEmailSender.js"; // Importul tău premium de trimitere PDF
+import { sendInvoiceEmail } from "../utils/pdfEmailSender.js";
 
-// Inițializăm instanța locală a clasei Ollama.
 const ollama = new Ollama({ 
   host: process.env.OLLAMA_HOST || "http://host.docker.internal:11434" 
 });
@@ -418,58 +417,6 @@ ${text}`;
 
   } catch (err) {
     console.error("Eroare gravă în funcția internă AI Worker:", err);
-  }
-};
-
-// ── 3. FUNCTIA PENTRU MODULUL DE CHAT ASISTENT ────────────────────────────────
-export const aiChat = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const { messages } = req.body;
-
-    if (!messages || !Array.isArray(messages)) {
-      return res.status(400).json({ message: "Missing or invalid messages" });
-    }
-
-    const historyText = messages
-      .map((m) => `${m.sender === "user" ? "User" : "Assistant"}: ${m.text}`)
-      .join("\n");
-
-    const clients = await Client.find({ user: userId }).lean();
-    const invoices = await Invoice.find({ user: userId }).populate("client").lean();
-
-    const prompt = `You are invoiceGenAI — a smart invoice & client assistant running locally via Ollama.
-
-You ALWAYS answer using the real data below:
-
-CLIENTS:
-${JSON.stringify(clients, null, 2)}
-
-INVOICES:
-${JSON.stringify(invoices, null, 2)}
-
-Conversation so far:
-${historyText}
-
-Rules:
-- Be friendly and professional.
-- Use ONLY real data from above.
-- If user asks for totals, overdue invoices, predictions, calculate them.
-- If user asks something impossible, say info is not available.
-- Never invent clients or invoices.`;
-
-    const result = await ollama.generate({
-      model: "llama3.1:latest",
-      prompt: prompt,
-    });
-
-    const reply = result.response || "I'm not sure how to answer that.";
-
-    return res.json({ success: true, reply: reply.trim() });
-
-  } catch (error) {
-    console.error("AI Chat error:", error);
-    return res.status(500).json({ message: "AI chat failed" });
   }
 };
 

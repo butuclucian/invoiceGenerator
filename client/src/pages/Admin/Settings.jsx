@@ -7,13 +7,11 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Profile General Info
   const [profile, setProfile] = useState({
     name: "",
     email: "",
   });
 
-  // Billing Profile - Structurat FIX după noua schemă Mongoose curată
   const [billing, setBilling] = useState({
     business_name: "",
     cif: "",
@@ -26,20 +24,6 @@ const Settings = () => {
     logo: "",
   });
 
-  // Păstrăm state-ul de settings deoarece endpoint-ul există în backend
-  const [settings, setSettings] = useState({
-    theme: "dark",
-    accentColor: "#80FFF9",
-    sidebarBehavior: "fixed",
-    density: "normal",
-    emailNotifications: true,
-    notifyInvoicePaid: true,
-    notifyInvoiceOverdue: true,
-    notifyAIInvoice: true,
-    notificationFrequency: "instant",
-    aiTone: "friendly",
-    aiLength: "normal",
-  });
 
   // Password State
   const [passwordForm, setPasswordForm] = useState({
@@ -59,17 +43,10 @@ const Settings = () => {
       const token = localStorage.getItem("token");
 
       try {
-        // Luăm datele utilizatorului
         const userRes = await API.get("/users/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Încarcă setările globale ale aplicației
-        const settingsRes = await API.get("/settings", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        // Luăm datele de facturare
         const billingRes = await API.get("/billing-profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -78,10 +55,6 @@ const Settings = () => {
           name: userRes.data.name || "",
           email: userRes.data.email || "",
         });
-
-        if (settingsRes.data) {
-          setSettings(settingsRes.data);
-        }
 
         if (billingRes.data) {
           setBilling((prev) => ({

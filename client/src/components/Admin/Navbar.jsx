@@ -2,32 +2,27 @@ import React, { useEffect, useState, useRef } from "react";
 import { Bell, X, Check, LogOut, ArrowLeft, Settings, Search, User2, MessageSquare, Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import API from "../../utils/api"; // Ajustat: ieșire corectă din components/Admin/ către utils
-import { useAIChatStore } from "../../store/useAIChatStore"; // Ajustat: către store
-import { useSearchStore } from "../../store/useSearchStore"; // Ajustat: către store
+import API from "../../utils/api";
+import { useSearchStore } from "../../store/useSearchStore";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = ({ openSidebar }) => {
   const navigate = useNavigate();
-  const { isOpen: aiOpen, toggleChat } = useAIChatStore();
   const { query, setQuery } = useSearchStore();
-
+  
   const popupRef = useRef(null);
   const userMenuRef = useRef(null);
-
+  
   const [notifications, setNotifications] = useState([]);
-  const [showPopup, setShowPopup] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
-
+  const [showPopup, setShowPopup] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [userData, setUserData] = useState(null);
   const [subscription, setSubscription] = useState(null);
 
   const currentPlan = subscription?.plan || "Free";
 
-  // ================================
-  // FETCH USER
-  // ================================
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -38,9 +33,7 @@ const Navbar = ({ openSidebar }) => {
     fetchUser();
   }, []);
 
-  // ================================
-  // FETCH SUB
-  // ================================
+
   useEffect(() => {
     const fetchSub = async () => {
       try {
@@ -51,15 +44,12 @@ const Navbar = ({ openSidebar }) => {
     fetchSub();
   }, []);
 
-  // ================================
-  // FETCH NOTIFICATIONS + AI INVOICES (Sincronizare fluidă)
-  // ================================
+
   const fetchNotifications = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      // 1. Preluăm notificările standard din sistem
       try {
         await API.get("/notifications/generate");
       } catch (e) {}
@@ -67,7 +57,6 @@ const Navbar = ({ openSidebar }) => {
       const sysRes = await API.get("/notifications");
       let allNotifications = Array.isArray(sysRes.data) ? [...sysRes.data] : [];
 
-      // 2. LOGICĂ EMAIL AI: Preluăm facturile pending din MongoDB
       const invRes = await API.get("/invoices");
       const invoicesList = Array.isArray(invRes.data) ? invRes.data : [];
       
@@ -81,7 +70,6 @@ const Navbar = ({ openSidebar }) => {
         invoice: inv
       }));
 
-      // Combinăm notificările (Cele AI apar primele în listă)
       const combined = [...aiNotifications, ...allNotifications];
 
       setNotifications(combined);
@@ -93,21 +81,10 @@ const Navbar = ({ openSidebar }) => {
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 15000); // Polling la 15 secunde
+    const interval = setInterval(fetchNotifications, 15000);
     return () => clearInterval(interval);
   }, []);
 
-  // Close popups
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (popupRef.current && !popupRef.current.contains(e.target))
-        setShowPopup(false);
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target))
-        setUserMenuOpen(false);
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const handleMarkAsRead = async () => {
     try {
@@ -125,18 +102,6 @@ const Navbar = ({ openSidebar }) => {
 
   return (
     <>
-      {/* AI OVERLAY */}
-      <AnimatePresence>
-        {aiOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.4 }}
-            exit={{ opacity: 0 }}
-            className="pointer-events-none fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-          />
-        )}
-      </AnimatePresence>
-
       {/* NAVBAR */}
       <motion.nav
         initial={{ opacity: 0, y: -20 }}
@@ -177,14 +142,6 @@ const Navbar = ({ openSidebar }) => {
           >
             <ArrowLeft size={18} className="text-[#80FFF9]" />
             <span className="text-sm text-gray-200">Back</span>
-          </button>
-
-          {/* CHATBOT */}
-          <button
-            onClick={toggleChat}
-            className="p-2 bg-white/5 hover:bg-white/10 rounded-full border border-white/10"
-          >
-            <MessageSquare className="text-[#80FFF9]" size={20} />
           </button>
         </div>
 

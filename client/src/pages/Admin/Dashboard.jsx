@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../../components/Admin/Sidebar";
 import Navbar from "../../components/Admin/Navbar";
-import AIChatPanel from "../../components/Admin/AIChatPanel";
 import { AnimatePresence, motion } from "framer-motion";
 
 const Dashboard = () => {
@@ -41,7 +40,6 @@ const Dashboard = () => {
           <Outlet />
         </main>
 
-        <AIChatPanel />
       </div>
     </div>
   );
