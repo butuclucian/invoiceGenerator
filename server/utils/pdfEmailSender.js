@@ -151,55 +151,70 @@ const generateInvoicePDF = (invoice, client) => {
 
 
 export const sendInvoiceEmail = async (invoice, client) => {
+  // Verificăm dacă structura de client conține o adresă de e-mail validă
   if (!client?.email) {
-    console.warn("Client has no email, skipping email send.");
+    console.warn("⚠️ [EmailService] Client has no email, skipping email send.");
     return;
   }
 
   try {
+    console.log(`[EmailService] Se generează PDF-ul pentru factura ${invoice.invoice_number || 'draft'}...`);
     const pdfPath = await generateInvoicePDF(invoice, client);
 
+    // Citirea fișierului PDF generat temporar din memoria Docker și conversia în Base64
     const pdfData = fs.readFileSync(pdfPath);
     const pdfBase64 = pdfData.toString("base64");
 
-
+    console.log(`[EmailService] Se expediază e-mailul prin Resend către adresa de test...`);
+    
     const response = await resend.emails.send({
-      from: process.env.RESEND_FROM,
-      to: "lucianbutuc16@gmail.com",
-      subject: `🧾 Invoice ${invoice.invoice_number} from invoiceGenAI`,
+      from: "onboarding@resend.dev",
+      // FORȚAT: Conturile gratuite Resend în mod Sandbox acceptă doar adresa ta confirmată la înregistrare
+      to: "butuclucian04@gmail.com", 
+      subject: `Factură nouă emisă de invoiceGenAI: ${invoice.series || 'INV'}-${invoice.invoice_number}`,
       html: `
-      <div style="font-family:Arial,sans-serif;padding:20px;color:#333;">
-        <img src="invoicelogo.png" alt="Logo" width="60" style="display:block;margin:auto;margin-bottom:15px;">
-        <h2 style="color:#4F46E5;text-align:center;">Hello ${client.name || "Client"},</h2>
-        <p style="text-align:center;">You’ve received a new invoice from <b>invoiceGenAI</b>.</p>
-        <div style="margin:20px auto;max-width:400px;background:#f5f5f5;padding:15px;border-radius:10px;">
-          <p><b>Invoice Number:</b> ${invoice.invoice_number}</p>
-          <p><b>Total:</b> $${invoice.total}</p>
-          <p><b>Due Date:</b> ${invoice.due_date || "—"}</p>
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 12px;">
+          <h2 style="color: #4F46E5; text-align: center;">Hello ${client.name || "Client"},</h2>
+          <p style="text-align: center; font-size: 15px;">You’ve received a new invoice from <b>invoiceGenAI</b>.</p>
+          
+          <div style="margin: 20px auto; max-width: 400px; background: #f9f9f9; padding: 20px; border-radius: 10px; border-left: 4px solid #4F46E5;">
+            <p style="margin: 5px 0;"><b>Invoice Number:</b> ${invoice.series || 'INV'}-${invoice.invoice_number}</p>
+            <p style="margin: 5px 0;"><b>Total Amount:</b> ${invoice.total?.toFixed(2)} ${invoice.currency || 'RON'}</p>
+            <p style="margin: 5px 0;"><b>Due Date:</b> ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('ro-RO') : "—"}</p>
+          </div>
+          
+          <p style="text-align: center; font-size: 14px; color: #666;">The official PDF document is attached to this email.</p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="text-align: center; color: #999; font-size: 12px;">Thank you for your business!<br><b>invoiceGenAI Team</b></p>
         </div>
-        <p style="text-align:center;">The PDF invoice is attached below.</p>
-        <p style="text-align:center;margin-top:20px;color:#666;">Thank you for your business!<br><b>invoiceGenAI</b></p>
-      </div>
-    `,
+      `,
       attachments: [
         {
-          filename: `Invoice_${invoice.invoice_number}.pdf`,
+          filename: `Invoice_${invoice.series || 'INV'}-${invoice.invoice_number}.pdf`,
           content: pdfBase64,
         },
       ],
     });
 
+    // Gestionarea erorilor returnate direct în interiorul obiectului response de către Resend
     if (response.error) {
-      console.error("[EmailService] Resend error:", response.error);
+      console.error("❌ [EmailService] Resend validation error:", response.error);
+      throw new Error(response.error.message || "Resend failed to deliver email");
     } else {
-      console.log("[EmailService] Invoice email sent successfully via Resend!");
+      console.log("\x1b[32m✉️ [EmailService] Invoice email sent successfully via Resend to butuclucian04@gmail.com!\x1b[0m");
     }
 
+    // Ștergerea fișierului PDF temporar pentru a păstra containerul Docker curat
     fs.unlink(pdfPath, (err) => {
-      if (err) console.warn("Could not delete temp PDF:", err.message);
-      else console.log("Temp PDF deleted successfully");
+      if (err) console.warn("⚠️ [EmailService] Could not delete temp PDF:", err.message);
+      else console.log("🧹 [EmailService] Temp PDF deleted successfully from workspace.");
     });
+
+    return response;
+
   } catch (error) {
-    console.error("[EmailService] Fatal error sending invoice email:", error);
+    console.error("❌ [EmailService] Fatal error sending invoice email:", error.message || error);
+    // Transmitem eroarea mai departe pentru a bloca execuția greșită a controllerului HTTP
+    throw error; 
   }
 };

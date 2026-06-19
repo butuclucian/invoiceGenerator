@@ -22,8 +22,8 @@ services:
       - EMAIL_PASSWORD=zmot ognk ikgp rzes
       - EMAIL_HOST=imap.gmail.com
       - EMAIL_PORT=993
-      - RESEND_API_KEY=re_WgqJm6Tx_DsMRhme6bmGRaEwfSDtEvyVn
-      - RESEND_FROM=invoiceGenAi <onboarding@resend.dev>
+      - RESEND_API_KEY=re_KYRKyxsE_2fKo3gn1m2guQHEjiuue6Ce1
+      # - RESEND_FROM=invoiceGenAi <onboarding@resend.dev>
     depends_on:
       - mongodb
 

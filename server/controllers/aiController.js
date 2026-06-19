@@ -9,7 +9,6 @@ import Invoice from "../models/Invoice.js";
 import Client from "../models/Client.js";
 import Subscription from "../models/Subscription.js";
 
-// ── Prețuri prestabilite per serviciu ─────────────────────────────────────────
 const SERVICE_PRICES = {
   "web design": 500,
   "website design": 500,
@@ -59,54 +58,54 @@ export const generateInvoiceFromText = async (req, res) => {
 
     const prompt = `You are an AI that extracts invoice data from any text (emails, messages, requests).
 
-PRICE LIST (use these prices for matching services):
-${priceListText}
+    PRICE LIST (use these prices for matching services):
+    ${priceListText}
 
-RULES:
-1. Extract client name, email, company, address from the text if present.
-2. Identify ALL services/products mentioned and match them to the price list above (case-insensitive, partial match allowed).
-3. If a service is not in the price list, set unit_price to 0 and price_known to false.
-4. If quantity is mentioned (e.g. "7 pages"), use it. Otherwise quantity = 1.
-5. Set status based on completeness:
-   - "draft" if client name is missing OR no items found OR no contact info (email or address)
-   - "pending_review" if all required fields exist but some item has unit_price = 0
-   - "ready" if all fields present and all prices known
-6. IMPORTANT: Fill the missing_fields array ONLY with fields that are genuinely completely absent from the text. Choose ONLY from: "client_name", "client_email", "client_address", "items", "due_date". If you found items, DO NOT put "items" in this array!
-7. Generate invoice_number as "DRAFT-001" if not provided.
-8. Use today's date for "date" if not mentioned. Leave "due_date" null if not mentioned.
+    RULES:
+    1. Extract client name, email, company, address from the text if present.
+    2. Identify ALL services/products mentioned and match them to the price list above (case-insensitive, partial match allowed).
+    3. If a service is not in the price list, set unit_price to 0 and price_known to false.
+    4. If quantity is mentioned (e.g. "7 pages"), use it. Otherwise quantity = 1.
+    5. Set status based on completeness:
+      - "draft" if client name is missing OR no items found OR no contact info (email or address)
+      - "pending_review" if all required fields exist but some item has unit_price = 0
+      - "ready" if all fields present and all prices known
+    6. IMPORTANT: Fill the missing_fields array ONLY with fields that are genuinely completely absent from the text. Choose ONLY from: "client_name", "client_email", "client_address", "items", "due_date". If you found items, DO NOT put "items" in this array!
+    7. Generate invoice_number as "DRAFT-001" if not provided.
+    8. Use today's date for "date" if not mentioned. Leave "due_date" null if not mentioned.
 
-Return ONLY this JSON, no markdown formatting (DO NOT wrap in \`\`\`json), no explanation, just raw JSON:
-{
-  "invoice_number": "string",
-  "date": "YYYY-MM-DD",
-  "due_date": "YYYY-MM-DD or null",
-  "status": "draft or pending_review or ready",
-  "missing_fields": [],
-  "client": {
-    "name": "string or null",
-    "email": "string or null",
-    "company": "string or null",
-    "address": "string or null"
-  },
-  "items": [
+    Return ONLY this JSON, no markdown formatting (DO NOT wrap in \`\`\`json), no explanation, just raw JSON:
     {
-      "description": "string",
-      "quantity": 1,
-      "unit_price": 0,
+      "invoice_number": "string",
+      "date": "YYYY-MM-DD",
+      "due_date": "YYYY-MM-DD or null",
+      "status": "draft or pending_review or ready",
+      "missing_fields": [],
+      "client": {
+        "name": "string or null",
+        "email": "string or null",
+        "company": "string or null",
+        "address": "string or null"
+      },
+      "items": [
+        {
+          "description": "string",
+          "quantity": 1,
+          "unit_price": 0,
+          "total": 0,
+          "price_known": true
+        }
+      ],
+      "tax_rate": 0,
+      "discount_rate": 0,
+      "subtotal": 0,
       "total": 0,
-      "price_known": true
+      "notes": "",
+      "payment_terms": ""
     }
-  ],
-  "tax_rate": 0,
-  "discount_rate": 0,
-  "subtotal": 0,
-  "total": 0,
-  "notes": "",
-  "payment_terms": ""
-}
 
-Text to analyze:
-${text}`;
+    Text to analyze:
+    ${text}`;
 
     let outputText = "";
     const result = await ollama.generate({
@@ -127,7 +126,6 @@ ${text}`;
       .replace(/```\s*/g, "")
       .trim();
 
-    // Bloc de siguranță la parsare JSON pentru stabilitatea containerului
     let parsedData;
     try {
       parsedData = JSON.parse(cleanOutput);
@@ -223,7 +221,6 @@ ${text}`;
 
     const populatedInvoice = await Invoice.findById(newInvoice._id).populate("client");
 
-    // 🔥 DISPATCH AUTOMAT EMAIL + PDF ACUM (Ruta Interfață)
     if (populatedInvoice && populatedInvoice.client && populatedInvoice.client.email) {
       sendInvoiceEmail(populatedInvoice, populatedInvoice.client)
         .then(() => console.log(`[Resend] Mail dispatch success to ${populatedInvoice.client.email}`))
@@ -247,60 +244,73 @@ ${text}`;
 // ── 2. FUNCTIA INTERNĂ PENTRU BACKGROUND EMAIL WORKER ───────────────────────
 export const generateInvoiceFromTextInternal = async (text, fallbackEmail = null, userId = null) => {
   try {
+    if (fallbackEmail && (
+      fallbackEmail.toLowerCase() === "lucianbutuc16@gmail.com" || 
+      fallbackEmail.toLowerCase() === "contact@rymvisuals.ro"
+    )) {
+      console.log(`\x1b[33m⚠️ [AI Worker Avoided Loop] Ignorăm e-mailul trimis de sistem: ${fallbackEmail}\x1b[0m`);
+      return null;
+    }
+
+    if (text.includes("Generat automat din email") || text.includes("Factura ta InvoiceGenAI")) {
+      console.log("\x1b[33m⚠️ [AI Worker Avoided Loop] Ignorăm e-mailul deoarece este o notificare generată de aplicație.\x1b[0m");
+      return null;
+    }
+
     const priceListText = Object.entries(SERVICE_PRICES)
       .map(([service, price]) => `- ${service}: ${price} EUR`)
       .join("\n");
 
     const prompt = `You are an AI that extracts invoice data from any text (emails, messages, requests).
 
-PRICE LIST (use these prices for matching services):
-${priceListText}
+    PRICE LIST (use these prices for matching services):
+    ${priceListText}
 
-RULES:
-1. Extract client name, email, company, address from the text if present.
-2. Identify ALL services/products mentioned and match them to the price list above (case-insensitive, partial match allowed).
-3. If a service is not in the price list, set unit_price to 0 and price_known to false.
-4. If quantity is mentioned (e.g. "7 pages"), use it. Otherwise quantity = 1.
-5. Set status based on completeness:
-   - "draft" if client name is missing OR no items found OR no contact info (email or address)
-   - "pending_review" if all required fields exist but some item has unit_price = 0
-   - "ready" if all fields present and all prices known
-6. IMPORTANT: Fill the missing_fields array ONLY with fields that are genuinely completely absent from the text. Choose ONLY from: "client_name", "client_email", "client_address", "items", "due_date". If you found items, DO NOT put "items" in this array!
-7. Generate invoice_number as "DRAFT-001" if not provided.
-8. Use today's date for "date" if not mentioned. Leave "due_date" null if not mentioned.
+    RULES:
+    1. Extract client name, email, company, address from the text if present.
+    2. Identify ALL services/products mentioned and match them to the price list above (case-insensitive, partial match allowed).
+    3. If a service is not in the price list, set unit_price to 0 and price_known to false.
+    4. If quantity is mentioned (e.g. "7 pages"), use it. Otherwise quantity = 1.
+    5. Set status based on completeness:
+      - "draft" if client name is missing OR no items found OR no contact info (email or address)
+      - "pending_review" if all required fields exist but some item has unit_price = 0
+      - "ready" if all fields present and all prices known
+    6. IMPORTANT: Fill the missing_fields array ONLY with fields that are genuinely completely absent from the text. Choose ONLY from: "client_name", "client_email", "client_address", "items", "due_date". If you found items, DO NOT put "items" in this array!
+    7. Generate invoice_number as "DRAFT-001" if not provided.
+    8. Use today's date for "date" if not mentioned. Leave "due_date" null if not mentioned.
 
-Return ONLY this JSON, no markdown formatting (DO NOT wrap in \`\`\`json), no explanation, just raw JSON:
-{
-  "invoice_number": "string",
-  "date": "YYYY-MM-DD",
-  "due_date": "YYYY-MM-DD or null",
-  "status": "draft or pending_review or ready",
-  "missing_fields": [],
-  "client": {
-    "name": "string or null",
-    "email": "string or null",
-    "company": "string or null",
-    "address": "string or null"
-  },
-  "items": [
+    Return ONLY this JSON, no markdown formatting (DO NOT wrap in \`\`\`json), no explanation, just raw JSON:
     {
-      "description": "string",
-      "quantity": 1,
-      "unit_price": 0,
+      "invoice_number": "string",
+      "date": "YYYY-MM-DD",
+      "due_date": "YYYY-MM-DD or null",
+      "status": "draft or pending_review or ready",
+      "missing_fields": [],
+      "client": {
+        "name": "string or null",
+        "email": "string or null",
+        "company": "string or null",
+        "address": "string or null"
+      },
+      "items": [
+        {
+          "description": "string",
+          "quantity": 1,
+          "unit_price": 0,
+          "total": 0,
+          "price_known": true
+        }
+      ],
+      "tax_rate": 0,
+      "discount_rate": 0,
+      "subtotal": 0,
       "total": 0,
-      "price_known": true
+      "notes": "",
+      "payment_terms": ""
     }
-  ],
-  "tax_rate": 0,
-  "discount_rate": 0,
-  "subtotal": 0,
-  "total": 0,
-  "notes": "",
-  "payment_terms": ""
-}
 
-Text to analyze:
-${text}`;
+    Text to analyze:
+    ${text}`;
 
     let outputText = "";
     const result = await ollama.generate({
@@ -354,13 +364,13 @@ ${text}`;
     parsedData.subtotal = Number(subtotal.toFixed(2));
     parsedData.total = Number(total.toFixed(2));
 
-    const activeUserId = userId || "6a291f417845124b816c688f";
+    const activeUserId = userId || "6a2bddddbd03f631953b0521";
 
     let clientId = null;
     const hasClientName = !!parsedData.client?.name && parsedData.client.name.toLowerCase() !== "null";
 
     if (hasClientName) {
-      let client = await Client.findOne({ name: new RegExp(`^${parsedData.client.name}$`, "i"), user: userId });
+      let client = await Client.findOne({ name: new RegExp(`^${parsedData.client.name}$`, "i"), user: activeUserId });
       if (!client) {
         client = await Client.create({
           name: parsedData.client.name,
@@ -372,9 +382,9 @@ ${text}`;
       }
       clientId = client._id;
     } else {
-      let defaultClient = await Client.findOne({ name: "Unknown Client", user: userId });
+      let defaultClient = await Client.findOne({ name: "Unknown Client", user: activeUserId });
       if (!defaultClient) {
-        defaultClient = await Client.create({ name: "Unknown Client", user: userId });
+        defaultClient = await Client.create({ name: "Unknown Client", user: activeUserId });
       }
       clientId = defaultClient._id;
     }
@@ -385,7 +395,6 @@ ${text}`;
       unit_price: Number(item.unit_price) || 0,
       total: Number(item.total) || 0,
     }));
-
 
     const newInvoice = await Invoice.create({
       user: activeUserId, 
@@ -405,12 +414,11 @@ ${text}`;
 
     const populatedWorkerInvoice = await Invoice.findById(newInvoice._id).populate("client");
 
-    // 🔥 DISPATCH AUTOMAT EMAIL + PDF ACUM (Background IMAP Worker)
-    if (populatedWorkerInvoice && populatedWorkerInvoice.client && populatedWorkerInvoice.client.email) {
-      sendInvoiceEmail(populatedWorkerInvoice, populatedWorkerInvoice.client)
-        .then(() => console.log(`[Worker Resend] Automated dispatch success to ${populatedWorkerInvoice.client.email}`))
-        .catch(err => console.error("[Worker Resend Error] Failed to send document:", err));
-    }
+    // if (populatedWorkerInvoice && populatedWorkerInvoice.client && populatedWorkerInvoice.client.email) {
+    //   sendInvoiceEmail(populatedWorkerInvoice, populatedWorkerInvoice.client)
+    //     .then(() => console.log(`[Worker Resend] Automated dispatch success to ${populatedWorkerInvoice.client.email}`))
+    //     .catch(err => console.error("[Worker Resend Error] Failed to send document:", err));
+    // }
 
     console.log(`\x1b[32m[AI Worker] Factură salvată cu succes din email! ID: ${newInvoice._id}\x1b[0m`);
     return newInvoice;
