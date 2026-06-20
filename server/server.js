@@ -5,7 +5,7 @@ import morgan from "morgan";
 import cron from "node-cron";
 import bodyParser from "body-parser";
 import connectDB from "./config/db.js";
-import {startEmailWorker} from "./services/emailWorker.js";
+import { startEmailWorker } from "./services/emailWorker.js";
 
 import authRoutes from "./routes/authRoutes.js";
 import clientRoutes from "./routes/clientRoutes.js";
@@ -22,21 +22,21 @@ import { handleWebhook } from "./controllers/subscriptionController.js";
 import User from "./models/User.js";
 
 dotenv.config();
-
 connectDB();
 
 const app = express();
+app.set("trust proxy", 1); // Necesar pentru deployment (Render/Vercel)
 
-
+// 1. WEBHOOK - Trebuie să fie primul și cu body-parser raw
 app.post(
   "/api/subscription/webhook",
   bodyParser.raw({ type: "application/json" }),
   handleWebhook
 );
 
+// 2. Middleware-uri (doar acum parșăm JSON pentru restul rutelor)
 app.use(express.json());
 app.use(morgan("dev"));
-
 app.use(
   cors({
     origin: "*",
@@ -46,7 +46,7 @@ app.use(
   })
 );
 
-
+// 3. Rute API
 app.get("/", (req, res) => {
   res.send("invoiceGenAI API is running stable...");
 });
@@ -61,26 +61,21 @@ app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/calendar", calendarRoutes);
 app.use("/api/billing-profile", billingRoutes);
 
-
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`\x1b[36m🚀 [Backend] Server running on port ${PORT}\x1b[0m`);
-
   startEmailWorker();
 });
 
-
+// 4. Cron Job
 cron.schedule("0 * * * *", async () => {
   console.log("⏰ [Cron] Se pornește verificarea automată a scadențelor...");
   try {
     const users = await User.find();
-
     for (const user of users) {
       await generateNearDueNotifications(
         { user },
-        {
-          status: () => ({ json: () => {} }),
-        }
+        { status: () => ({ json: () => {} }) }
       );
     }
     console.log("✅ [Cron] Notificările automate au fost procesate cu succes.");

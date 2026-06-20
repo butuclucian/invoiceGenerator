@@ -19,10 +19,15 @@ services:
       - MONGO_URI=mongodb://mongodb:27017/invoice_generator
       - OLLAMA_HOST=http://host.docker.internal:11434
       - EMAIL_USER=lucianbutuc16@gmail.com
-      - EMAIL_PASSWORD=zmot ognk ikgp rzes
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
       - EMAIL_HOST=imap.gmail.com
       - EMAIL_PORT=993
-      - RESEND_API_KEY=re_KYRKyxsE_2fKo3gn1m2guQHEjiuue6Ce1
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - CLIENT_URL=${CLIENT_URL}
+      - STRIPE_PRICE_PRO=${STRIPE_PRICE_PRO}
+      - STRIPE_PRICE_ENTERPRISE${STRIPE_PRICE_ENTERPRISE}
       # - RESEND_FROM=invoiceGenAi <onboarding@resend.dev>
     depends_on:
       - mongodb

@@ -126,31 +126,32 @@ const MySubscription = () => {
         <div className="absolute inset-0 bg-linear-to-r from-[#80FFF9]/5 to-[#CB52D4]/10 blur-3xl -z-10" />
 
         {/* HEADER INFO */}
-        <div className="flex flex-col md:flex-row items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold tracking-wide">{plan} Plan</h2>
-            <p className="text-gray-400 text-sm mt-1">
-              {isActive ? "Currently Active" : "Inactive"}
-            </p>
-            {subscription?.renewal_date && (
-              <p className="text-gray-500 text-sm">
-                Next renewal:{" "}
-                {new Date(subscription.renewal_date).toLocaleDateString()}
-              </p>
-            )}
-          </div>
-          <div className="text-right">
-            <p className="text-5xl font-bold text-[#80FFF9]">
-              {plan === "Free"
-                ? "$0"
-                : plan === "Pro"
-                ? "$9"
-                : "$29"}
-              <span className="text-lg text-gray-400 font-medium">/mo</span>
-            </p>
-            <p className="text-gray-500 text-xs mt-1">Billed monthly</p>
-          </div>
-        </div>
+        // 1. Adaugă acest "Status Badge" chiar sub Header-ul tău principal:
+
+{/* ===== STATUS BADGE FLOTANT ===== */}
+<div className="fixed top-24 right-8 z-50">
+  <div className={`flex items-center gap-2 px-4 py-2 rounded-full border shadow-xl backdrop-blur-md ${
+    plan === "Pro" 
+      ? "bg-indigo-950/50 border-[#80FFF9]/30 text-[#80FFF9]"
+      : plan === "Enterprise"
+      ? "bg-purple-950/50 border-[#CB52D4]/30 text-[#CB52D4]"
+      : "bg-gray-900/50 border-white/10 text-gray-400"
+  }`}>
+    <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-400 animate-pulse' : 'bg-gray-500'}`} />
+    <span className="text-sm font-semibold tracking-wide uppercase">{plan}</span>
+  </div>
+</div>
+
+// 2. Înlocuiește Header-ul tău cu acesta (mai aerisit):
+<div className="flex flex-col mb-10">
+  <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
+    <Crown className="text-[#80FFF9]" size={26} />
+    My Subscription
+  </h1>
+  <p className="text-gray-400 text-sm">
+    Manage your billing plan, renewal and AI feature access
+  </p>
+</div>
 
         {/* FEATURES */}
         <div className="grid md:grid-cols-2 gap-4 mb-10 text-sm">

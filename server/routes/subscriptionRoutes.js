@@ -1,16 +1,16 @@
 import express from "express";
-import { createCheckoutSession, handleWebhook, getMySubscription, cancelSubscription, createBillingPortal, getInvoices} from "../controllers/subscriptionController.js";
+import { 
+  createCheckoutSession, 
+  getMySubscription, 
+  cancelSubscription, 
+  createBillingPortal, 
+  getInvoices 
+} from "../controllers/subscriptionController.js";
 import { protect } from "../middleware/authMiddleware.js";
-import bodyParser from "body-parser";
 
 const router = express.Router();
 
-router.post(
-  "/webhook",
-  bodyParser.raw({ type: "application/json" }),
-  handleWebhook
-);
-
+// Webhook-ul a fost mutat în server.js pentru a evita erorile de parșare
 router.post("/create-checkout-session", protect, createCheckoutSession);
 router.get("/me", protect, getMySubscription);
 router.post("/cancel", protect, cancelSubscription);

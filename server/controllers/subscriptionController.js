@@ -40,7 +40,6 @@ export const createCheckoutSession = async (req, res) => {
   }
 };
 
-//  Webhook handler
 export const handleWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
   let event;
@@ -52,20 +51,25 @@ export const handleWebhook = async (req, res) => {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
-    console.error("Webhook signature verification failed:", err.message);
+    console.error("❌ Webhook signature verification failed:", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   const data = event.data.object;
 
   try {
+    console.log(`📥 [Webhook] Eveniment primit: ${event.type}`);
+
     switch (event.type) {
-      //  Caz 1: Checkout finalizat
       case "checkout.session.completed": {
-        const email = data.customer_email;
+        // Obținem email-ul din surse multiple pentru siguranță
+        const email = data.customer_email || data.customer_details?.email;
         const planMeta = data.metadata?.plan || "pro";
 
-        const user = await User.findOne({ email });
+        console.log(`🔍 Caut user cu email: ${email}`);
+        
+        const user = await User.findOne({ email: email?.toLowerCase() });
+
         if (user) {
           const updated = await Subscription.findOneAndUpdate(
             { user: user._id },
@@ -73,76 +77,36 @@ export const handleWebhook = async (req, res) => {
               user: user._id,
               stripeCustomerId: data.customer || "",
               stripeSubscriptionId: data.subscription || "",
-              plan:
-                planMeta === "enterprise"
-                  ? "Enterprise"
-                  : "Pro",
+              plan: planMeta.charAt(0).toUpperCase() + planMeta.slice(1),
               status: "Active",
               renewal_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
             },
             { upsert: true, new: true }
           );
-          console.log(`Subscription created/updated for ${user.email}: ${updated.plan}`);
+          console.log(`✅ Subscription actualizat în DB pentru ${user.email}`);
         } else {
-          console.warn("No user found for email:", email);
+          console.error(`❌ EROARE: Nu am găsit niciun user cu emailul: ${email}`);
         }
         break;
       }
 
-      // Caz 2: Subscriptie noua (Stripe Customer -> Subscription)
-      case "customer.subscription.created": {
-        const sub = data;
-        const customerId = sub.customer;
-
-        const customer = await stripe.customers.retrieve(customerId);
-        const email = customer.email;
-        const user = await User.findOne({ email });
-
-        if (user) {
-          const updated = await Subscription.findOneAndUpdate(
-            { user: user._id },
-            {
-              user: user._id,
-              stripeCustomerId: customerId,
-              stripeSubscriptionId: sub.id,
-              plan:
-                sub.items.data[0].price.id === process.env.STRIPE_PRICE_ENTERPRISE
-                  ? "Enterprise"
-                  : "Pro",
-              status: sub.status === "active" ? "Active" : "Pending",
-              renewal_date: new Date(sub.current_period_end * 1000),
-            },
-            { upsert: true, new: true }
-          );
-          console.log(`Subscription synced for ${user.email}: ${updated.plan}`);
-        } else {
-          console.warn("No user found for customer email:", email);
-        }
-        break;
-      }
-
-      //  Caz 3: Subscriptie stearsa / anulata
       case "customer.subscription.deleted": {
         const subId = data.id;
-
-        const sub = await Subscription.findOne({
-          stripeSubscriptionId: subId,
-        });
-        if (sub) {
-          sub.status = "Cancelled";
-          await sub.save();
-          console.log("Subscription cancelled for user:", sub.user);
-        }
+        const sub = await Subscription.findOneAndUpdate(
+            { stripeSubscriptionId: subId },
+            { status: "Cancelled" }
+        );
+        if (sub) console.log("✅ Abonament anulat în DB");
         break;
       }
 
       default:
-        console.log(`ℹUnhandled event type: ${event.type}`);
+        console.log(`ℹ Eveniment neprocesat: ${event.type}`);
     }
 
     res.status(200).json({ received: true });
   } catch (err) {
-    console.error("Webhook handling failed:", err);
+    console.error("❌ Webhook handling failed:", err);
     res.status(500).send("Webhook handler error");
   }
 };
