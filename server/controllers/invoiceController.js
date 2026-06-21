@@ -1,8 +1,13 @@
+import {Ollama} from "ollama";
 import Invoice from "../models/Invoice.js";
 import Client from "../models/Client.js";
 import { sendInvoiceEmail } from "../utils/pdfEmailSender.js";
 import axios from "axios";
 import Report from "../models/Report.js";
+
+const ollama = new Ollama({ 
+  host: process.env.OLLAMA_HOST
+});
 
 export const getInvoices = async (req, res) => {
   try {
@@ -324,14 +329,14 @@ Răspunde direct în limba română. Fii concis, profesional și folosește un t
 
     console.log(`📊 [BI Analytics] Se inițiază analiza financiară locală cu Llama 3.1 pentru ${compactInvoicesData.length} facturi...`);
 
-    const ollamaResponse = await axios.post("http://host.docker.internal:11434/api/generate", {
-      model: "llama3.1",
+    const result = await ollama.generate({
+      model: "llama3.1:latest",
       prompt: prompt,
       stream: false
     });
 
-    const aiReport = ollamaResponse.data.response;
-
+    const aiReport = result.response;
+    
     const savedReport = await Report.create({
       user: req.user._id,
       title: `Analiză Financiară — ${new Date().toLocaleDateString("ro-RO")}`,
