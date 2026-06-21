@@ -181,7 +181,7 @@ const Invoices = () => {
   const handlePreview = (id) => navigate(`/dashboard/invoices/${id}`);
 
   return (
-    <div className="relative p-8 text-white min-h-screen bg-[#0e0e0e]">
+    <div className="relative p-8 pt-30 text-white min-h-screen bg-[#0e0e0e]">
 
       {/* HEADER */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">

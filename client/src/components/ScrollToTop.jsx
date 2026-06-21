@@ -1,31 +1,15 @@
-import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    const dashboardRoutes = [
-      "/dashboard",
-      "/clients",
-      "/clients/add",
-      "/invoices",
-      "/invoices/create",
-      "/invoices/recurring",
-      "/accounting",
-      "/reports",
-      "/ai",
-    ];
-
-    if (dashboardRoutes.some((path) => pathname.startsWith(path))) {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
-    }
+    // Forțează scroll-ul la începutul paginii (0,0) la fiecare schimbare de rută
+    window.scrollTo(0, 0);
   }, [pathname]);
 
-  return null;
+  return null; // Componenta nu randează nimic vizual
 };
 
 export default ScrollToTop;

@@ -9,7 +9,6 @@ const Dashboard = () => {
 
   return (
     <div className="flex bg-[#0e0e0e] min-h-screen text-white">
-
       <div className="hidden md:block">
         <Sidebar />
       </div>
@@ -30,16 +29,14 @@ const Dashboard = () => {
         )}
       </AnimatePresence>
 
-      <div className="flex-1 flex flex-col relative">
-
-        <div className="md:ml-64 fixed top-0 left-0 right-0 z-30">
+      <div className="flex-1 flex flex-col">
+        <div className="md:ml-64 sticky top-0 z-30">
           <Navbar openSidebar={() => setSidebarOpen(true)} />
         </div>
 
-        <main className="pt-24 p-6 overflow-y-auto md:ml-64">
+        <main className="md:ml-64 flex-1 overflow-y-auto">
           <Outlet />
         </main>
-
       </div>
     </div>
   );

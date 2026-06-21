@@ -2,7 +2,7 @@ import { Ollama } from "ollama";
 import { sendInvoiceEmail } from "../utils/pdfEmailSender.js";
 
 const ollama = new Ollama({ 
-  host: process.env.OLLAMA_HOST || "http://host.docker.internal:11434" 
+  host: process.env.OLLAMA_HOST
 });
 
 import Invoice from "../models/Invoice.js";
@@ -413,12 +413,6 @@ export const generateInvoiceFromTextInternal = async (text, fallbackEmail = null
     });
 
     const populatedWorkerInvoice = await Invoice.findById(newInvoice._id).populate("client");
-
-    // if (populatedWorkerInvoice && populatedWorkerInvoice.client && populatedWorkerInvoice.client.email) {
-    //   sendInvoiceEmail(populatedWorkerInvoice, populatedWorkerInvoice.client)
-    //     .then(() => console.log(`[Worker Resend] Automated dispatch success to ${populatedWorkerInvoice.client.email}`))
-    //     .catch(err => console.error("[Worker Resend Error] Failed to send document:", err));
-    // }
 
     console.log(`\x1b[32m[AI Worker] Factură salvată cu succes din email! ID: ${newInvoice._id}\x1b[0m`);
     return newInvoice;

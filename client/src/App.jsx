@@ -40,6 +40,7 @@ import HowItWorks from "./pages/HowItWorks";
 import Pricing from "./pages/Pricing";
 import Blog from "./pages/Blog";
 import AiInsights from "./pages/Admin/AiInsights";
+import DashboardHome from "./pages/Admin/DashboardHome";
 
 
 const App = () => {
@@ -80,7 +81,7 @@ const App = () => {
 
         {/* Protected admin routes */}
         <Route path="/dashboard" element={<Dashboard />}>
-          <Route index element={<Invoices />} />
+          <Route index element={<DashboardHome />} />
           <Route path="invoices" element={<Invoices />} />
           <Route path="invoices/create" element={<CreateInvoice />} />
           <Route path="invoices/recurring" element={<RecurringInvoice />} />

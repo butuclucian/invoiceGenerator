@@ -1,22 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Home/Navbar';
-import ScrollDownPopup from '../components/ScrollDownPopup';
 import Footer from '../components/Home/Footer';
 import Navbar2 from '../components/Home/Navbar2';
 import API from '../utils/api';
 
 const Home = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeCard, setActiveCard] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     API.get("/users/me") 
       .then((res) => {
         setIsLoggedIn(true);
-        
       })
       .catch((err) => {
         setIsLoggedIn(false);
@@ -30,7 +26,7 @@ const Home = () => {
     { value: " NOW!", transparent: false },
   ];
 
-  const subtext = "with invoiceGenAi";
+  const subtext = "powered by local AI (Ollama 3.1)";
 
   const container = {
     hidden: { opacity: 0 },
@@ -56,93 +52,52 @@ const Home = () => {
       </motion.span>
     ));
 
-  const cardsData = [
+  const workflowData = [
     {
-      title: "Pick your invoice",
-      description:
-        "Save time as an entrepreneur or small business owner, by creating smart branded invoice with our free invoice templates. Download, add your business information and the payment details, and you’re done.",
+      title: "Inbox Sync",
+      description: "Our system connects to your email and scans for billing requests every 30 seconds. Uninterrupted flow.",
     },
     {
-      title: "Save or share your invoice",
-      description:
-        "Save your invoice to your own records, and share it online or in hard copy with your client to acknowledge their payment.",
+      title: "AI Drafts",
+      description: "Ollama 3.1 reads the context and auto-generates the invoice data locally, without sending info to the cloud.",
     },
     {
-      title: "Receiving payments from abroad?",
-      description:
-        "The invoiceGenAi account is the perfect fit if you're receiving payments from abroad. Get bank account details in 10 different currencies, to get paid like a local from around the world.",
-      linkText: "Find out more.",
-      linkUrl: "/find-out-more",
+      title: "Send & Get Paid",
+      description: "Review the AI draft, approve it with one click, and track your payments seamlessly.",
+      linkText: "Explore features",
+      linkUrl: "/features",
     },
   ];
 
-  const templatesData = [
-    {
-      title: "Classic Design",
-      description: "Perfect for standard business billing."
-    },
-    {
-      title: "Modern Design",
-      description: "A sleek approach for freelancers."
-    },
-    {
-      title: "Minimalist Design",
-      description: "Clean and straight to the point."
+  const itemVariants = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { duration: 0.6, ease: [0.215, 0.61, 0.355, 1.0] } 
     }
-  ];
-
-  
-  const blogPosts = [
-    {
-      id: 1,
-      tag: "Product Update",
-      title: "Introducing Smart AI Invoicing: Get paid 2x faster",
-      description: "Discover how our new machine learning algorithms predict the best time to send invoices to your clients.",
-      image: "https://images.unsplash.com/photo-1664575602276-bc303c004a43?q=80&w=2070&auto=format&fit=crop", 
-      isLarge: true,
-      darkText: false,
-    },
-    {
-      id: 2,
-      tag: "Guide",
-      title: "5 Tax Season Tips for Freelancers in 2026",
-      description: "Don't let tax season overwhelm you. Here is your ultimate checklist.",
-      image: "",
-      isLarge: false,
-      darkText: true,
-      // Folosim același stil ca la cardul 2 din "How it works"
-      bgColor: "border-2 border-[#1E1E1E] bg-transparent", 
-    },
-    {
-      id: 3,
-      tag: "Business",
-      title: "How to handle late payments gracefully",
-      description: "Templates and strategies to maintain client relationships while securing your cashflow.",
-      image: "",
-      isLarge: false,
-      darkText: false,
-      // Folosim același stil ca la cardul 1/3 din "How it works"
-      bgColor: "bg-[#1E1E1E] shadow-xl", 
-    }
-  ];
+  };
 
   return (
-    <div>
+    <div className="bg-[#E8E8E8] min-h-screen selection:bg-[#1E1E1E] selection:text-[#E8E8E8] overflow-hidden">
       <Navbar2 />
 
-      {/* hero section */}
+      {/* ========================================================= */}
+      {/* HERO SECTION */}
+      {/* ========================================================= */}
       <div className="h-screen bg-[#E8E8E8] relative flex items-center justify-center p-2 overflow-hidden">
-        <div className="w-full h-full bg-[#1E1E1E] rounded-4xl overflow-hidden relative flex flex-col justify-center">
+        <div className="w-full h-full bg-[#1E1E1E] rounded-[2.5rem] overflow-hidden relative flex flex-col justify-center">
+          
           {/* buttons */}
-          <div className="absolute top-8 right-20 flex items-center gap-4 z-50">
+          <div className="absolute top-8 right-8 md:right-20 flex items-center gap-4 z-50">
             {isLoggedIn ? (
-              <Link to="/dashboard" className="text-[#E8E8E8] text-sm border-2 border-[#E8E8E8] px-6 py-2 rounded-full font-bold hover:bg-[#E8E8E8]/20 transition-colors">
-              Dashboard
-            </Link>
-            ): (
-              <Link to="/register" className="text-[#E8E8E8] text-sm border-2 border-[#E8E8E8] px-6 py-2 rounded-full font-bold hover:bg-[#E8E8E8]/20 transition-colors">
-              Get Started
-            </Link>
+              <Link to="/dashboard" className="text-[#E8E8E8] text-sm border-2 border-[#E8E8E8] px-6 py-2 rounded-full font-bold hover:bg-[#E8E8E8]/20 transition-colors uppercase tracking-widest hidden md:block">
+                Dashboard
+              </Link>
+            ) : (
+              <Link to="/register" className="text-[#E8E8E8] text-sm border-2 border-[#E8E8E8] px-6 py-2 rounded-full font-bold hover:bg-[#E8E8E8]/20 transition-colors uppercase tracking-widest hidden md:block">
+                Get Started
+              </Link>
             )}
             
             <img src={menuOpen ? "OpenMenu.png" : "menu.png"} alt="Menu" className="w-7 h-auto cursor-pointer" onClick={() => setMenuOpen(!menuOpen)}/>
@@ -151,355 +106,202 @@ const Home = () => {
           {/* Fullscreen Overlay Menu */}
           {menuOpen && (
             <motion.div initial={{ y: "-100%" }} animate={{ y: 0 }} exit={{ y: "-100%" }} transition={{ duration: 0.5 }} className="fixed inset-0 bg-[#1E1E1E]/90 backdrop-blur-md z-40 flex flex-col h-screen">
-              <div className="grid grid-cols-3 grid-rows-2 flex-1 border-0 text-white">
-                {["About", "Templates", "Pricing", "Contact"].map(
+              <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 flex-1 border-0 text-white pt-20 md:pt-0">
+                {["Dashboard", "Features", "Pricing", "Contact"].map(
                   (item, idx) => (
-                    <Link key={idx} to={`/${item.toLowerCase()}`} className="border border-[#E8E8E8] flex items-center justify-center text-7xl font-bold cursor-pointer hover:bg-white/10 tracking-[-11%] text-[#E8E8E8] no-underline">
+                    <Link key={idx} to={`/${item.toLowerCase()}`} className="border border-[#E8E8E8] flex items-center justify-center text-5xl md:text-7xl font-bold cursor-pointer hover:bg-white/10 tracking-[-11%] text-[#E8E8E8] no-underline py-10 md:py-0">
                       {item}
                     </Link>
                   ),
                 )}
-                <div className="text-[#E8E8E8] p-8 flex flex-col justify-center h-full max-w-xl mx-auto">
+                <div className="text-[#E8E8E8] p-8 flex flex-col justify-center h-full max-w-xl mx-auto hidden md:flex">
                   <h2 className="text-xs uppercase tracking-[0.2em] text-[#E8E8E8] font-black mb-6">
-                    // Our offices
+                    // Local AI Status
                   </h2>
-
-                  <div className="grid grid-cols-2 gap-8 text-left">
-                    <div className="group cursor-pointer">
-                      <h3 className="text-lg font-bold tracking-tight transition-colors group-hover:text-gray-400">
-                        Timisoara.
-                      </h3>
-                      <p className="text-sm text-[#E8E8E8] mt-1 leading-relaxed">
-                        Str. Macilor
-                        <br />
-                        51, Timisoara, RO
-                      </p>
-                    </div>
-
-                    <div className="group cursor-pointer">
-                      <h3 className="text-lg font-bold tracking-tight transition-colors group-hover:text-gray-400">
-                        Iasi.
-                      </h3>
-                      <p className="text-sm text-[#E8E8E8] mt-1 leading-relaxed">
-                        Str. Mihai Viteazul
-                        <br />
-                        71, Iasi, RO
-                      </p>
-                    </div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                    <p className="text-sm font-bold tracking-widest uppercase">Ollama 3.1 Active</p>
                   </div>
                 </div>
-
               </div>
             </motion.div>
           )}
 
           {/* Hero Typography Content */}
-          <div className="ml-2">
-            <div className="ml-2">
-              <motion.div variants={container} initial="hidden" animate="visible" className="mt-15 w-full max-w-4xl text-white ml-3 font-bold text-[120px] lg:text-[190px] tracking-[-11%] leading-[0.8] [-webkit-text-stroke:2px_white]">
-                {text.map((part, i) => (
-                  <span  key={i} className={part.transparent ? "text-transparent tracking-[-10%]" : ""}>
-                    {renderText(part.value)}
-                  </span>
-                ))}
-              </motion.div>
+          <div className="ml-4 md:ml-10 z-10">
+            <motion.div variants={container} initial="hidden" animate="visible" className="mt-15 w-full max-w-5xl text-white ml-0 md:ml-3 font-bold text-[80px] md:text-[140px] lg:text-[180px] tracking-[-11%] leading-[0.8] [-webkit-text-stroke:2px_white]">
+              {text.map((part, i) => (
+                <span key={i} className={part.transparent ? "text-transparent tracking-[-10%]" : ""}>
+                  {renderText(part.value)}
+                </span>
+              ))}
+            </motion.div>
 
-              <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.5, duration: 0.8 }} className="text-white text-2xl pl-34 mt-4 font-handwriting">
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.5, duration: 0.8 }} className="flex items-center gap-4 mt-8 md:pl-34">
+              <span className="px-4 py-2 bg-[#E8E8E8] text-[#1E1E1E] text-xs font-black uppercase tracking-widest rounded-full">
+                V 2.0
+              </span>
+              <h1 className="text-white text-xl md:text-2xl font-handwriting">
                 {subtext}
-              </motion.h1>
-            </div>
+              </h1>
+            </motion.div>
           </div>
 
         </div>
       </div>
 
-      
+      {/* ========================================================= */}
+      {/* FEATURE 1: OLLAMA 3.1 (LOCAL BRAIN) */}
+      {/* ========================================================= */}
+      <div className="w-full max-w-[1700px] mx-auto py-24 md:py-32 px-4 md:px-8">
+        <div className="flex flex-col lg:flex-row items-center gap-16">
+          
+          <div className="flex-1 w-full">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="font-bold text-[60px] md:text-[100px] lg:text-[130px] tracking-[-8%] leading-[0.8] uppercase select-none mb-8">
+              <span className="text-[#1E1E1E]">LOCAL </span>
+              <br className="hidden md:block"/>
+              <span className="text-transparent [-webkit-text-stroke:2px_#1E1E1E]">BRAIN.</span>
+            </motion.div>
+            
+            <p className="text-[#1E1E1E] text-xl font-handwriting max-w-md mb-8">
+              100% privacy. Zero cloud data leaks.
+            </p>
 
-      {/* how it works section */}
-      <div className="mx-auto relative overflow-hidden select-none flex items-center justify-center py-20 pb-75 px-4 w-full">
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-48 h-auto hidden md:block pointer-events-none z-0">
-          <img
-            src="/Chenar2.png"
-            alt="Background"
-            className="w-full h-auto object-cover"
-          />
+            <p className="text-[#1E1E1E]/80 text-lg md:text-xl font-bold max-w-xl leading-relaxed mb-8">
+              We completely ditched cloud APIs. Your invoice generation runs <span className="bg-[#1E1E1E] text-white px-2 py-1 rounded-md mx-1">Ollama 3.1</span> directly in your local environment. Your client data never leaves your system.
+            </p>
+          </div>
+
+          <div className="flex-1 w-full relative">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} viewport={{ once: true }} className="bg-white border-4 border-[#1E1E1E] rounded-[2.5rem] p-8 md:p-12 shadow-[16px_16px_0px_0px_rgba(30,30,30,1)] relative overflow-hidden">
+              
+              <div className="flex items-center gap-2 mb-8 pb-6 border-b-4 border-[#1E1E1E]">
+                <div className="w-4 h-4 rounded-full border-2 border-[#1E1E1E] bg-[#E8E8E8]"></div>
+                <div className="w-4 h-4 rounded-full border-2 border-[#1E1E1E] bg-[#E8E8E8]"></div>
+                <div className="w-4 h-4 rounded-full border-2 border-[#1E1E1E] bg-[#E8E8E8]"></div>
+                <span className="ml-auto text-xs font-black uppercase tracking-widest text-[#1E1E1E]">Terminal</span>
+              </div>
+              
+              <div className="font-mono text-sm md:text-base text-[#1E1E1E] space-y-4 font-bold">
+                <p className="text-gray-500">{`> initializing ollama serve...`}</p>
+                <p className="text-gray-500">{`> loading model 'llama3.1'...`}</p>
+                <p className="text-purple-600 bg-purple-100 inline-block px-2">{`> model loaded locally. [OK]`}</p>
+                <p className="mt-4">{`> extracting invoice data from context...`}</p>
+                <div className="pl-4 border-l-4 border-[#1E1E1E]">
+                  <p>{`{ "client": "TechCorp", "amount": 4500, "status": "generated" }`}</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
         </div>
+      </div>
 
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-96 lg:w-125 h-auto hidden md:block pointer-events-none z-0">
-          <img
-            src="/Circles.png"
-            alt="Background"
-            className="w-full h-auto object-cover"
-          />
+      {/* ========================================================= */}
+      {/* FEATURE 2: 30-SECOND AUTOPILOT */}
+      {/* ========================================================= */}
+      <div className="w-full max-w-[1700px] mx-auto pb-24 md:pb-32 px-4 md:px-8">
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} 
+          className="bg-purple-500 rounded-[3rem] p-8 md:p-20 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-12 border-4 border-[#1E1E1E] shadow-[16px_16px_0px_0px_rgba(30,30,30,1)]">
+          
+          <div className="absolute -left-20 -bottom-20 w-80 h-80 border-8 border-[#1E1E1E]/20 rounded-full pointer-events-none"></div>
+
+          <div className="relative z-10 w-full md:w-1/2">
+            <span className="inline-block px-6 py-3 bg-[#1E1E1E] text-white text-xs font-black uppercase tracking-[0.2em] rounded-full mb-8 border-2 border-[#1E1E1E]">
+              // AUTOPILOT ENABLED
+            </span>
+            <h2 className="text-[50px] md:text-[80px] font-black uppercase leading-[0.9] text-[#1E1E1E] tracking-tighter mb-6">
+              NEVER MISS <br/>A BILL.
+            </h2>
+            <p className="text-[#1E1E1E] text-lg md:text-xl font-bold leading-relaxed max-w-lg">
+              Our background worker connects to your inbox. Every <span className="bg-[#1E1E1E] text-white px-2 py-1 mx-1 rounded">30 seconds</span>, it scans for client emails, detects billing requests, and auto-drafts the invoice instantly.
+            </p>
+          </div>
+
+          <div className="relative z-10 w-full md:w-1/3 flex justify-center">
+            <div className="w-64 h-64 rounded-full border-8 border-[#1E1E1E] flex items-center justify-center relative bg-[#E8E8E8] shadow-inner">
+              <div className="absolute inset-4 border-4 border-dashed border-[#1E1E1E]/30 rounded-full animate-[spin_10s_linear_infinite]"></div>
+              <div className="text-center z-10 bg-[#E8E8E8] px-4 py-2 rounded-xl border-2 border-[#1E1E1E]">
+                <span className="text-6xl font-black text-[#1E1E1E] block tracking-tighter">30s</span>
+                <span className="text-xs font-black uppercase tracking-widest text-[#1E1E1E]">Sync</span>
+              </div>
+            </div>
+          </div>
+          
+        </motion.div>
+      </div>
+
+      {/* ========================================================= */}
+      {/* WORKFLOW SECTION */}
+      {/* ========================================================= */}
+      <div className="w-full max-w-[1700px] mx-auto pb-24 md:pb-32 px-4 md:px-8 select-none">
+        
+        <div className="w-full mb-16">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="font-bold text-[60px] md:text-[100px] lg:text-[130px] tracking-[-8%] leading-[0.8] uppercase select-none mb-6">
+            <span className="text-[#1E1E1E]">ONE </span>
+            <span className="text-transparent [-webkit-text-stroke:2px_#1E1E1E]">PLATFORM.</span>
+          </motion.div>
+          <p className="text-[#1E1E1E] text-xl font-handwriting max-w-md">
+            Your entire billing workflow, automated and connected.
+          </p>
         </div>
 
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true, margin: "-50px" }}
           variants={{
             hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: {
-                staggerChildren: 0.15,
-              },
-            },
+            visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
           }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-4 lg:gap-6 w-full max-w-[1700px] mx-auto relative z-10"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 w-full relative z-10"
         >
-          {/* div1 */}
-          <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 30 },
-              visible: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.8, ease: [0.215, 0.61, 0.355, 1.0] },
-              },
-            }}
-            className="flex flex-col items-center text-center pt-4"
-          >
-            <div className="w-full aspect-video md:aspect-16/8 bg-[#1E1E1E] rounded-3xl p-6 flex flex-col justify-center relative shadow-xl">
-              <h3 className="text-white text-lg md:text-xl font-bold tracking-tight mb-2">
-                {cardsData[0].title}
-              </h3>
-              <p className="text-xs text-gray-400 leading-relaxed font-light line-clamp-3">
-                {cardsData[0].description}
-              </p>
+          {workflowData.map((card, index) => {
+            const isMiddle = index === 1;
+            const isLast = index === 2;
+            
+            return (
+              <motion.div key={index} variants={itemVariants} 
+                className={`relative flex flex-col p-8 lg:p-12 rounded-[2.5rem] transition-all duration-500 group h-full border-4 border-[#1E1E1E]
+                ${isMiddle ? "bg-transparent text-[#1E1E1E] hover:bg-white" 
+                : isLast ? "bg-purple-500 text-[#1E1E1E] hover:bg-purple-400" 
+                : "bg-[#1E1E1E] text-white shadow-[12px_12px_0px_0px_rgba(30,30,30,0.2)] md:scale-105 z-10 lg:py-16"}`}>
+                
+                <div className="mb-10">
+                  <span className={`text-[80px] lg:text-[100px] font-black tracking-tighter leading-none block mb-4
+                    ${isMiddle || isLast ? "text-transparent [-webkit-text-stroke:2px_#1E1E1E]" 
+                    : "text-transparent [-webkit-text-stroke:2px_#E8E8E8]"}`}>
+                    0{index + 1}
+                  </span>
+                  <h3 className="text-2xl md:text-3xl font-black tracking-tight leading-none mb-4 uppercase">
+                    {card.title}
+                  </h3>
+                  <p className={`text-sm md:text-base font-bold leading-relaxed ${isMiddle || isLast ? "text-[#1E1E1E]/80" : "text-gray-300"}`}>
+                    {card.description}
+                  </p>
+                </div>
 
-              <motion.div
-                variants={{
-                  hidden: { scale: 0.9, opacity: 0, rotate: 0 },
-                  visible: {
-                    scale: 1,
-                    opacity: 1,
-                    rotate: -8,
-                    transition: { delay: 0.4, duration: 0.5 },
-                  },
-                }}
-                className="absolute -bottom-6 left-1/2 -translate-x-1/2 md:left-32 md:translate-x-0 w-45 h-14 bg-[#1E1E1E] border border-[#E8E8E8] text-white py-2 px-4 rounded-xl text-xs tracking-wider flex items-center justify-between shadow-xl origin-center"
-              >
-                <span></span>
+                <div className="mt-auto">
+                  {card.linkText ? (
+                    <Link to={card.linkUrl} className={`w-full block py-5 rounded-full font-black text-sm uppercase tracking-widest text-center transition-all duration-300 border-2 border-[#1E1E1E]
+                      ${isLast ? "bg-[#1E1E1E] text-[#E8E8E8] hover:bg-transparent hover:text-[#1E1E1E]" 
+                      : "bg-[#E8E8E8] text-[#1E1E1E] hover:bg-transparent"}`}>
+                      {card.linkText}
+                    </Link>
+                  ) : (
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 
+                      ${isMiddle ? "border-[#1E1E1E] text-[#1E1E1E]" : "border-[#E8E8E8] text-[#E8E8E8]"}`}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                      </svg>
+                    </div>
+                  )}
+                </div>
+
               </motion.div>
-            </div>
-          </motion.div>
-
-          {/* div2 */}
-          <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 30 },
-              visible: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.8, ease: [0.215, 0.61, 0.355, 1.0] },
-              },
-            }}
-            className="flex flex-col items-center text-center pt-4 relative"
-          >
-            <div className="w-full aspect-video md:aspect-16/8 border-2 border-[#1E1E1E] rounded-3xl p-6 flex flex-col justify-center relative bg-transparent">
-              <h3 className="text-[#1E1E1E] text-lg md:text-xl font-bold tracking-tight mb-2">
-                {cardsData[1].title}
-              </h3>
-              <p className="text-xs text-gray-600 leading-relaxed font-light line-clamp-3">
-                {cardsData[1].description}
-              </p>
-
-              <motion.div
-                variants={{
-                  hidden: { scale: 0, opacity: 0 },
-                  visible: {
-                    scale: 1,
-                    opacity: 1,
-                    transition: { delay: 0.5, type: "spring", stiffness: 150 },
-                  },
-                }}
-                className="absolute -bottom-8 md:-bottom-10 left-1/2 -translate-x-1/2 w-16 h-16 md:w-20 md:h-20 bg-[#1E1E1E] rounded-full flex items-center justify-center shadow-md origin-center"
-              >
-                <span></span>
-              </motion.div>
-            </div>
-          </motion.div>
-
-          {/* div3 */}
-          <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 30 },
-              visible: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.8, ease: [0.215, 0.61, 0.355, 1.0] },
-              },
-            }}
-            className="flex flex-col items-center text-center pt-4 relative"
-          >
-            <div className="w-full aspect-video md:aspect-16/8 bg-[#1E1E1E] rounded-3xl p-6 flex flex-col justify-center relative shadow-xl">
-              <motion.div
-                variants={{
-                  hidden: { y: -20, opacity: 0 },
-                  visible: {
-                    y: 0,
-                    opacity: 1,
-                    transition: { delay: 0.6, duration: 0.4 },
-                  },
-                }}
-                className="absolute -top-8 md:-top-10 right-1/2 translate-x-1/2 md:right-8 md:translate-x-0 w-10 h-16 md:w-12 md:h-20 bg-[#1E1E1E] border border-[#E8E8E8] rounded-xl flex items-center justify-center shadow-xl"
-              >
-                <span></span>
-              </motion.div>
-
-              <h3 className="text-white text-lg md:text-xl font-bold tracking-tight mb-2">
-                {cardsData[2].title}
-              </h3>
-              <p className="text-xs text-gray-400 leading-relaxed font-light line-clamp-3 mb-1">
-                {cardsData[2].description}
-              </p>
-              {cardsData[2].linkText && (
-                <Link
-                  to={cardsData[2].linkUrl}
-                  className="text-xs text-purple-400 underline font-medium inline-block hover:text-purple-300 transition-colors"
-                >
-                  {cardsData[2].linkText}
-                </Link>
-              )}
-            </div>
-          </motion.div>
+            )
+          })}
         </motion.div>
-      </div>
-
-      {/* templates section */}
-      <div className="max-w-8xl mx-auto py-20 px-4 w-full">
-        
-        <h2 className="text-3xl md:text-4xl font-bold text-[#1E1E1E] tracking-tight text-center mb-10">
-          Our Templates
-        </h2>
-
-        <div className="flex flex-col md:flex-row max-w-[1700px] mx-auto h-[600px] gap-4" onMouseLeave={() => setActiveCard(0)}>
-          {templatesData.map((template, index) => (
-            <div key={index} onMouseEnter={() => setActiveCard(index)}
-              className={`transition-all duration-500 ease-in-out bg-[#1E1E1E] rounded-4xl cursor-pointer relative overflow-hidden shadow-lg ${
-                activeCard === index ? "flex-3" : "flex-1"}`}>
-              
-              <div className={`absolute inset-0 p-8 flex flex-col justify-end transition-opacity duration-300 delay-150 ${
-                  activeCard === index ? "opacity-100" : "opacity-0"}`}>
-                <h3 className="text-white text-2xl font-bold whitespace-nowrap">
-                  {template.title}
-                </h3>
-                <p className="text-gray-400 text-sm mt-2 whitespace-nowrap">
-                  {template.description}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* blog section - ACUM ADAPTATĂ LA TEMA TA */}
-      <div className="w-full max-w-[1700px] mx-auto px-4 py-24 mb-10">
-        {/* Header-ul secțiunii - Folosim culorile #1E1E1E pentru consistență */}
-        <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
-          <div>
-            <h2 className="text-4xl md:text-5xl font-bold text-[#1E1E1E] tracking-tight">
-              Latest Insights
-            </h2>
-            <p className="text-gray-600 mt-2 text-lg font-light">
-              Resources and tips to grow your freelance business.
-            </p>
-          </div>
-          <button className="text-[#1E1E1E] font-bold border-b-2 border-[#1E1E1E] pb-1 hover:opacity-70 transition-opacity">
-            View all articles
-          </button>
-        </div>
-
-        {/* Grid-ul Asimetric */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-auto lg:h-[600px]">
-          
-          {/* Articolul Principal */}
-          <motion.div 
-            whileHover="hover"
-            className="lg:col-span-8 relative rounded-3xl overflow-hidden cursor-pointer group h-[400px] lg:h-full flex flex-col justify-end p-8 md:p-12 bg-[#1E1E1E]"
-          >
-            <motion.div 
-              variants={{ hover: { scale: 1.05 } }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="absolute inset-0 bg-cover bg-center z-0"
-              style={{ backgroundImage: `url(${blogPosts[0].image})` }}
-            />
-            <div className="absolute inset-0 bg-linear-to-t from-[#1E1E1E] via-[#1E1E1E]/40 to-transparent z-0" />
-            
-            <div className="relative z-10 w-full md:w-3/4">
-              <span className="inline-block px-4 py-1 rounded-full bg-white/10 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider mb-4 border border-[#E8E8E8]/30">
-                {blogPosts[0].tag}
-              </span>
-              <h3 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">
-                {blogPosts[0].title}
-              </h3>
-              <p className="text-gray-300 text-sm md:text-base font-light hidden md:block mb-6">
-                {blogPosts[0].description}
-              </p>
-              <div className="flex items-center gap-2 text-white font-medium">
-                Read Article 
-                <motion.span variants={{ hover: { x: 5 } }} transition={{ duration: 0.2 }}>
-                  →
-                </motion.span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Coloana din dreapta */}
-          <div className="lg:col-span-4 flex flex-col gap-4 lg:gap-6 h-full">
-            
-            {/* Articol Secundar 1 - Sincronizat cu stilul transparent din "How it works" */}
-            <motion.div 
-              whileHover="hover"
-              className={`flex-1 rounded-3xl p-8 flex flex-col justify-between cursor-pointer group ${blogPosts[1].bgColor}`}
-            >
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[#1E1E1E] mb-4 block">
-                  {blogPosts[1].tag}
-                </span>
-                <h3 className={`text-2xl font-bold tracking-tight mb-3 text-[#1E1E1E]`}>
-                  {blogPosts[1].title}
-                </h3>
-                <p className="text-gray-600 font-light text-sm line-clamp-2">
-                  {blogPosts[1].description}
-                </p>
-              </div>
-              <div className={`flex items-center gap-2 font-medium mt-6 text-[#1E1E1E]`}>
-                Read Article
-                <motion.span variants={{ hover: { x: 5 } }} transition={{ duration: 0.2 }}>
-                  →
-                </motion.span>
-              </div>
-            </motion.div>
-
-            {/* Articol Secundar 2 - Sincronizat cu stilul solid #1E1E1E */}
-            <motion.div 
-              whileHover="hover"
-              className={`flex-1 rounded-3xl p-8 flex flex-col justify-between cursor-pointer group ${blogPosts[2].bgColor}`}
-            >
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4 block">
-                  {blogPosts[2].tag}
-                </span>
-                <h3 className={`text-2xl font-bold tracking-tight mb-3 text-white`}>
-                  {blogPosts[2].title}
-                </h3>
-                <p className="text-gray-400 font-light text-sm line-clamp-2">
-                  {blogPosts[2].description}
-                </p>
-              </div>
-              <div className={`flex items-center gap-2 font-medium mt-6 text-white`}>
-                Read Article
-                <motion.span variants={{ hover: { x: 5 } }} transition={{ duration: 0.2 }}>
-                  →
-                </motion.span>
-              </div>
-            </motion.div>
-
-          </div>
-        </div>
-        
       </div>
 
       <Footer />

@@ -1,15 +1,14 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { useNavigate } from "react-router-dom";
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from "sonner";
-
+import { Eye, EyeOff } from "lucide-react"; // Importăm iconițele
 
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // Starea pentru vizibilitate
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,7 +19,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const { data } = await axios.post( `${import.meta.env.VITE_API_URL}/auth/login`, formData);
+      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, formData);
       localStorage.setItem("token", data.token);
       toast.success("Welcome back!");
       navigate("/");
@@ -43,29 +42,52 @@ const Login = () => {
         <p className='font-bold tracking-[-13%] absolute top-50 left-195 text-9xl'>SIGN IN</p>
       </div>
 
-      
-
       <div className='w-full max-w-md mt-30 ml-10'>
         <form onSubmit={handleSubmit} className='flex flex-col gap-3'>
           <label>Email</label>
-          <input type="email" name="email" placeholder="Enter your email address" value={formData.email} onChange={handleChange} className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10' />
+          <input 
+            type="email" 
+            name="email" 
+            placeholder="Enter your email address" 
+            value={formData.email} 
+            onChange={handleChange} 
+            className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10' 
+          />
+          
           <label htmlFor="password">Password</label>
-          <input type="password" name="password" placeholder="Enter your password" value={formData.password} onChange={handleChange} className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10' />
+          {/* Container relativ pentru a poziționa iconița */}
+          <div className="relative w-full">
+            <input 
+              type={showPassword ? "text" : "password"} 
+              name="password" 
+              placeholder="Enter your password" 
+              value={formData.password} 
+              onChange={handleChange} 
+              className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10 w-full pr-12' 
+            />
+            <button 
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#1E1E1E] hover:text-purple-600 z-10"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+
           <button type="submit" disabled={loading} className='bg-[#1E1E1E] text-white pt-3 pb-3 rounded-xl hover:bg-[#333] mt-5'>
             {loading ? "Signing in..." : "Continue"}
           </button>
         </form>
         
-
         <div className="text-center mt-6 text-sm text-[#1E1E1E]">
-          Already have an account?
-          <Link to="/register" className="text-[#1E1E1E] hover:underline">
+          Don't have an account?
+          <Link to="/register" className="text-[#1E1E1E] hover:underline ml-1 font-bold">
             Register
           </Link>
         </div>
-
       </div>
 
+      {/* Imaginile tale de background păstrate */}
       <div className=''>
         <img src="INVBLACK.png" alt="" className='left-300 bottom-180 rotate-20 absolute' />
         <img src="INVBLACK.png" alt="" className='left-315 top-150 rotate-340 absolute' />
@@ -74,7 +96,6 @@ const Login = () => {
         <img src="invoiceGenAi1.png" alt="" className='left-60 top-107 absolute'/>
         <img src="invoiceGenAi2.png" alt="" className='right-155 bottom-162 absolute'/>
       </div>
-      
     </div>
   )
 }

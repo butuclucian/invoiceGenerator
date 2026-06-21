@@ -142,7 +142,7 @@ const MySubscription = () => {
   </div>
 </div>
 
-// 2. Înlocuiește Header-ul tău cu acesta (mai aerisit):
+
 <div className="flex flex-col mb-10">
   <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
     <Crown className="text-[#80FFF9]" size={26} />
