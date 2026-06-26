@@ -1,11 +1,12 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import Navbar2 from "../../components/Home/Navbar2";
+import Footer from "../../components/Home/Footer";
 
 const Cookies = () => {
   const navigate = useNavigate();
 
-  // Variante pentru animații secvențiale
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -24,17 +25,11 @@ const Cookies = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#E8E8E8] pt-32 pb-24 px-4 overflow-hidden selection:bg-[#1E1E1E] selection:text-[#E8E8E8]">
-      <div className="max-w-[1700px] mx-auto">
+    <div className="min-h-screen bg-[#E8E8E8] pt-32 overflow-hidden selection:bg-[#1E1E1E] selection:text-[#E8E8E8]">
+      <Navbar2 />
+      <div className="max-w-9xl mx-auto px-4 md:px-8 pb-24 md:pb-16">
         
-        {/* Buton de Back */}
-        <motion.button 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, ease: [0.215, 0.61, 0.355, 1.0] }}
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-3 text-[#1E1E1E] font-bold uppercase tracking-widest text-sm mb-12 group hover:text-purple-600 transition-colors"
-        >
+        <motion.button initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, ease: [0.215, 0.61, 0.355, 1.0] }} onClick={() => navigate(-1)} className="flex items-center gap-3 text-[#1E1E1E] font-bold uppercase tracking-widest text-sm mb-12 group hover:text-purple-600 transition-colors">
           <div className="w-12 h-12 rounded-full border-2 border-[#1E1E1E] flex items-center justify-center group-hover:bg-[#1E1E1E] group-hover:text-[#E8E8E8] group-hover:border-[#1E1E1E] transition-all duration-300">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform duration-300">
               <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -43,42 +38,19 @@ const Cookies = () => {
           Go Back
         </motion.button>
 
-        {/* Header Section: Tipografie Masivă */}
         <div className="flex flex-col mb-16 relative">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.215, 0.61, 0.355, 1.0] }}
-            className="w-full font-bold text-[80px] md:text-[140px] lg:text-[180px] tracking-[-9%] leading-[0.8] uppercase select-none"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.215, 0.61, 0.355, 1.0] }} className="w-full font-bold text-[80px] md:text-[140px] lg:text-[180px] tracking-[-9%] leading-[0.8] uppercase select-none">
             <span className="text-transparent [-webkit-text-stroke:2px_#1E1E1E]">COOKIE </span>
             <span className="text-[#1E1E1E]">POLICY.</span>
           </motion.div>
           
-          <motion.p 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-[#1E1E1E] text-xl md:text-3xl pl-2 md:pl-34 mt-8 font-handwriting max-w-3xl"
-          >
+          <motion.p initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4, duration: 0.8 }} className="text-[#1E1E1E] text-xl md:text-3xl pl-2 md:pl-34 mt-8 font-handwriting max-w-3xl">
             How and why we use cookies on invoiceGenAi.
           </motion.p>
         </div>
 
-        {/* Grid Asimetric pentru Conținut */}
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 md:grid-cols-12 gap-6"
-        >
-          
-          {/* Card 1: Tipurile de Cookie-uri (Dark & Massive) */}
-          <motion.div 
-            variants={itemVariants}
-            className="md:col-span-8 bg-[#1E1E1E] text-[#E8E8E8] rounded-[2.5rem] p-10 md:p-16 flex flex-col relative overflow-hidden group shadow-2xl"
-          >
-            {/* Background Accent */}
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          <motion.div variants={itemVariants} className="md:col-span-8 bg-[#1E1E1E] text-[#E8E8E8] rounded-[2.5rem] p-10 md:p-16 flex flex-col relative overflow-hidden group shadow-2xl">
             <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
             
             <div className="relative z-10">
@@ -114,14 +86,9 @@ const Cookies = () => {
             </div>
           </motion.div>
 
-          {/* Coloana din dreapta pentru elemente secundare */}
           <div className="md:col-span-4 flex flex-col gap-6">
             
-            {/* Card 2: Third-Party (Outlined Minimalist) */}
-            <motion.div 
-              variants={itemVariants}
-              className="flex-1 border-2 border-[#1E1E1E] bg-transparent text-[#1E1E1E] rounded-[2.5rem] p-10 flex flex-col justify-between group hover:bg-[#1E1E1E] hover:text-[#E8E8E8] transition-colors duration-500"
-            >
+            <motion.div variants={itemVariants} className="flex-1 border-2 border-[#1E1E1E] bg-transparent text-[#1E1E1E] rounded-[2.5rem] p-10 flex flex-col justify-between group hover:bg-[#1E1E1E] hover:text-[#E8E8E8] transition-colors duration-500">
               <div>
                 <span className="text-sm font-bold uppercase tracking-[0.2em] mb-6 block transition-colors duration-500">
                   // 02 Third-Party
@@ -143,12 +110,8 @@ const Cookies = () => {
               </div>
             </motion.div>
 
-            {/* Card 3: Cookie Control (Accent Purple) */}
-            <motion.div 
-              variants={itemVariants}
-              className="flex-1 bg-purple-500 text-[#1E1E1E] rounded-[2.5rem] p-10 relative overflow-hidden"
-            >
-              {/* Geometrie de fundal */}
+
+            <motion.div variants={itemVariants} className="flex-1 bg-purple-500 text-[#1E1E1E] rounded-[2.5rem] p-10 relative overflow-hidden">
               <div className="absolute -right-10 -bottom-10 w-40 h-40 border-4 border-[#1E1E1E]/20 rounded-full"></div>
               
               <div className="relative z-10 h-full flex flex-col justify-between">
@@ -168,6 +131,7 @@ const Cookies = () => {
           </div>
         </motion.div>
       </div>
+      <Footer />
     </div>
   );
 };

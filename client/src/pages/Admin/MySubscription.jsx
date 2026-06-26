@@ -1,274 +1,126 @@
 import React, { useEffect, useState } from "react";
-import { CheckCircle, AlertTriangle, Sparkles, Clock, Zap, ArrowUpRight, Crown, CreditCard, Rocket, ShieldCheck,} from "lucide-react";
+import { Crown, Zap, ShieldCheck, RefreshCw, XCircle, CreditCard, CheckCircle, Clock } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import API from "../../utils/api";
-
 
 const MySubscription = () => {
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
 
-  // 🔹 Fetch real subscription data
   useEffect(() => {
-    const fetchSubscription = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          toast.error("Please log in to view your subscription.");
-          setLoading(false);
-          return;
-        }
-
-        const { data } = await API.get("/subscription/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        setSubscription(data);
-      } catch (err) {
-        console.error("Subscription fetch error:", err);
-        toast.error(
-          err.response?.data?.message || "Failed to load subscription data."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchSubscription();
   }, []);
 
-  const handleUpgrade = async (target) => {
+  const fetchSubscription = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Please log in to upgrade your plan.");
-        window.location.href = "/login";
-        return;
-      }
-
-      //  Trimite cererea la backend pentru a crea o sesiune Stripe
-      const { data } = await API.post(
-        "/subscription/create-checkout-session",
-        { plan: target.toLowerCase() },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (data?.url) {
-        toast.success(`Redirecting to Stripe Checkout (${target})...`);
-        window.location.href = data.url; 
-      } else {
-        toast.error("Failed to start checkout.");
-      }
+      setLoading(true);
+      const { data } = await API.get("/subscription/me");
+      setSubscription(data);
     } catch (err) {
-      console.error("Upgrade error:", err);
-      toast.error("Stripe checkout failed. Try again later.");
+      toast.error("Nu am putut încărca datele abonamentului.");
+    } finally {
+      setLoading(false);
     }
   };
 
-
-  const handleManageBilling = () => {
-    toast.info("Opening Stripe Billing Portal...");
-    window.location.href = "/dashboard/billing";
+  const handleAction = async (endpoint) => {
+    setActionLoading(true);
+    try {
+      const { data } = await API.post(`/subscription/${endpoint}`);
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        toast.success("Acțiune finalizată cu succes!");
+        fetchSubscription();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Eroare la procesare.");
+    } finally {
+      setActionLoading(false);
+    }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0e0e0e] text-white">
-        <div className="flex flex-col items-center">
-          <Clock className="animate-spin text-[#80FFF9]" size={28} />
-          <p className="mt-4 text-gray-400">Loading your subscription...</p>
-        </div>
-      </div>
-    );
-  }
 
   const plan = subscription?.plan || "Free";
   const isActive = subscription?.status === "Active";
 
-  const planColors = {
-    Free: "from-gray-800/60 to-gray-900/80 border-white/10",
-    Pro: "from-indigo-600/25 to-purple-600/25 border-[#80FFF9]/30",
-    Enterprise: "from-[#CB52D4]/25 to-[#80FFF9]/25 border-[#CB52D4]/30",
-  };
-
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white px-8 py-12">
-      {/* ===== HEADER ===== */}
-      <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-4">
-        {/* title + subtitle */}
-        <div>
-          <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
-            <Crown className="text-[#80FFF9]" size={26} />
-            My Subscription
-          </h1>
-          <p className="text-gray-400 text-sm">
-            Manage your billing plan, renewal and AI feature access
-          </p>
-        </div>
+    <div className="p-8 text-white min-h-screen bg-[#0e0e0e] relative pt-30 space-y-8">
+      {/* Background Glows */}
+      <div className="absolute top-20 right-10 w-72 h-72 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600/10 blur-3xl rounded-full pointer-events-none" />
 
-        {isActive && (
-          <div
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm border ${
-              plan === "Pro"
-                ? "text-[#80FFF9] border-[#80FFF9]/30 bg-[#80FFF9]/10"
-                : plan === "Enterprise"
-                ? "text-[#CB52D4] border-[#CB52D4]/30 bg-[#CB52D4]/10"
-                : "text-gray-400 border-white/10 bg-white/5"
-            }`}>
-            <Sparkles size={16} />
-            You’re {plan === "Enterprise" ? "Enterprise" : plan}!
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+        <h1 className="text-3xl font-extrabold flex items-center gap-3">
+          <Crown className="text-[#80FFF9]" size={30} />
+          My Subscription
+        </h1>
+        <p className="text-gray-400 mt-2 text-sm">Gestionează planul tău, facturarea și accesul la funcțiile AI.</p>
+      </div>
+
+      {/* ACTIVE PLAN CARD */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+        className="max-w-4xl mx-auto bg-[#121212]/60 border border-white/10 backdrop-blur-xl p-8 rounded-2xl mb-12 shadow-2xl"
+      >
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div>
+            <h2 className="text-sm uppercase tracking-widest text-gray-500 font-bold mb-2">Plan Curent</h2>
+            <div className="flex items-center gap-3">
+              <span className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                {plan}
+              </span>
+              <span className={`px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase ${isActive ? 'bg-teal-500/10 text-teal-400 border border-teal-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                {isActive ? "Activ" : "Inactiv"}
+              </span>
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* ===== MAIN CARD ===== */}
-      <div className={`max-w-4xl mx-auto bg-linear-to-br ${planColors[plan]} border rounded-2xl p-10 shadow-lg shadow-indigo-900/10 relative overflow-hidden transition-all`}>
-        <div className="absolute inset-0 bg-linear-to-r from-[#80FFF9]/5 to-[#CB52D4]/10 blur-3xl -z-10" />
-
-        {/* HEADER INFO */}
-        // 1. Adaugă acest "Status Badge" chiar sub Header-ul tău principal:
-
-{/* ===== STATUS BADGE FLOTANT ===== */}
-<div className="fixed top-24 right-8 z-50">
-  <div className={`flex items-center gap-2 px-4 py-2 rounded-full border shadow-xl backdrop-blur-md ${
-    plan === "Pro" 
-      ? "bg-indigo-950/50 border-[#80FFF9]/30 text-[#80FFF9]"
-      : plan === "Enterprise"
-      ? "bg-purple-950/50 border-[#CB52D4]/30 text-[#CB52D4]"
-      : "bg-gray-900/50 border-white/10 text-gray-400"
-  }`}>
-    <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-400 animate-pulse' : 'bg-gray-500'}`} />
-    <span className="text-sm font-semibold tracking-wide uppercase">{plan}</span>
-  </div>
-</div>
-
-
-<div className="flex flex-col mb-10">
-  <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
-    <Crown className="text-[#80FFF9]" size={26} />
-    My Subscription
-  </h1>
-  <p className="text-gray-400 text-sm">
-    Manage your billing plan, renewal and AI feature access
-  </p>
-</div>
-
-        {/* FEATURES */}
-        <div className="grid md:grid-cols-2 gap-4 mb-10 text-sm">
-          {plan === "Free" && (
-            <>
-              <Feature text="Up to 3 invoices / month" />
-              <Feature text="Basic client management" />
-              <Feature text="Email delivery for invoices" />
-              <Feature text="AI invoice generator unavailable" muted />
-            </>
-          )}
-          {plan === "Pro" && (
-            <>
-              <Feature text="Unlimited invoices" />
-              <Feature text="Smart analytics dashboard" />
-              <Feature text="AI invoice generator unlocked" />
-              <Feature text="Priority invoice email delivery" />
-            </>
-          )}
-          {plan === "Enterprise" && (
-            <>
-              <Feature text="Team analytics & reports" />
-              <Feature text="Priority AI processing" />
-              <Feature text="Dedicated 24/7 support" />
-              <Feature text="Custom integrations via API" />
-            </>
-          )}
+          <div className="flex gap-3">
+            <button 
+              onClick={() => handleAction("create-billing-portal")}
+              className="flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition text-sm"
+            >
+              <CreditCard size={16} /> Manage Billing
+            </button>
+            {isActive && (
+              <button 
+                onClick={() => handleAction("cancel")}
+                className="flex items-center gap-2 px-5 py-2.5 bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl transition text-sm"
+              >
+                <XCircle size={16} /> Anulează
+              </button>
+            )}
+          </div>
         </div>
+      </motion.div>
 
-        {/* ACTIONS */}
-        <div className="flex justify-end gap-4">
-          {plan === "Free" && (
-            <button onClick={() => handleUpgrade("Pro")} className="flex items-center gap-2 px-6 py-3 rounded-md bg-linear-to-r from-indigo-600 to-purple-600 text-white hover:opacity-90 transition-all shadow-lg shadow-indigo-800/20">
-              <Zap size={18} />
-              Upgrade to Pro
-            </button>
-          )}
-
-          {plan === "Pro" && isActive && (
-            <button onClick={handleManageBilling} className="flex items-center gap-2 px-6 py-3 border border-white/10 rounded-md text-gray-300 hover:bg-white/10 hover:text-white transition" >
-              <CreditCard size={16} />
-              Manage Billing
-            </button>
-          )}
-
-          {plan === "Enterprise" && isActive && (
-            <button onClick={() => toast.success("You're at the top tier!")} className="flex items-center gap-2 px-6 py-3 border border-white/10 rounded-md text-gray-300 hover:bg-white/10 hover:text-white transition">
-              <ShieldCheck size={16} />
-              Manage Account
-            </button>
-          )}
+      {/* UPGRADE TIERS */}
+      <div className="max-w-4xl mx-auto">
+        <h3 className="text-xl font-bold mb-6 text-center">Upgrade la un nivel superior</h3>
+        <div className="grid md:grid-cols-2 gap-6">
+          {[
+            { name: "Pro", desc: "Pentru freelanceri", icon: Zap, color: "teal" },
+            { name: "Enterprise", desc: "Pentru echipe mari", icon: ShieldCheck, color: "purple" }
+          ].map((tier) => (
+            <div key={tier.name} className="bg-[#151515] border border-white/10 p-6 rounded-2xl hover:border-white/20 transition">
+              <tier.icon className={`text-${tier.color}-400 mb-4`} size={32} />
+              <h4 className="text-lg font-bold">{tier.name}</h4>
+              <p className="text-sm text-gray-400 mb-6">{tier.desc}</p>
+              <button 
+                onClick={() => handleAction("create-checkout-session")}
+                className={`w-full py-3 rounded-xl bg-gradient-to-r from-${tier.color}-600/20 to-indigo-600/20 border border-${tier.color}-500/30 hover:bg-${tier.color}-600/30 transition text-sm font-medium`}
+              >
+                Activează {tier.name}
+              </button>
+            </div>
+          ))}
         </div>
       </div>
-
-      {/* ===== UPGRADE / PROMO SUGGESTIONS ===== */}
-      {plan === "Free" && (
-        <UpgradeCard
-          title="Upgrade to Pro"
-          desc="Unlock AI invoice generation, advanced analytics, and unlimited invoices."
-          gradient="from-indigo-600/20 to-purple-600/20"
-          button="Go Pro"
-          icon={Rocket}
-          onClick={() => handleUpgrade("Pro")}
-        />
-      )}
-
-      {plan === "Pro" && (
-        <UpgradeCard
-          title="Upgrade to Enterprise"
-          desc="Empower your team with collaboration tools, faster AI processing, and 24/7 support."
-          gradient="from-[#CB52D4]/20 to-[#80FFF9]/20"
-          button="Go Enterprise"
-          icon={ShieldCheck}
-          onClick={() => handleUpgrade("Enterprise")}
-        />
-      )}
-
-      {plan === "Enterprise" && (
-        <UpgradeCard
-          title="You're at the top!"
-          desc="Thank you for being part of our elite users. You’re enjoying full access to every feature BillForgeAI offers."
-          gradient="from-[#CB52D4]/20 to-[#80FFF9]/20"
-          button="Exclusive Perks Coming Soon"
-          icon={Sparkles}
-          disabled
-        />
-      )}
     </div>
   );
 };
-
-
-  const Feature = ({ text, muted }) => (
-    <div className={`flex items-center gap-2 ${
-        muted ? "opacity-50 text-gray-500" : "text-gray-200"
-      }`}>
-      <CheckCircle size={16} className={muted ? "text-gray-600" : "text-[#80FFF9]"}/>
-      {text}
-    </div>
-  );
-
-  const UpgradeCard = ({ title, desc, gradient, button, icon: Icon, onClick, disabled,}) => (
-    <div className={`max-w-4xl mx-auto mt-12 bg-linear-to-r ${gradient} border border-white/10 rounded-2xl p-8 text-center relative overflow-hidden`}>
-      <div className="absolute inset-0 bg-linear-to-r from-[#80FFF9]/10 to-[#CB52D4]/10 blur-2xl -z-10" />
-      <Icon className="mx-auto mb-4 text-[#80FFF9]" size={40} />
-      <h3 className="text-2xl font-semibold mb-3">{title}</h3>
-      <p className="text-gray-400 max-w-md mx-auto mb-6">{desc}</p>
-      <button onClick={!disabled ? onClick : null} disabled={disabled}
-        className={`px-8 py-3 rounded-full text-white font-medium transition flex items-center justify-center gap-2 mx-auto ${
-          disabled
-            ? "bg-white/10 text-gray-400 cursor-not-allowed"
-            : "bg-linear-to-r from-indigo-600 to-purple-600 hover:opacity-90"
-        }`}>
-        <ArrowUpRight size={18} />
-        {button}
-      </button>
-    </div>
-);
 
 export default MySubscription;

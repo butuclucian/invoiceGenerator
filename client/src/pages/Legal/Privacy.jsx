@@ -1,11 +1,12 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import Navbar2 from "../../components/Home/Navbar2";
+import Footer from "../../components/Home/Footer";
 
 const Privacy = () => {
   const navigate = useNavigate();
 
-  // Variante pentru animații
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -24,17 +25,11 @@ const Privacy = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#E8E8E8] pt-32 pb-24 px-4 overflow-hidden selection:bg-[#1E1E1E] selection:text-[#E8E8E8]">
-      <div className="max-w-[1700px] mx-auto">
+    <div className="min-h-screen bg-[#E8E8E8] pt-32 overflow-hidden selection:bg-[#1E1E1E] selection:text-[#E8E8E8]">
+      <Navbar2 />
+      <div className="max-w-9xl mx-auto px-4 md:px-8 pb-24 md:pb-16">
         
-        {/* Buton de Back */}
-        <motion.button 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, ease: [0.215, 0.61, 0.355, 1.0] }}
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-3 text-[#1E1E1E] font-bold uppercase tracking-widest text-sm mb-12 group hover:text-purple-600 transition-colors"
-        >
+        <motion.button initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, ease: [0.215, 0.61, 0.355, 1.0] }} onClick={() => navigate(-1)} className="flex items-center gap-3 text-[#1E1E1E] font-bold uppercase tracking-widest text-sm mb-12 group hover:text-purple-600 transition-colors">
           <div className="w-12 h-12 rounded-full border-2 border-[#1E1E1E] flex items-center justify-center group-hover:bg-[#1E1E1E] group-hover:text-[#E8E8E8] group-hover:border-[#1E1E1E] transition-all duration-300">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform duration-300">
               <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -43,45 +38,24 @@ const Privacy = () => {
           Go Back
         </motion.button>
 
-        {/* Header Section: Tipografie Masivă */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10 mb-16 relative">
           <div className="relative z-10">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.215, 0.61, 0.355, 1.0] }}
-              className="w-full font-bold text-[70px] md:text-[130px] lg:text-[160px] tracking-[-9%] leading-[0.8] uppercase select-none"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.215, 0.61, 0.355, 1.0] }} className="w-full font-bold text-[70px] md:text-[130px] lg:text-[160px] tracking-[-9%] leading-[0.8] uppercase select-none"   >
               <span className="text-transparent [-webkit-text-stroke:2px_#1E1E1E]">PRIVACY </span>
               <br className="hidden md:block" />
               <span className="text-[#1E1E1E]">POLICY.</span>
             </motion.div>
           </div>
           
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="relative z-10 bg-[#1E1E1E] text-white px-8 py-4 rounded-full flex flex-col md:items-end"
-          >
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4, duration: 0.8 }} className="relative z-10 bg-[#1E1E1E] text-white px-8 py-4 rounded-full flex flex-col md:items-end" >
             <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Last Updated</span>
             <span className="text-xl font-bold">{new Date().toISOString().split("T")[0]}</span>
           </motion.div>
         </div>
 
-        {/* Grid Asimetric pentru Conținut */}
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 md:grid-cols-12 gap-6"
-        >
+        <motion.div variants={containerVariants}initial="hidden" animate="visible" className="grid grid-cols-1 md:grid-cols-12 gap-6">
           
-          {/* 1. Who We Are (Outlined) */}
-          <motion.div 
-            variants={itemVariants}
-            className="md:col-span-4 border-2 border-[#1E1E1E] bg-transparent text-[#1E1E1E] rounded-[2.5rem] p-10 flex flex-col justify-between"
-          >
+          <motion.div variants={itemVariants} className="md:col-span-4 border-2 border-[#1E1E1E] bg-transparent text-[#1E1E1E] rounded-[2.5rem] p-10 flex flex-col justify-between">
             <div>
               <span className="text-xs font-bold uppercase tracking-[0.2em] mb-6 block text-[#1E1E1E]">
                 // 01 Who We Are
@@ -99,11 +73,7 @@ const Privacy = () => {
             </div>
           </motion.div>
 
-          {/* 2. Data We Collect (Dark) */}
-          <motion.div 
-            variants={itemVariants}
-            className="md:col-span-8 bg-[#1E1E1E] text-[#E8E8E8] rounded-[2.5rem] p-10 md:p-12 relative overflow-hidden shadow-2xl"
-          >
+          <motion.div variants={itemVariants} className="md:col-span-8 bg-[#1E1E1E] text-[#E8E8E8] rounded-[2.5rem] p-10 md:p-12 relative overflow-hidden shadow-2xl">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
             
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-8 block relative z-10">
@@ -129,11 +99,7 @@ const Privacy = () => {
             </div>
           </motion.div>
 
-          {/* 3. Legal Basis & 6. GDPR Rights (Combined in one row) */}
-          <motion.div 
-            variants={itemVariants}
-            className="md:col-span-6 bg-white border border-[#1E1E1E]/10 text-[#1E1E1E] rounded-[2.5rem] p-10 md:p-12 shadow-lg"
-          >
+          <motion.div variants={itemVariants} className="md:col-span-6 bg-white border border-[#1E1E1E]/10 text-[#1E1E1E] rounded-[2.5rem] p-10 md:p-12 shadow-lg">
             <span className="text-xs font-bold uppercase tracking-[0.2em] mb-6 block text-gray-400">
               // 03 Legal Basis
             </span>
@@ -154,10 +120,7 @@ const Privacy = () => {
             </ul>
           </motion.div>
 
-          <motion.div 
-            variants={itemVariants}
-            className="md:col-span-6 bg-[#1E1E1E] text-white rounded-[2.5rem] p-10 md:p-12 shadow-2xl"
-          >
+          <motion.div variants={itemVariants} className="md:col-span-6 bg-[#1E1E1E] text-white rounded-[2.5rem] p-10 md:p-12 shadow-2xl">
             <span className="text-xs font-bold uppercase tracking-[0.2em] mb-6 block text-gray-400">
               // 04 GDPR Rights
             </span>
@@ -171,11 +134,7 @@ const Privacy = () => {
             </div>
           </motion.div>
 
-          {/* 4. AI Processing (Accent Card) */}
-          <motion.div 
-            variants={itemVariants}
-            className="md:col-span-12 bg-purple-500 text-[#1E1E1E] rounded-[2.5rem] p-10 md:p-16 flex flex-col md:flex-row items-start justify-between gap-10 shadow-xl relative overflow-hidden"
-          >
+          <motion.div variants={itemVariants} className="md:col-span-12 bg-purple-500 text-[#1E1E1E] rounded-[2.5rem] p-10 md:p-16 flex flex-col md:flex-row items-start justify-between gap-10 shadow-xl relative overflow-hidden">
             <div className="absolute -right-20 -bottom-20 w-80 h-80 border-4 border-[#1E1E1E]/20 rounded-full"></div>
             
             <div className="relative z-10 md:w-1/3">
@@ -196,11 +155,7 @@ const Privacy = () => {
             </div>
           </motion.div>
 
-          {/* 5. Subprocessors & 7. Retention */}
-          <motion.div 
-            variants={itemVariants}
-            className="md:col-span-5 border-2 border-[#1E1E1E] bg-transparent text-[#1E1E1E] rounded-[2.5rem] p-10"
-          >
+          <motion.div variants={itemVariants} className="md:col-span-5 border-2 border-[#1E1E1E] bg-transparent text-[#1E1E1E] rounded-[2.5rem] p-10">
             <span className="text-xs font-bold uppercase tracking-[0.2em] mb-6 block">
               // 06 Subprocessors
             </span>
@@ -220,10 +175,7 @@ const Privacy = () => {
             </div>
           </motion.div>
 
-          <motion.div 
-            variants={itemVariants}
-            className="md:col-span-7 bg-[#1E1E1E] text-white rounded-[2.5rem] p-10 flex flex-col justify-center"
-          >
+          <motion.div variants={itemVariants} className="md:col-span-7 bg-[#1E1E1E] text-white rounded-[2.5rem] p-10 flex flex-col justify-center">
             <span className="text-xs font-bold uppercase tracking-[0.2em] mb-6 block text-gray-400">
               // 07 Data Retention
             </span>
@@ -237,6 +189,7 @@ const Privacy = () => {
 
         </motion.div>
       </div>
+      <Footer />
     </div>
   );
 };

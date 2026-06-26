@@ -1,12 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import QRCode from "qrcode";
-import {
-  renderEUTemplate,
-  renderUSTemplate,
-  renderGlobalTemplate,
-  renderEnterpriseTemplate
-} from "./templates";
+import { renderEUTemplate, renderUSTemplate, renderGlobalTemplate, renderEnterpriseTemplate} from "./templates";
 
 export const generateInvoicePDF = async (invoice, billingProfile, hexToRgb) => {
   if (!billingProfile) return;

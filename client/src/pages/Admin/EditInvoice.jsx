@@ -13,13 +13,12 @@ const EditInvoice = () => {
   const [loading, setLoading] = useState(true);
   const [currency, setCurrency] = useState("RON");
 
-  // State local pentru taxe randate în UI (Mongoose nu le stochează direct ca sume)
   const [uiAmounts, setUiAmounts] = useState({
     tax_amount: 0,
     discount_amount: 0
   });
 
-  // ========== FETCH INVOICE + CLIENTS ==========
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -31,7 +30,6 @@ const EditInvoice = () => {
         const invData = invoiceRes.data;
         setFormData({
           ...invData,
-          // Convertim ID-ul de client la string pur dacă vine populate din spate
           client: invData.client?._id || invData.client || "",
           series: invData.series || "INV",
           payment_method: invData.payment_method || "not_paid",
@@ -49,8 +47,6 @@ const EditInvoice = () => {
         if (invData.currency) setCurrency(invData.currency);
 
         setClients(clientsRes.data);
-
-        // Calculăm sumele UI inițiale
         const discountAmount = (invData.subtotal * invData.discount_rate) / 100;
         const taxAmount = ((invData.subtotal - discountAmount) * invData.tax_rate) / 100;
         setUiAmounts({ tax_amount: taxAmount, discount_amount: discountAmount });
@@ -66,7 +62,6 @@ const EditInvoice = () => {
     fetchData();
   }, [id, navigate]);
 
-  // ========== CALCUL TOTALS ==========
   const calculateTotals = (items, tax_rate, discount_rate) => {
     const subtotal = items.reduce((sum, item) => sum + item.total, 0);
     const discount_amount = (subtotal * discount_rate) / 100;
@@ -81,7 +76,6 @@ const EditInvoice = () => {
     };
   };
 
-  // ========== HANDLE CHANGES ==========
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...formData.items];
     updatedItems[index][field] = field === "description" ? value : parseFloat(value) || 0;
@@ -130,7 +124,6 @@ const EditInvoice = () => {
     if (!formData.client) return toast.error("Please select a client");
     if (formData.items.some((item) => !item.description)) return toast.error("Please complete all item descriptions");
 
-    // Curățăm datele goale înainte de trimitere ca să prevenim erorile CastError din MongoDB
     const payload = { ...formData, currency };
     if (!payload.due_date) delete payload.due_date;
     if (!payload.next_billing) delete payload.next_billing;
@@ -146,7 +139,6 @@ const EditInvoice = () => {
     }
   };
 
-  const handleReset = () => navigate("/dashboard/invoices");
 
   if (loading || !formData)
     return (
@@ -156,23 +148,21 @@ const EditInvoice = () => {
     );
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-10 pt-8 pb-32 overflow-hidden">
+    <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-10 overflow-hidden pb-16 p-8 pt-30 space-y-8">
       
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-semibold flex items-center gap-2">
             <FileEdit className="text-[#80FFF9]" size={26} />
             Edit Invoice
           </h1>
           <p className="text-gray-400 text-sm">Update existing invoice details and payment metrics</p>
+          <p className="text-gray-500 text-xs mt-2 font-mono"><span className="text-red-500">*</span> Required fields</p>
         </div>
       </div>
 
-      {/* FORM */}
       <form className="max-w-6xl mx-auto space-y-10 relative z-10" onSubmit={(e) => e.preventDefault()}>
         
-        {/* SECTION 1: INVOICE IDENTIFICATION */}
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold text-indigo-400 uppercase tracking-wider border-b border-white/5 pb-2">
             Invoice Details
@@ -222,7 +212,6 @@ const EditInvoice = () => {
           </div>
         </div>
 
-        {/* SECTION 2: ITEMS MODULE */}
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold text-indigo-400 uppercase tracking-wider border-b border-white/5 pb-2 flex justify-between items-center">
             Items Inventory
@@ -262,7 +251,6 @@ const EditInvoice = () => {
           </div>
         </div>
 
-        {/* SECTION 3: ADVANCED BALANCES & TAXES */}
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold text-indigo-400 uppercase tracking-wider border-b border-white/5 pb-2">
             Taxing & Financial Summary
@@ -279,7 +267,6 @@ const EditInvoice = () => {
             </div>
           </div>
 
-          {/* 💳 LOGICA DE ÎNCASĂRI STRATEGICE MAPATĂ DIRECT ÎN EDIT */}
           <div className="grid md:grid-cols-3 gap-6 pt-2">
             <div>
               <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Payment Method</label>
@@ -301,7 +288,6 @@ const EditInvoice = () => {
             </div>
           </div>
 
-          {/* RENDERING MATHEMATICAL TOTALS */}
           <div className="mt-4 space-y-2 text-gray-400 bg-[#141414] border border-white/5 p-4 rounded-xl font-mono text-xs max-w-md ml-auto">
             <div className="flex justify-between">
               <span>Subtotal:</span>
@@ -337,7 +323,6 @@ const EditInvoice = () => {
           </div>
         </div>
 
-        {/* SECTION 4: RECURRING CORES */}
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold text-indigo-400 uppercase tracking-wider border-b border-white/5 pb-2">
             Recurring Invoice Automation
@@ -371,12 +356,8 @@ const EditInvoice = () => {
           </div>
         </div>
 
-        {/* ===== STICKY FOOTER ===== */}
         <div className="fixed bottom-0 right-0 left-0 md:left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-4 z-40">
           <div className="flex flex-row justify-center items-center gap-3 sm:gap-4 px-4">
-            <button type="button" onClick={handleReset} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 border border-white/20 rounded-xl text-xs font-mono uppercase tracking-wider text-gray-300 hover:bg-white/10 hover:text-white transition duration-300" >
-              <RotateCcw size={14} /> Reset
-            </button>
             <button type="button" onClick={() => navigate(-1)} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 border border-white/20 rounded-xl text-xs font-mono uppercase tracking-wider text-gray-300 hover:bg-white/10 hover:text-white transition duration-300" >
               <X size={14} /> Cancel
             </button>

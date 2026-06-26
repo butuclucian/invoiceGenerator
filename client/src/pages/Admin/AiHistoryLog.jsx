@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, History, Calendar, User, Loader2, Edit } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom"; // 🔥 Adăugat pentru navigare
+import { useNavigate } from "react-router-dom";
 import API from "../../utils/api";
 import { toast } from "sonner";
 
 const AiHistoryLog = () => {
   const [historyItems, setHistoryItems] = useState([]);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // 🔥 Inițializare hook de navigare
+  const navigate = useNavigate();
 
   const fetchHistory = async () => {
     setLoading(true);
@@ -121,7 +121,6 @@ const AiHistoryLog = () => {
                   </div>
 
                   <div className="flex items-center gap-1">
-                    {/* 🔥 MODIFICARE: Butonul tău perfect de Editare cu navigare dinamică */}
                     <button
                       onClick={() => navigate(`/dashboard/invoices/${item._id}/edit`)}
                       className="p-2 text-gray-400 hover:text-indigo-400 transition"

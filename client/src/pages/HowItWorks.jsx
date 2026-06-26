@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Home/Navbar';
+import Navbar2 from '../components/Home/Navbar';
+
 const HowItWorks = () => {
 
   const stepsData = [
@@ -104,7 +105,7 @@ const HowItWorks = () => {
                     <span className="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border-2 border-[#1E1E1E] text-[#1E1E1E]">
                       {step.badge}
                     </span>
-                    <div className="h-[2px] w-12 bg-[#1E1E1E]/20"></div>
+                    <div className="h-0.5 w-12 bg-[#1E1E1E]/20"></div>
                   </div>
                   
                   <div className="relative">
@@ -123,7 +124,7 @@ const HowItWorks = () => {
 
                 {/* Partea Vizuală (Cardul abstract) */}
                 <div className="w-full lg:w-1/2">
-                  <div className={`w-full aspect-[4/3] rounded-[2.5rem] p-8 flex flex-col relative overflow-hidden shadow-2xl ${
+                  <div className={`w-full aspect-4/3 rounded-[2.5rem] p-8 flex flex-col relative overflow-hidden shadow-2xl ${
                     step.isDark ? "bg-[#1E1E1E]" : "bg-transparent border-2 border-[#1E1E1E]"
                   }`}>
                     

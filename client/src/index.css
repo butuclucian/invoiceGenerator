@@ -54,8 +54,6 @@ body{
 
 
 
-
-
 .no-scrollbar{
   scrollbar-width: none;
 }
@@ -80,7 +78,6 @@ input[type="date"]:hover::-webkit-calendar-picker-indicator {
 input[type="time"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
 }
-
 
 
 select {

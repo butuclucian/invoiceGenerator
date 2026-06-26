@@ -7,8 +7,6 @@ import API from "../../utils/api";
 const EditClient = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-
-  // 🔥 Extins cu toate câmpurile noi din structura ta premium
   const [formData, setFormData] = useState({
     name: "",
     brand: "",
@@ -24,7 +22,8 @@ const EditClient = () => {
     bank: "",
     contact_person: "",
     email: "",
-    phone: ""
+    phone: "",
+    company: "",
   });
 
   const [loading, setLoading] = useState(true);
@@ -33,7 +32,6 @@ const EditClient = () => {
     const fetchClient = async () => {
       try {
         const { data } = await API.get(`/clients/${id}`);
-        // Mapăm cu fallback ("") pentru a preveni erorile de tip "uncontrolled input"
         setFormData({
           name: data.name || "",
           brand: data.brand || "",
@@ -50,6 +48,7 @@ const EditClient = () => {
           contact_person: data.contact_person || "",
           email: data.email || "",
           phone: data.phone || "",
+          company: data.reg_com || "",
         });
       } catch (error) {
         toast.error("Failed to load client data");
@@ -63,7 +62,6 @@ const EditClient = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    // Gestionăm diferențiat input-urile de tip checkbox/radio pentru plătitorul de TVA
     setFormData({
       ...formData,
       [name]: type === "checkbox" ? checked : value,
@@ -100,9 +98,7 @@ const EditClient = () => {
     );
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-6 md:px-10 pt-8 pb-32">
-      
-      {/* HEADER */}
+    <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-10 overflow-hidden pb-16 p-8 pt-30 space-y-8">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-semibold flex items-center gap-2">
@@ -120,123 +116,115 @@ const EditClient = () => {
 
       <form onSubmit={handleSubmit} className="space-y-10 max-w-4xl mx-auto relative z-10">
         
-        {/* SECTION 1: GENERAL & FISCAL INFO */}
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
-          <h3 className="text-sm font-mono font-bold text-indigo-400 uppercase tracking-wider border-b border-white/5 pb-2">
+          <h2 className="text-sm font-mono font-bold tracking-wider text-indigo-400 uppercase border-b border-white/5 pb-2">
             General & Fiscal Info
-          </h3>
+          </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">
-                Denumire / Full Name <span className="text-red-500">*</span>
+                Denumire <span className="text-red-500">*</span>
               </label>
-              <input type="text" name="name" value={formData.name} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" required />
+              <input type="text" name="name" placeholder="Numele firmei sau al clientului" value={formData.name} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" required />
             </div>
 
             <div>
               <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Brand</label>
-              <input type="text" name="brand" placeholder="Nume comercial" value={formData.brand} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
+              <input type="text" name="brand" placeholder="Nume comercial / Brand" value={formData.brand} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">CIF / CNP</label>
-              <input type="text" name="cui" placeholder="ROxxxxxxxx" value={formData.cui} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
+              <input type="text" name="cui" placeholder="RO12345678 sau CNP" value={formData.cui} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Reg Com</label>
-              <input type="text" name="reg_com" placeholder="Jxx/xxxx/xxxx" value={formData.reg_com} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
+              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Reg com</label>
+              <input type="text" name="reg_com" placeholder="J35/XXXX/YYYY" value={formData.reg_com} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Cod Client</label>
-              <input type="text" name="client_code" placeholder="CLNT-00x" value={formData.client_code} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
+              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Cod client</label>
+              <input type="text" name="client_code" placeholder="Ex: CL-001" value={formData.client_code} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Plătitor TVA</label>
-            <div className="flex items-center gap-6 mt-1">
-              <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-                <input type="radio" name="is_tva_payer" value="true" checked={formData.is_tva_payer === true || formData.is_tva_payer === "true"} onChange={() => setFormData({ ...formData, is_tva_payer: true })} className="accent-[#80FFF9] bg-[#161616] border-white/10" />
+            <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Platitor TVA</label>
+            <div className="flex gap-4 mt-1">
+              <button type="button" onClick={() => handleVatChange(true)} className={`px-4 py-1.5 rounded-lg border text-xs font-mono uppercase tracking-wider transition duration-300 ${formData.is_tva_payer ? "bg-[#80FFF9]/10 border-[#80FFF9] text-[#80FFF9]" : "bg-[#161616] border-white/10 text-gray-400 hover:border-white/20"}`}>
                 Da
-              </label>
-              <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-                <input type="radio" name="is_tva_payer" value="false" checked={formData.is_tva_payer === false || formData.is_tva_payer === "false"} onChange={() => setFormData({ ...formData, is_tva_payer: false })} className="accent-[#80FFF9] bg-[#161616] border-white/10" />
+              </button>
+              <button type="button" onClick={() => handleVatChange(false)} className={`px-4 py-1.5 rounded-lg border text-xs font-mono uppercase tracking-wider transition duration-300 ${!formData.is_tva_payer ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-[#161616] border-white/10 text-gray-400 hover:border-white/20"}`}>
                 Nu
-              </label>
+              </button>
             </div>
           </div>
         </div>
 
-        {/* SECTION 2: ADDRESS & LOCATION */}
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
-          <h3 className="text-sm font-mono font-bold text-indigo-400 uppercase tracking-wider border-b border-white/5 pb-2">
+          <h2 className="text-sm font-mono font-bold tracking-wider text-indigo-400 uppercase border-b border-white/5 pb-2">
             Address & Location
-          </h3>
-          
+          </h2>
+
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Adresă completă</label>
-            <input type="text" name="address" placeholder="Strada, Număr, Bloc..." value={formData.address} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
+            <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Adresa</label>
+            <input type="text" name="address" placeholder="Strada, Numar, Bloc, Apartament" value={formData.address} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Localitate</label>
-              <input type="text" name="city" value={formData.city} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
+              <input type="text" name="city" placeholder="Localitate" value={formData.city} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Județ</label>
-              <input type="text" name="county" value={formData.county} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
+              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Judet</label>
+              <input type="text" name="county" placeholder="Judet / Sector" value={formData.county} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Țară</label>
-              <input type="text" name="country" value={formData.country} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
+              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Tara</label>
+              <input type="text" name="country" placeholder="Tara" value={formData.country} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
             </div>
           </div>
         </div>
 
-        {/* SECTION 3: BANK DETAILS */}
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
-          <h3 className="text-sm font-mono font-bold text-indigo-400 uppercase tracking-wider border-b border-white/5 pb-2">
+          <h2 className="text-sm font-mono font-bold tracking-wider text-indigo-400 uppercase border-b border-white/5 pb-2">
             Bank Details
-          </h3>
+          </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Cont IBAN</label>
-              <input type="text" name="iban" placeholder="ROxx xxxx xxxx xxxx xxxx xxxx" value={formData.iban} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none font-mono uppercase transition" />
+              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">IBAN</label>
+              <input type="text" name="iban" placeholder="ROXX BTRL XXXX XXXX XXXX XXXX" value={formData.iban} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none font-mono uppercase transition" />
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Bancă</label>
-              <input type="text" name="bank" placeholder="Numele băncii" value={formData.bank} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
+              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Banca</label>
+              <input type="text" name="bank" placeholder="Numele Bancii" value={formData.bank} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
             </div>
           </div>
         </div>
 
-        {/* SECTION 4: CONTACT PERSONS */}
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
-          <h3 className="text-sm font-mono font-bold text-indigo-400 uppercase tracking-wider border-b border-white/5 pb-2">
+          <h2 className="text-sm font-mono font-bold tracking-wider text-indigo-400 uppercase border-b border-white/5 pb-2">
             Contact Persons
-          </h3>
-          
+          </h2> 
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Persoană de Contact</label>
-              <input type="text" name="contact_person" placeholder="Nume reprezentant" value={formData.contact_person} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
+              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Persoana contact</label>
+              <input type="text" name="contact_person" placeholder="Nume persoana" value={formData.contact_person} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">
-                Email Address <span className="text-red-500">*</span>
-              </label>
-              <input type="email" name="email" placeholder="client@email.com" value={formData.email} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" required />
+              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Email</label>
+              <input type="email" name="email" placeholder="client@email.com" value={formData.email} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
             </div>
 
             <div>
@@ -244,16 +232,14 @@ const EditClient = () => {
               <input type="text" name="phone" placeholder="07xx xxx xxx" value={formData.phone} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
             </div>
           </div>
+
+          <div className="hidden">
+            <input type="text" name="company" value={formData.company} onChange={handleChange} />
+          </div>
         </div>
 
-        {/* FIXED ACTION BAR */}
-        <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-4 z-40">
-          <div className="flex justify-center gap-3 sm:gap-4 px-4">
-            <button type="button" onClick={handleReset} className="flex items-center gap-2 px-4 sm:px-5 py-2 border border-white/20 rounded-xl text-xs font-mono uppercase tracking-wider text-gray-300 hover:text-white hover:bg-white/10 transition duration-300">
-              <RotateCcw size={14} />
-              Reset
-            </button>
-
+        <div className="fixed bottom-0 right-0 left-0 md:left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-4 z-40">
+          <div className="flex flex-row justify-center items-center gap-3 sm:gap-4 px-4">
             <button type="button" onClick={() => navigate(-1)} className="flex items-center gap-2 px-4 sm:px-5 py-2 border border-white/20 rounded-xl text-xs font-mono uppercase tracking-wider text-gray-300 hover:text-white hover:bg-white/10 transition duration-300">
               <X size={14} />
               Cancel

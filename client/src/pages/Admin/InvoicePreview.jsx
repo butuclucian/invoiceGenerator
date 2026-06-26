@@ -2,16 +2,37 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Download, Edit, FileText } from "lucide-react";
 import { toast } from "sonner";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
+import html2pdf from "html2pdf.js";
 import API from "../../utils/api";
+
+import Template1 from "../../components/invoiceTemplates/Template1";
+import Template2 from "../../components/invoiceTemplates/Template2";
+import Template3 from "../../components/invoiceTemplates/Template3";
+
+const preInvoicePreview = ({ invoice, template, billingProfile }) => {
+  if (!invoice || !billingProfile) return null;
+
+  const props = { invoice, billingProfile };
+  const scale = 280 / 794;
+
+  return (
+    <div style={{width: "280px", height: `${Math.round(1123 * scale)}px`, overflow: "hidden", position: "relative", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.1)", backgroundColor: "#F5F2EC",}}>
+      <div style={{transform: `scale(${scale})`, transformOrigin: "top left", width: "794px", pointerEvents: "none",}}>
+        {template === 1 && <Template1 {...props} />}
+        {template === 2 && <Template2 {...props} />}
+        {template === 3 && <Template3 {...props} />}
+      </div>
+    </div>
+  );
+};
 
 const InvoicePreview = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-
   const [invoice, setInvoice] = useState(null);
   const [client, setClient] = useState(null);
+  const [user, setUser] = useState(null);
+
 
   useEffect(() => {
     const fetchInvoice = async () => {
@@ -39,74 +60,36 @@ const InvoicePreview = () => {
       </div>
     );
 
-  // PDF Download
-  const handleDownload = () => {
-    const doc = new jsPDF();
-
-    doc.setFontSize(18);
-    doc.text(`Invoice: ${invoice.invoice_number}`, 14, 20);
-
-    doc.setFontSize(12);
-    doc.text("Billed To:", 14, 35);
-    doc.text(client?.name || "Unknown Client", 14, 42);
-    if (client?.company) doc.text(client.company, 14, 49);
-    if (client?.email) doc.text(client.email, 14, 56);
-    if (client?.address) doc.text(client.address, 14, 63);
-
-    doc.text(`Date: ${invoice.date}`, 150, 35);
-    doc.text(`Due Date: ${invoice.due_date || "N/A"}`, 150, 42);
-    doc.text(`Status: ${invoice.status}`, 150, 49);
-
-    const tableData = invoice.items.map((item) => [
-      item.description,
-      item.quantity,
-      `$${item.unit_price.toFixed(2)}`,
-      `$${item.total.toFixed(2)}`,
-    ]);
-
-    autoTable(doc, {
-      startY: 75,
-      head: [["Description", "Qty", "Unit Price", "Total"]],
-      body: tableData,
-      theme: "grid",
-      headStyles: { fillColor: [240, 240, 240], textColor: 0 },
-      styles: { fontSize: 11, textColor: 50 },
-    });
-
-    let finalY = doc.lastAutoTable.finalY + 10;
-    doc.text(`Subtotal: $${invoice.subtotal.toFixed(2)}`, 150, finalY);
-
-    if (invoice.discount_amount > 0) {
-      finalY += 7;
-      doc.text(
-        `Discount (${invoice.discount_rate}%): -$${invoice.discount_amount.toFixed(
-          2
-        )}`,
-        150,
-        finalY
-      );
+  const handleDownloadPDF = () => {
+    const element = hiddenRef.current;
+    if (!element) {
+      toast.error("Preview not ready, please try again.");
+      return;
     }
 
-    if (invoice.tax_amount > 0) {
-      finalY += 7;
-      doc.text(
-        `Tax (${invoice.tax_rate}%): +$${invoice.tax_amount.toFixed(2)}`,
-        150,
-        finalY
-      );
-    }
+    setIsDownloading(true);
 
-    finalY += 10;
-    doc.text(`Total: $${invoice.total.toFixed(2)}`, 150, finalY);
+    const opt = {
+      margin: 0,
+      filename: `invoice_${selectedInvoice.invoice_number}.pdf`,
+      image: { type: "jpeg", quality: 1 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    };
 
-    if (invoice.notes) {
-      doc.text("Notes:", 14, finalY + 15);
-      const notes = doc.splitTextToSize(invoice.notes, 180);
-      doc.text(notes, 14, finalY + 22);
-    }
-
-    doc.save(`${invoice.invoice_number}.pdf`);
-    toast.success("Invoice downloaded!");
+    html2pdf()
+      .set(opt)
+      .from(element)
+      .save()
+      .then(() => {
+        setIsDownloading(false);
+        setShowTemplateModal(false);
+        setSelectedInvoice(null);
+      })
+      .catch(() => {
+        setIsDownloading(false);
+        toast.error("Failed to generate PDF");
+      });
   };
 
   const formatDate = (dateStr) => {
@@ -127,18 +110,12 @@ const taxAmount = invoice.tax_rate
 
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-6 md:px-10 py-8">
-
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:justify-between justify-center items-center gap-4 mb-10">
-
-        {/* Title */}
+    <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-10 overflow-hidden pb-16 p-8 pt-30 space-y-8">
+      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <div className="flex items-center gap-2 text-center md:text-left">
           <FileText className="text-[#80FFF9]" size={26} />
           <h1 className="text-2xl sm:text-3xl font-semibold">Invoice Preview</h1>
         </div>
-
-        
       </div>
 
       {/* INVOICE CARD */}
@@ -259,25 +236,21 @@ const taxAmount = invoice.tax_rate
       </div>
 
       {/* Sticky Footer */}
-      <div className="fixed bottom-0 right-0 left-0 md:left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-3 z-10">
-        <div className="flex flex-row justify-center items-center gap-2 sm:gap-4 px-3 sm:px-4">
+      <div className="fixed bottom-0 right-0 left-0 md:left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-4 z-40">
+        <div className="flex flex-row justify-center items-center gap-3 sm:gap-4 px-4">
 
           {/* Edit */}
           <button
             type="button"
             onClick={() => navigate(`/dashboard/invoices/${invoice._id}/edit`)}
-            className="flex items-center justify-center gap-2 px-3 sm:px-5 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition text-sm sm:text-base"
+            className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 border border-white/20 rounded-xl text-xs font-mono uppercase tracking-wider text-gray-300 hover:text-white hover:bg-white/10 transition duration-300"
           >
             <Edit size={16} />
             Edit
           </button>
 
           {/* Download */}
-          <button
-            type="button"
-            onClick={handleDownload}
-            className="flex items-center justify-center gap-2 px-3 sm:px-5 py-2 rounded-md bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition text-sm sm:text-base"
-          >
+          <button type="button" onClick={handleDownloadPDF} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-teal-500/20 to-indigo-600/20 hover:from-teal-500/30 hover:to-indigo-600/30 border border-teal-500/30 hover:border-teal-400/60 text-xs font-mono uppercase tracking-wider text-[#80FFF9] font-bold shadow-lg transition duration-300">
             <Download size={16} />
             Download
           </button>

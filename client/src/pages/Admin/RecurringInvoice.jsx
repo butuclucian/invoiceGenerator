@@ -73,8 +73,8 @@ const RecurringInvoice = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 text-white min-h-screen bg-[#0e0e0e]">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
+    <div className="p-8 text-white min-h-screen bg-[#0e0e0e] relative pt-30 space-y-8">
+      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-semibold flex items-center gap-2">
             <Repeat className="text-[#80FFF9]" size={26} />

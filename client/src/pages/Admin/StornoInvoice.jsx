@@ -18,7 +18,7 @@ const StornoInvoice = () => {
     date: new Date().toISOString().split("T")[0],
     due_date: new Date().toISOString().split("T")[0],
     client: "",
-    clientName: "", // Doar pentru afișare vizuală (read-only)
+    clientName: "",
     status: "draft",
     items: [],
     tax_rate: 0,
@@ -33,7 +33,6 @@ const StornoInvoice = () => {
   useEffect(() => {
     const initializeStorno = async () => {
       try {
-        // 1. Preluăm detaliile facturii originale
         const invoiceId = id || location.state?.invoiceId;
         if (!invoiceId) {
           toast.error("No invoice ID provided for storno");
@@ -48,7 +47,6 @@ const StornoInvoice = () => {
           setCurrency(originalInvoice.currency);
         }
 
-        // 2. Calculăm următorul număr secvențial disponibil pentru factura storno
         let nextInvoiceNumber = "INV-0001";
         try {
           const { data: invoicesData } = await API.get("/invoices");
@@ -59,7 +57,6 @@ const StornoInvoice = () => {
           console.error("Failed to calculate next invoice number:", invErr);
         }
 
-        // 3. Transformăm produsele originale în valori negative (-1)
         const stornoItems = originalInvoice.items.map(item => {
           const negativeQty = item.quantity * -1;
           return {
@@ -70,14 +67,12 @@ const StornoInvoice = () => {
           };
         });
 
-        // 4. Recalculăm totalurile inversate
         const subtotal = stornoItems.reduce((sum, item) => sum + item.total, 0);
         const discount_amount = (subtotal * originalInvoice.discount_rate) / 100;
         const taxable = subtotal - discount_amount;
         const tax_amount = (taxable * originalInvoice.tax_rate) / 100;
         const total = taxable + tax_amount;
 
-        // 5. Completăm starea formularului în designul nostru
         setFormData({
           invoice_number: nextInvoiceNumber,
           date: new Date().toISOString().split("T")[0],
@@ -111,7 +106,6 @@ const StornoInvoice = () => {
   const handleReset = () => {
     if (!initialInvoice) return;
     toast.info("Form reset to original storno values");
-    // Declanșează reîncărcarea valorilor storno implicite
     window.location.reload();
   };
 
@@ -120,7 +114,6 @@ const StornoInvoice = () => {
     setLoading(true);
 
     try {
-      // Trimitem noua factură storno către backend
       await API.post("/invoices", formData);
       toast.success(`Storno invoice ${formData.invoice_number} generated successfully!`);
       navigate("/dashboard/invoices");
@@ -133,9 +126,8 @@ const StornoInvoice = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white px-10 pt-8 pb-28 overflow-hidden">
+    <div className="p-8 text-white min-h-screen bg-[#0e0e0e] relative pt-30 space-y-8">
       
-      {/* Header */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
@@ -149,8 +141,6 @@ const StornoInvoice = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="max-w-6xl mx-auto space-y-12">
-
-        {/* --- SECTION 1: Document Details --- */}
         <section>
           <h2 className="text-xl font-semibold mb-4 text-[#80FFF9] border-b border-white/10 pb-2">
             Storno Reference Details
@@ -173,7 +163,6 @@ const StornoInvoice = () => {
           </div>
         </section>
 
-        {/* --- SECTION 2: Inverted Items --- */}
         <section>
           <h2 className="text-xl font-semibold mb-4 text-[#80FFF9] border-b border-white/10 pb-2">
             Reversed Items (Negative Quantities)
@@ -204,7 +193,6 @@ const StornoInvoice = () => {
           ))}
         </section>
 
-        {/* --- SECTION 3: Summary & Notes --- */}
         <section>
           <h2 className="text-xl font-semibold mb-4 text-[#80FFF9] border-b border-white/10 pb-2">
             Summary & Accounting Notes
@@ -237,21 +225,16 @@ const StornoInvoice = () => {
           </div>
         </section>
 
-        {/* Sticky Footer */}
-        <div className="fixed bottom-0 right-0 left-0 md:left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-3 z-10">
-          <div className="flex flex-row justify-center items-center gap-2 sm:gap-4 px-3 sm:px-4">
-            
-            <button type="button" onClick={handleReset} className="flex items-center justify-center gap-2 px-3 sm:px-5 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition text-sm sm:text-base">
-              <RotateCcw size={16} />
-              Reset Form
-            </button>
+        <div className="fixed bottom-0 right-0 left-0 md:left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-4 z-40">
+          <div className="flex flex-row justify-center items-center gap-3 sm:gap-4 px-4">
 
-            <button type="button" onClick={() => navigate(-1)} className="flex items-center justify-center gap-2 px-3 sm:px-5 py-2 border border-white/20 rounded-md text-gray-300 hover:text-white hover:bg-white/10 transition text-sm sm:text-base">
+
+            <button type="button" onClick={() => navigate(-1)} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 border border-white/20 rounded-xl text-xs font-mono uppercase tracking-wider text-gray-300 hover:text-white hover:bg-white/10 transition duration-300">
               <X size={16} />
               Cancel
             </button>
 
-            <button type="submit" disabled={loading || formData.items.length === 0} className="flex items-center justify-center gap-2 px-3 sm:px-5 py-2 rounded-md bg-red-500/20 border border-red-500/40 hover:bg-red-500/30 transition text-sm sm:text-base">
+            <button type="submit" disabled={loading || formData.items.length === 0} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-teal-500/20 to-indigo-600/20 hover:from-teal-500/30 hover:to-indigo-600/30 border border-teal-500/30 hover:border-teal-400/60 text-xs font-mono uppercase tracking-wider text-[#80FFF9] font-bold shadow-lg transition duration-300">
               <Save size={16} />
               {loading ? "Generating Storno..." : "Save Storno Invoice"}
             </button>

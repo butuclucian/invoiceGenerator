@@ -44,7 +44,6 @@ const DashboardHome = () => {
 
   return (
     <div className="p-8 pt-30 space-y-8">
-      {/* 1. KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {kpis.map((k, i) => (
           <div key={i} className="bg-[#1a1a1a]/80 p-6 rounded-2xl border border-white/10 flex items-center justify-between shadow-lg">
@@ -58,7 +57,6 @@ const DashboardHome = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* 2. Chart Distribuție */}
         <div className="bg-[#1a1a1a]/80 p-6 rounded-2xl border border-white/10 lg:col-span-1 h-[300px]">
           <h2 className="text-lg font-semibold mb-6 flex items-center gap-2"><PieIcon size={18} className="text-[#80FFF9]"/> Status Facturi</h2>
           <ResponsiveContainer width="100%" height="80%">
@@ -71,8 +69,6 @@ const DashboardHome = () => {
             </PieChart>
           </ResponsiveContainer>
         </div>
-
-        {/* 3. Facturi Întârziate (Widget Urgențe) */}
         <div className="bg-[#1a1a1a]/80 p-6 rounded-2xl border border-white/10 lg:col-span-1">
           <h2 className="text-lg font-semibold mb-4 text-red-400 flex items-center gap-2">
             <AlertCircle size={20} /> Urgente
@@ -89,13 +85,12 @@ const DashboardHome = () => {
           ) : <p className="text-gray-500 text-sm italic">Nicio factură întârziată!</p>}
         </div>
 
-        {/* 4. Quick Actions */}
         <div className="bg-[#1a1a1a]/80 p-6 rounded-2xl border border-white/10 flex flex-col justify-center gap-4">
           <h2 className="text-lg font-semibold text-white">Acțiuni</h2>
-          <button onClick={() => navigate("/dashboard/invoices/new")} className="flex items-center gap-3 bg-[#80FFF9]/10 text-[#80FFF9] p-4 rounded-xl hover:bg-[#80FFF9]/20 transition">
+          <button onClick={() => navigate("/dashboard/invoices/create")} className="flex items-center gap-3 bg-[#80FFF9]/10 text-[#80FFF9] p-4 rounded-xl hover:bg-[#80FFF9]/20 transition">
             <Plus size={20} /> Factură Nouă
           </button>
-          <button onClick={() => navigate("/dashboard/clients/new")} className="flex items-center gap-3 bg-white/5 text-white p-4 rounded-xl hover:bg-white/10 transition">
+          <button onClick={() => navigate("/dashboard/clients/add")} className="flex items-center gap-3 bg-white/5 text-white p-4 rounded-xl hover:bg-white/10 transition">
             <Users size={20} /> Client Nou
           </button>
         </div>

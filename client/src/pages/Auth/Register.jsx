@@ -50,10 +50,7 @@ const Register = () => {
 
   return (
     <div className="overflow-hidden min-h-screen flex items-center justify-center bg-[#E8E8E8] relative">
-      <button
-        onClick={() => navigate("/")}
-        className="bg-[#1E1E1E] text-white px-20 pt-3 pb-3 rounded-xl hover:bg-[#333] absolute top-20 left-10 z-10"
-      >
+      <button onClick={() => navigate("/")} className="bg-[#1E1E1E] text-white px-20 pt-3 pb-3 rounded-xl hover:bg-[#333] absolute top-20 left-10 z-10">
         Back
       </button>
 
@@ -65,44 +62,15 @@ const Register = () => {
       <div className="w-full max-w-md mt-40 ml-10">
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <label htmlFor="name">Full Name</label>
-          <input
-            type="text"
-            name="name"
-            placeholder="Enter your full name"
-            value={form.name}
-            required
-            onChange={handleChange}
-            className="border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10"
-          />
+          <input type="text" name="name" placeholder="Enter your full name" value={form.name} required onChange={handleChange} className="border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10"/>
           
           <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter your email address"
-            value={form.email}
-            required
-            onChange={handleChange}
-            className="border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10"
-          />
+          <input type="email" name="email" placeholder="Enter your email address" value={form.email} required onChange={handleChange} className="border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10"/>
 
           <label htmlFor="password">Password</label>
-          {/* AICI AM REPARAT: Input-ul și butonul sunt în același container relativ */}
           <div className="relative w-full">
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              placeholder="Enter your password"
-              value={form.password}
-              required
-              onChange={handleChange}
-              className="border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10 w-full"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-2 text-[#1E1E1E] hover:text-purple-600 focus:outline-none"
-            >
+            <input type={showPassword ? "text" : "password"} name="password" placeholder="Enter your password" value={form.password} required onChange={handleChange} className="border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10 w-full"/>
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-2 text-[#1E1E1E] hover:text-purple-600 focus:outline-none" >
               {showPassword ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
               ) : (
@@ -115,9 +83,7 @@ const Register = () => {
             {form.password.length > 0 && (
               <div className="flex flex-col gap-1">
                 <div className="w-full h-2 border-2 border-[#1E1E1E] bg-white rounded-full overflow-hidden">
-                  <div
-                    className={`h-full transition-all duration-300 ${strengthColors[strengthScore]} ${strengthWidths[strengthScore]} border-r-2 border-[#1E1E1E]`}
-                  ></div>
+                  <div className={`h-full transition-all duration-300 ${strengthColors[strengthScore]} ${strengthWidths[strengthScore]} border-r-2 border-[#1E1E1E]`}></div>
                 </div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-right text-[#1E1E1E]">
                   {strengthLabels[strengthScore]}
@@ -126,11 +92,7 @@ const Register = () => {
             )}
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-[#1E1E1E] text-white pt-3 pb-3 rounded-xl hover:bg-[#333] mt-5"
-          >
+          <button type="submit" disabled={loading} className="bg-[#1E1E1E] text-white pt-3 pb-3 rounded-xl hover:bg-[#333] mt-5" >
             {loading ? "Loading..." : "Continue"}
           </button>
         </form>
@@ -143,7 +105,6 @@ const Register = () => {
         </div>
       </div>
 
-      {/* Imaginile de decor neschimbate */}
       <div className="">
         <img src="INVBLACK.png" alt="" className="left-300 bottom-180 rotate-20 absolute" />
         <img src="INVBLACK.png" alt="" className="left-315 top-150 rotate-340 absolute" />

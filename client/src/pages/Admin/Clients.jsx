@@ -13,8 +13,6 @@ const Clients = () => {
 
   const { query } = useSearchStore();
 
-
-  // FETCH CLIENTS
   const fetchClients = async () => {
     try {
       setLoading(true);
@@ -33,7 +31,6 @@ const Clients = () => {
   }, []);
 
 
-  // APPLY SEARCH FILTER
   useEffect(() => {
     if (!query.trim()) {
       setFilteredClients(clients);
@@ -55,7 +52,6 @@ const Clients = () => {
     setFilteredClients(results);
   }, [query, clients]);
 
-  // DELETE CLIENT
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this client?")) return;
 
@@ -69,8 +65,7 @@ const Clients = () => {
   };
 
   return (
-    <div className="p-8 text-white min-h-screen bg-[#0e0e0e] relative">
-      {/* Header */}
+    <div className="p-8 text-white min-h-screen bg-[#0e0e0e] relative pt-30 space-y-8">
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
@@ -86,7 +81,6 @@ const Clients = () => {
         </button>
       </div>
 
-      {/* Clients Grid */}
       {loading ? (
         <div className="flex justify-center items-center py-20 text-gray-400">
           Loading clients...
@@ -103,13 +97,10 @@ const Clients = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredClients.map((client) => (
             <div key={client._id} className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-6 hover:border-[#80FFF9]/40 transition-all shadow-md shadow-indigo-500/5" >
-              {/* Header */}
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-semibold text-white">
                   {client.name}
                 </h2>
-
-                {/* Buttons */}
                 <div className="flex items-center gap-2">
                   <button onClick={() => navigate(`/dashboard/clients/${client._id}/edit`) } className="p-2 text-gray-400 hover:text-indigo-400 transition" title="Edit" >
                     <Edit size={18} />
@@ -122,7 +113,6 @@ const Clients = () => {
 
               </div>
 
-              {/* Info */}
               <div className="space-y-2 text-sm text-gray-300">
                 <div className="flex items-center gap-2">
                   <Mail size={14} className="text-[#80FFF9]" />

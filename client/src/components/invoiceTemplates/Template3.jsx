@@ -15,21 +15,10 @@ const Template3 = ({ invoice, billingProfile }) => {
   const items = invoice.items || [];
 
   return (
-    <div style={{
-      width: "794px",
-      minHeight: "1123px",
-      backgroundColor: "#F5F2EC",
-      padding: "36px 50px",
-      fontFamily: "Helvetica, Arial, sans-serif",
-      color: "#1a1a1a",
-      boxSizing: "border-box",
-      position: "relative",
-    }}>
+    <div style={{width: "794px", minHeight: "1123px", backgroundColor: "#F5F2EC", padding: "36px 50px", fontFamily: "Helvetica, Arial, sans-serif", color: "#1a1a1a", boxSizing: "border-box", position: "relative"}}>
 
-      {/* TOP SECTION: Title left + Black card right */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px" }}>
 
-        {/* LEFT: Title + invoice number + customer + payment */}
         <div style={{ flex: 1 }}>
           <h1 style={{ fontSize: "38px", fontWeight: "bold", margin: "0 0 4px 0", letterSpacing: "2px" }}>INVOICE</h1>
           <p style={{ fontSize: "11px", color: "#555", margin: "0 0 20px 0" }}>Invoice No. #{invoice.invoice_number}</p>
@@ -46,17 +35,7 @@ const Template3 = ({ invoice, billingProfile }) => {
           <p style={{ fontSize: "11px", margin: "2px 0" }}>{b.bank_name || "Barclays"}</p>
         </div>
 
-        {/* RIGHT: Black card with invoice details */}
-        <div style={{
-          backgroundColor: "#1a1a1a",
-          color: "#fff",
-          padding: "20px 24px",
-          width: "220px",
-          flexShrink: 0,
-          marginLeft: "32px",
-          position: "relative",
-        }}>
-          {/* Corner brackets */}
+        <div style={{backgroundColor: "#1a1a1a", color: "#fff", padding: "20px 24px", width: "220px", flexShrink: 0, marginLeft: "32px", position: "relative"}}>
           <div style={{ position: "absolute", top: "-6px", left: "-6px", width: "12px", height: "12px", borderTop: "2px solid #1a1a1a", borderLeft: "2px solid #1a1a1a" }} />
           <div style={{ position: "absolute", bottom: "-6px", right: "-6px", width: "12px", height: "12px", borderBottom: "2px solid #1a1a1a", borderRight: "2px solid #1a1a1a" }} />
 
@@ -82,7 +61,6 @@ const Template3 = ({ invoice, billingProfile }) => {
         </div>
       </div>
 
-      {/* ITEMS TABLE with border */}
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px", border: "1px solid #1a1a1a", marginBottom: "16px" }}>
         <thead>
           <tr style={{ backgroundColor: "#ebebeb" }}>
@@ -106,7 +84,6 @@ const Template3 = ({ invoice, billingProfile }) => {
         </tbody>
       </table>
 
-      {/* SUMMARY */}
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "40px" }}>
         <div style={{ minWidth: "280px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "6px" }}>
@@ -124,7 +101,6 @@ const Template3 = ({ invoice, billingProfile }) => {
         </div>
       </div>
 
-      {/* SUPPLIER */}
       <div style={{ marginBottom: "20px" }}>
         <p style={{ fontWeight: "bold", fontSize: "12px", marginBottom: "6px" }}>Supplier</p>
         <p style={{ fontSize: "11px", margin: "2px 0" }}>{b.business_name || "BrightTech Solutions Ltd"}</p>
@@ -133,7 +109,6 @@ const Template3 = ({ invoice, billingProfile }) => {
         <p style={{ fontSize: "11px", margin: "2px 0", color: "#555" }}>{b.email || "contact@brighttech.co.uk"}</p>
       </div>
 
-      {/* BOTTOM BAR */}
       <hr style={{ border: "none", borderTop: "1px solid #1a1a1a", margin: "0 0 10px 0" }} />
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "#555" }}>
         <span>☎ {b.phone || "+44 20 7946 0958"}</span>

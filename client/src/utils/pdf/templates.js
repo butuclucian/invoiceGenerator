@@ -5,7 +5,6 @@ export const renderEUTemplate = async (doc, invoice, b, h) => {
 
   let y = 20;
 
-  // Header
   doc.setFontSize(24);
   doc.setTextColor(...accent);
   doc.setFont("helvetica", "bold");
@@ -16,7 +15,6 @@ export const renderEUTemplate = async (doc, invoice, b, h) => {
   doc.setFont("helvetica", "normal");
   doc.text(`#${invoice.invoice_number}`, 15, y + 6);
 
-  // Company block
   doc.setFontSize(12);
   doc.setTextColor(20, 20, 20);
   doc.text(b.business_name || "Company", 140, y);
@@ -27,7 +25,6 @@ export const renderEUTemplate = async (doc, invoice, b, h) => {
 
   y += 35;
 
-  // Client
   doc.setFont("helvetica", "bold");
   doc.text("Bill To", 15, y);
 
@@ -35,13 +32,11 @@ export const renderEUTemplate = async (doc, invoice, b, h) => {
   doc.text(c.name || "Client", 15, y + 6);
   if (c.address) doc.text(c.address, 15, y + 12);
 
-  // Dates
   doc.text(`Date: ${formatDate(invoice.date)}`, 140, y);
   doc.text(`Due: ${formatDate(invoice.due_date)}`, 140, y + 6);
 
   y += 20;
 
-  // Table
   const items = invoice.items?.map(i => [
     i.description,
     i.quantity,
@@ -60,7 +55,6 @@ export const renderEUTemplate = async (doc, invoice, b, h) => {
 
   const endY = doc.lastAutoTable.finalY + 10;
 
-  // Summary
   doc.text(`VAT (${b.vat_rate}%):`, 140, endY);
   doc.text(`${invoice.tax_amount.toFixed(2)} ${currency}`, 195, endY, { align: "right" });
 

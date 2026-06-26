@@ -13,7 +13,7 @@ const AddClients = () => {
     cui: "",
     reg_com: "",
     client_code: "",
-    is_tva_payer: false, // 🔥 REPARAT: Aliniat cu modelul Mongoose (din is_vat_payer în is_tva_payer)
+    is_tva_payer: false,
     address: "",
     city: "",
     county: "",
@@ -23,7 +23,7 @@ const AddClients = () => {
     contact_person: "",
     email: "",
     phone: "",
-    company: "", // Păstrat în stare pentru consistență structurală
+    company: "",
   });
 
   const handleChange = (e) => {
@@ -32,7 +32,6 @@ const AddClients = () => {
   };
 
   const handleVatChange = (isPayer) => {
-    // 🔥 REPARAT: Actualizează cheia corectă din baza de date
     setFormData({ ...formData, is_tva_payer: isPayer });
   };
 
@@ -45,7 +44,6 @@ const AddClients = () => {
     }
 
     try {
-      // Trimitem formData complet direct către backend
       const { data } = await API.post("/clients", formData);
       toast.success(`Client ${data.name} added successfully!`);
       navigate("/dashboard/clients");
@@ -82,9 +80,7 @@ const AddClients = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-10 pt-8 overflow-hidden pb-32">
-
-      {/* Header */}
+    <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-10 overflow-hidden pb-16 p-8 pt-30 space-y-8">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-semibold flex items-center gap-2">
@@ -100,10 +96,8 @@ const AddClients = () => {
         </div>
       </div>
 
-      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-10 max-w-4xl mx-auto relative z-10">
 
-        {/* --- SECTIUNEA 1: Identificare & Date Principale --- */}
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold tracking-wider text-indigo-400 uppercase border-b border-white/5 pb-2">
             General & Fiscal Info
@@ -153,7 +147,6 @@ const AddClients = () => {
           </div>
         </div>
 
-        {/* --- SECTIUNEA 2: Adresa & Localizare --- */}
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold tracking-wider text-indigo-400 uppercase border-b border-white/5 pb-2">
             Address & Location
@@ -182,7 +175,6 @@ const AddClients = () => {
           </div>
         </div>
 
-        {/* --- SECTIUNEA 3: Detalii Financiare / Bancare --- */}
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold tracking-wider text-indigo-400 uppercase border-b border-white/5 pb-2">
             Bank Details
@@ -201,7 +193,6 @@ const AddClients = () => {
           </div>
         </div>
 
-        {/* --- SECTIUNEA 4: Contact --- */}
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold tracking-wider text-indigo-400 uppercase border-b border-white/5 pb-2">
             Contact Persons
@@ -229,7 +220,6 @@ const AddClients = () => {
           </div>
         </div>
 
-        {/* Footer Buttons */}
         <div className="fixed bottom-0 right-0 left-0 md:left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-4 z-40">
           <div className="flex flex-row justify-center items-center gap-3 sm:gap-4 px-4">
             

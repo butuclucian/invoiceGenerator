@@ -82,20 +82,16 @@ const Home = () => {
     <div className="bg-[#E8E8E8] min-h-screen selection:bg-[#1E1E1E] selection:text-[#E8E8E8] overflow-hidden">
       <Navbar2 />
 
-      {/* ========================================================= */}
-      {/* HERO SECTION */}
-      {/* ========================================================= */}
       <div className="h-screen bg-[#E8E8E8] relative flex items-center justify-center p-2 overflow-hidden">
         <div className="w-full h-full bg-[#1E1E1E] rounded-[2.5rem] overflow-hidden relative flex flex-col justify-center">
           
-          {/* buttons */}
           <div className="absolute top-8 right-8 md:right-20 flex items-center gap-4 z-50">
             {isLoggedIn ? (
-              <Link to="/dashboard" className="text-[#E8E8E8] text-sm border-2 border-[#E8E8E8] px-6 py-2 rounded-full font-bold hover:bg-[#E8E8E8]/20 transition-colors uppercase tracking-widest hidden md:block">
+              <Link to="/dashboard" className="text-[#E8E8E8] text-sm border-2 border-[#E8E8E8] px-6 py-2 rounded-full font-bold hover:bg-[#E8E8E8]/20 transition-colors tracking-widest hidden md:block">
                 Dashboard
               </Link>
             ) : (
-              <Link to="/register" className="text-[#E8E8E8] text-sm border-2 border-[#E8E8E8] px-6 py-2 rounded-full font-bold hover:bg-[#E8E8E8]/20 transition-colors uppercase tracking-widest hidden md:block">
+              <Link to="/register" className="text-[#E8E8E8] text-sm border-2 border-[#E8E8E8] px-6 py-2 rounded-full font-bold hover:bg-[#E8E8E8]/20 transition-colors tracking-widest hidden md:block">
                 Get Started
               </Link>
             )}
@@ -103,7 +99,6 @@ const Home = () => {
             <img src={menuOpen ? "OpenMenu.png" : "menu.png"} alt="Menu" className="w-7 h-auto cursor-pointer" onClick={() => setMenuOpen(!menuOpen)}/>
           </div>
 
-          {/* Fullscreen Overlay Menu */}
           {menuOpen && (
             <motion.div initial={{ y: "-100%" }} animate={{ y: 0 }} exit={{ y: "-100%" }} transition={{ duration: 0.5 }} className="fixed inset-0 bg-[#1E1E1E]/90 backdrop-blur-md z-40 flex flex-col h-screen">
               <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 flex-1 border-0 text-white pt-20 md:pt-0">
@@ -114,20 +109,10 @@ const Home = () => {
                     </Link>
                   ),
                 )}
-                <div className="text-[#E8E8E8] p-8 flex flex-col justify-center h-full max-w-xl mx-auto hidden md:flex">
-                  <h2 className="text-xs uppercase tracking-[0.2em] text-[#E8E8E8] font-black mb-6">
-                    // Local AI Status
-                  </h2>
-                  <div className="flex items-center gap-4">
-                    <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-                    <p className="text-sm font-bold tracking-widest uppercase">Ollama 3.1 Active</p>
-                  </div>
-                </div>
               </div>
             </motion.div>
           )}
 
-          {/* Hero Typography Content */}
           <div className="ml-4 md:ml-10 z-10">
             <motion.div variants={container} initial="hidden" animate="visible" className="mt-15 w-full max-w-5xl text-white ml-0 md:ml-3 font-bold text-[80px] md:text-[140px] lg:text-[180px] tracking-[-11%] leading-[0.8] [-webkit-text-stroke:2px_white]">
               {text.map((part, i) => (
@@ -137,10 +122,7 @@ const Home = () => {
               ))}
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.5, duration: 0.8 }} className="flex items-center gap-4 mt-8 md:pl-34">
-              <span className="px-4 py-2 bg-[#E8E8E8] text-[#1E1E1E] text-xs font-black uppercase tracking-widest rounded-full">
-                V 2.0
-              </span>
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.5, duration: 0.8 }} className="flex items-center gap-4 mt-8 md:pl-10">
               <h1 className="text-white text-xl md:text-2xl font-handwriting">
                 {subtext}
               </h1>
@@ -150,23 +132,18 @@ const Home = () => {
         </div>
       </div>
 
-      {/* ========================================================= */}
-      {/* FEATURE 1: OLLAMA 3.1 (LOCAL BRAIN) */}
-      {/* ========================================================= */}
-      <div className="w-full max-w-[1700px] mx-auto py-24 md:py-32 px-4 md:px-8">
+
+      <div className="w-full max-w-8xl mx-auto pb-24 pt-20 md:pb-32 px-4 md:px-8">
         <div className="flex flex-col lg:flex-row items-center gap-16">
-          
           <div className="flex-1 w-full">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="font-bold text-[60px] md:text-[100px] lg:text-[130px] tracking-[-8%] leading-[0.8] uppercase select-none mb-8">
               <span className="text-[#1E1E1E]">LOCAL </span>
               <br className="hidden md:block"/>
               <span className="text-transparent [-webkit-text-stroke:2px_#1E1E1E]">BRAIN.</span>
             </motion.div>
-            
             <p className="text-[#1E1E1E] text-xl font-handwriting max-w-md mb-8">
               100% privacy. Zero cloud data leaks.
             </p>
-
             <p className="text-[#1E1E1E]/80 text-lg md:text-xl font-bold max-w-xl leading-relaxed mb-8">
               We completely ditched cloud APIs. Your invoice generation runs <span className="bg-[#1E1E1E] text-white px-2 py-1 rounded-md mx-1">Ollama 3.1</span> directly in your local environment. Your client data never leaves your system.
             </p>
@@ -187,9 +164,6 @@ const Home = () => {
                 <p className="text-gray-500">{`> loading model 'llama3.1'...`}</p>
                 <p className="text-purple-600 bg-purple-100 inline-block px-2">{`> model loaded locally. [OK]`}</p>
                 <p className="mt-4">{`> extracting invoice data from context...`}</p>
-                <div className="pl-4 border-l-4 border-[#1E1E1E]">
-                  <p>{`{ "client": "TechCorp", "amount": 4500, "status": "generated" }`}</p>
-                </div>
               </div>
             </motion.div>
           </div>
@@ -197,10 +171,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* ========================================================= */}
-      {/* FEATURE 2: 30-SECOND AUTOPILOT */}
-      {/* ========================================================= */}
-      <div className="w-full max-w-[1700px] mx-auto pb-24 md:pb-32 px-4 md:px-8">
+      <div className="w-full max-w-8xl mx-auto pb-24 md:pb-32 px-4 md:px-8">
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} 
           className="bg-purple-500 rounded-[3rem] p-8 md:p-20 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-12 border-4 border-[#1E1E1E] shadow-[16px_16px_0px_0px_rgba(30,30,30,1)]">
           
@@ -231,10 +202,7 @@ const Home = () => {
         </motion.div>
       </div>
 
-      {/* ========================================================= */}
-      {/* WORKFLOW SECTION */}
-      {/* ========================================================= */}
-      <div className="w-full max-w-[1700px] mx-auto pb-24 md:pb-32 px-4 md:px-8 select-none">
+      <div className="w-full max-w-8xl mx-auto pb-24 md:pb-32 px-4 md:px-8">
         
         <div className="w-full mb-16">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="font-bold text-[60px] md:text-[100px] lg:text-[130px] tracking-[-8%] leading-[0.8] uppercase select-none mb-6">
@@ -246,16 +214,7 @@ const Home = () => {
           </p>
         </div>
 
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          variants={{
-            hidden: { opacity: 0 },
-            visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
-          }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 w-full relative z-10"
-        >
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.15 } } }} className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 w-full relative z-10" >
           {workflowData.map((card, index) => {
             const isMiddle = index === 1;
             const isLast = index === 2;

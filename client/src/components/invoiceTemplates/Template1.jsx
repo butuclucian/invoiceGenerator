@@ -15,17 +15,8 @@ const Template2 = ({ invoice, billingProfile }) => {
   const items = invoice.items || [];
 
   return (
-    <div style={{
-      width: "794px",
-      minHeight: "1123px",
-      backgroundColor: "#F5F2EC",
-      padding: "36px 50px",
-      fontFamily: "Helvetica, Arial, sans-serif",
-      color: "#1a1a1a",
-      boxSizing: "border-box",
-    }}>
+    <div style={{width: "794px", minHeight: "1123px", backgroundColor: "#F5F2EC", padding: "36px 50px", fontFamily: "Helvetica, Arial, sans-serif", color: "#1a1a1a", boxSizing: "border-box"}}>
 
-      {/* HEADER */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
         <h1 style={{ fontSize: "32px", fontWeight: "bold", margin: 0, letterSpacing: "1px" }}>invoice</h1>
         <div style={{ textAlign: "right", fontSize: "11px" }}>
@@ -44,7 +35,6 @@ const Template2 = ({ invoice, billingProfile }) => {
         </div>
       </div>
 
-      {/* CUSTOMER */}
       <div style={{ marginBottom: "6px" }}>
         <span style={{ fontWeight: "bold", fontSize: "12px", marginRight: "24px" }}>customer</span>
         <span style={{ fontSize: "11px", marginRight: "16px" }}>{cl.name || "Digital Growth Agency Ltd"}</span>
@@ -53,7 +43,6 @@ const Template2 = ({ invoice, billingProfile }) => {
       </div>
       <hr style={{ border: "none", borderTop: "1px solid #1a1a1a", margin: "0 0 14px 0" }} />
 
-      {/* SUPPLIER */}
       <div style={{ marginBottom: "30px" }}>
         <span style={{ fontWeight: "bold", fontSize: "12px", marginRight: "24px" }}>supplier</span>
         <span style={{ fontSize: "11px", marginRight: "16px" }}>{b.business_name || "BrightTech Solutions Ltd"}</span>
@@ -62,7 +51,6 @@ const Template2 = ({ invoice, billingProfile }) => {
         <span style={{ fontSize: "11px", color: "#555" }}>{b.email || "contact@brighttech.co.uk"}</span>
       </div>
 
-      {/* TABLE */}
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px", marginBottom: "8px" }}>
         <thead>
           <tr style={{ borderTop: "1px solid #1a1a1a", borderBottom: "1px solid #1a1a1a" }}>
@@ -87,13 +75,11 @@ const Template2 = ({ invoice, billingProfile }) => {
       </table>
       <hr style={{ border: "none", borderTop: "1px solid #1a1a1a", margin: "0 0 10px 0" }} />
 
-      {/* SUBTOTAL ROW */}
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "20px" }}>
         <span>subtotal (excl. vat)</span>
         <span style={{ fontWeight: "bold" }}>{(invoice.subtotal ?? 0).toFixed(2)} {currency}</span>
       </div>
 
-      {/* VAT / DISCOUNT / TOTAL */}
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "40px" }}>
         <div style={{ minWidth: "280px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "6px" }}>
@@ -111,7 +97,6 @@ const Template2 = ({ invoice, billingProfile }) => {
         </div>
       </div>
 
-      {/* FOOTER */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
           <p style={{ fontWeight: "bold", fontSize: "13px", marginBottom: "8px" }}>payment options</p>

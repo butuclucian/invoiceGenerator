@@ -121,9 +121,7 @@ const CalendarPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white p-10">
-
-      {/* HEADER */}
+    <div className="p-8 text-white min-h-screen bg-[#0e0e0e] relative pt-30 space-y-8">
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-semibold flex items-center gap-2">
@@ -134,18 +132,14 @@ const CalendarPage = () => {
             Track meetings, reminders and invoice-related events.
           </p>
         </div>
-
-        {/* NEW EVENT BUTTON */}
         <button onClick={() => setOpenPopup(true)} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2" >
           <Plus size={16} className="text-indigo-400" />
           New Event
         </button>
       </div>
 
-      {/* GRID LAYOUT */}
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-10">
 
-        {/* === MAIN CALENDAR === */}
         <div className="w-full">
           <Calendar onChange={setSelectedDate} value={selectedDate} className="full-calendar" tileClassName={({ date }) => {
               const key = format(date, "yyyy-MM-dd");
@@ -154,7 +148,6 @@ const CalendarPage = () => {
               return null;
             }} />
 
-          {/* YOUR EXACT STYLING */}
           <style>{`
             .full-calendar {
               width: 100%;
@@ -169,7 +162,7 @@ const CalendarPage = () => {
               gap: 6px !important;
             }
             .full-calendar .react-calendar__tile {
-              height: 120px;
+              height: 100px;
               border-radius: 18px;
               background: #131313;
               border: 1px solid #1f1f1f;
@@ -201,10 +194,8 @@ const CalendarPage = () => {
           `}</style>
         </div>
 
-        {/* === RIGHT SIDEBAR === */}
         <div className="flex flex-col gap-6">
 
-          {/* MINI CALENDAR */}
           <div className="bg-[#111]/60 border border-white/10 rounded-2xl p-5 shadow-lg">
             <Calendar value={selectedDate} className="mini-calendar" tileDisabled={() => true} navigationLabel={({ date }) => format(date, "MMMM yyyy")} next2Label={null} nextLabel={null} prevLabel={null} prev2Label={null}/>
 
@@ -241,7 +232,6 @@ const CalendarPage = () => {
             `}</style>
           </div>
 
-          {/* MONTH EVENTS */}
           <div className="bg-[#111]/60 border border-white/10 rounded-2xl p-6 shadow-lg flex flex-col">
             <h2 className="text-lg font-semibold mb-3"> Events this month</h2>
 
@@ -259,18 +249,14 @@ const CalendarPage = () => {
                     </div>
 
                     <div className="flex items-center gap-3">
-
-                      {/* EDIT */}
                       <button onClick={() => { setNewNote({ time: ev.time, title: ev.title }); setSelectedDate(new Date(ev.date)); setEditingEventId(ev._id); setOpenPopup(true); }} className="text-indigo-400 hover:text-indigo-300 transition" >
                         <PenIcon size={18}/>
                       </button>
-
-                      {/* DELETE */}
                       <button onClick={() => deleteNote(ev._id)} className="text-red-500 hover:text-red-400 transition">
                         <Trash2 size={18} />
                       </button>
-
                     </div>
+
                   </div>
                 ))}
               </div>
@@ -280,7 +266,6 @@ const CalendarPage = () => {
         </div>
       </div>
 
-      {/* POPUP */}
       {openPopup && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center">
           <div className="bg-[#111] p-6 rounded-2xl w-[350px] border border-white/10 shadow-xl">

@@ -15,24 +15,13 @@ const Template1 = ({ invoice, billingProfile }) => {
   const items = invoice.items || [];
 
   return (
-    <div style={{
-      width: "794px",
-      minHeight: "1123px",
-      backgroundColor: "#F5F2EC",
-      padding: "40px 50px",
-      fontFamily: "Helvetica, Arial, sans-serif",
-      color: "#1a1a1a",
-      boxSizing: "border-box",
-      position: "relative",
-    }}>
+    <div style={{ width: "794px", minHeight: "1123px", backgroundColor: "#F5F2EC", padding: "40px 50px", fontFamily: "Helvetica, Arial, sans-serif", color: "#1a1a1a", boxSizing: "border-box", position: "relative"}}>
 
-      {/* HEADER */}
       <h1 style={{ textAlign: "center", fontSize: "36px", fontWeight: "bold", margin: "0 0 16px 0", letterSpacing: "2px" }}>
         INVOICE
       </h1>
       <hr style={{ border: "none", borderTop: "1px solid #1a1a1a", margin: "0 0 24px 0" }} />
 
-      {/* TWO COLUMN: Supplier + Invoice Details */}
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "40px" }}>
         <div>
           <p style={{ fontWeight: "bold", fontSize: "12px", marginBottom: "6px" }}>Supplier</p>
@@ -52,7 +41,6 @@ const Template1 = ({ invoice, billingProfile }) => {
         </div>
       </div>
 
-      {/* ITEMS TABLE */}
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px", marginBottom: "8px" }}>
         <thead>
           <tr style={{ borderTop: "1px solid #1a1a1a", borderBottom: "1px solid #1a1a1a" }}>
@@ -76,7 +64,6 @@ const Template1 = ({ invoice, billingProfile }) => {
         </tbody>
       </table>
 
-      {/* SUMMARY - right aligned */}
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "40px" }}>
         <div style={{ minWidth: "260px" }}>
           <hr style={{ border: "none", borderTop: "1px solid #1a1a1a", marginBottom: "10px" }} />
@@ -95,7 +82,6 @@ const Template1 = ({ invoice, billingProfile }) => {
         </div>
       </div>
 
-      {/* FOOTER */}
       <hr style={{ border: "none", borderTop: "1px solid #1a1a1a", margin: "0 0 20px 0" }} />
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <div>

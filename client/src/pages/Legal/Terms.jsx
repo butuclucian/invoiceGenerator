@@ -1,11 +1,12 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
+import Navbar2 from "../../components/Home/Navbar2";
+import Footer from "../../components/Home/Footer";
 
 const Terms = () => {
   const navigate = useNavigate();
 
-  // Variante pentru animații
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -24,17 +25,11 @@ const Terms = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#E8E8E8] pt-32 pb-24 px-4 overflow-hidden selection:bg-[#1E1E1E] selection:text-[#E8E8E8]">
-      <div className="max-w-[1700px] mx-auto">
+    <div className="min-h-screen bg-[#E8E8E8] pt-32  overflow-hidden selection:bg-[#1E1E1E] selection:text-[#E8E8E8]">
+      <Navbar2 />
+      <div className="max-w-9xl mx-auto px-4 md:px-8 pb-24 md:pb-16">
         
-        {/* Buton de Back */}
-        <motion.button 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, ease: [0.215, 0.61, 0.355, 1.0] }}
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-3 text-[#1E1E1E] font-bold uppercase tracking-widest text-sm mb-12 group hover:text-purple-600 transition-colors"
-        >
+        <motion.button initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, ease: [0.215, 0.61, 0.355, 1.0] }} onClick={() => navigate(-1)} className="flex items-center gap-3 text-[#1E1E1E] font-bold uppercase tracking-widest text-sm mb-12 group hover:text-purple-600 transition-colors">
           <div className="w-12 h-12 rounded-full border-2 border-[#1E1E1E] flex items-center justify-center group-hover:bg-[#1E1E1E] group-hover:text-[#E8E8E8] group-hover:border-[#1E1E1E] transition-all duration-300">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform duration-300">
               <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -43,45 +38,24 @@ const Terms = () => {
           Go Back
         </motion.button>
 
-        {/* Header Section: Tipografie Masivă */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10 mb-16 relative">
           <div className="relative z-10">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.215, 0.61, 0.355, 1.0] }}
-              className="w-full font-bold text-[70px] md:text-[130px] lg:text-[160px] tracking-[-9%] leading-[0.8] uppercase select-none"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.215, 0.61, 0.355, 1.0] }} className="w-full font-bold text-[70px] md:text-[130px] lg:text-[160px] tracking-[-9%] leading-[0.8] uppercase select-none">
               <span className="text-transparent [-webkit-text-stroke:2px_#1E1E1E]">TERMS OF </span>
               <br className="hidden md:block" />
               <span className="text-[#1E1E1E]">SERVICE.</span>
             </motion.div>
           </div>
           
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="relative z-10 bg-white border-2 border-[#1E1E1E] text-[#1E1E1E] px-8 py-4 rounded-full flex flex-col md:items-end shadow-[8px_8px_0px_#1E1E1E]"
-          >
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4, duration: 0.8 }} className="relative z-10 bg-white border-2 border-[#1E1E1E] text-[#1E1E1E] px-8 py-4 rounded-full flex flex-col md:items-end shadow-[8px_8px_0px_#1E1E1E]">
             <span className="text-xs font-bold uppercase tracking-widest text-gray-500">Last Updated</span>
             <span className="text-xl font-black">{new Date().toISOString().split("T")[0]}</span>
           </motion.div>
         </div>
 
-        {/* Grid Asimetric pentru Conținut */}
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 md:grid-cols-12 gap-6"
-        >
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid grid-cols-1 md:grid-cols-12 gap-6">
           
-          {/* 1. About & 2. Use of Service (Outlined) */}
-          <motion.div 
-            variants={itemVariants}
-            className="md:col-span-7 border-2 border-[#1E1E1E] bg-transparent text-[#1E1E1E] rounded-[2.5rem] p-10 flex flex-col gap-10"
-          >
+          <motion.div variants={itemVariants} className="md:col-span-7 border-2 border-[#1E1E1E] bg-transparent text-[#1E1E1E] rounded-[2.5rem] p-10 flex flex-col gap-10">
             <div>
               <span className="text-xs font-bold uppercase tracking-[0.2em] mb-4 block text-gray-500">
                 // 01 About invoiceGenAi
@@ -107,11 +81,7 @@ const Terms = () => {
             </div>
           </motion.div>
 
-          {/* 3. AI Disclaimer (Dark) */}
-          <motion.div 
-            variants={itemVariants}
-            className="md:col-span-5 bg-[#1E1E1E] text-white rounded-[2.5rem] p-10 relative overflow-hidden shadow-2xl flex flex-col justify-between"
-          >
+          <motion.div variants={itemVariants} className="md:col-span-5 bg-[#1E1E1E] text-white rounded-[2.5rem] p-10 relative overflow-hidden shadow-2xl flex flex-col justify-between">
             <div className="absolute top-0 right-0 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
             
             <div>
@@ -134,11 +104,7 @@ const Terms = () => {
             </div>
           </motion.div>
 
-          {/* 4. User Responsibilities (White Solid) */}
-          <motion.div 
-            variants={itemVariants}
-            className="md:col-span-6 bg-white border border-[#1E1E1E]/10 text-[#1E1E1E] rounded-[2.5rem] p-10 shadow-lg"
-          >
+          <motion.div variants={itemVariants} className="md:col-span-6 bg-white border border-[#1E1E1E]/10 text-[#1E1E1E] rounded-[2.5rem] p-10 shadow-lg">
             <span className="text-xs font-bold uppercase tracking-[0.2em] mb-6 block text-gray-400">
               // 04 User Responsibilities
             </span>
@@ -159,11 +125,7 @@ const Terms = () => {
             </ul>
           </motion.div>
 
-          {/* 5. Subscriptions (Accent Purple) */}
-          <motion.div 
-            variants={itemVariants}
-            className="md:col-span-6 bg-purple-500 text-[#1E1E1E] rounded-[2.5rem] p-10 shadow-xl relative overflow-hidden"
-          >
+          <motion.div variants={itemVariants} className="md:col-span-6 bg-purple-500 text-[#1E1E1E] rounded-[2.5rem] p-10 shadow-xl relative overflow-hidden">
              <div className="absolute -left-10 -bottom-10 w-40 h-40 border-4 border-[#1E1E1E]/10 rounded-full"></div>
             
             <span className="text-xs font-bold uppercase tracking-[0.2em] mb-6 block text-[#1E1E1E]/70 relative z-10">
@@ -175,11 +137,7 @@ const Terms = () => {
             </p>
           </motion.div>
 
-          {/* 6. Data & Privacy (Outlined) */}
-          <motion.div 
-            variants={itemVariants}
-            className="md:col-span-5 border-2 border-[#1E1E1E] bg-transparent text-[#1E1E1E] rounded-[2.5rem] p-10 flex flex-col justify-between"
-          >
+          <motion.div variants={itemVariants} className="md:col-span-5 border-2 border-[#1E1E1E] bg-transparent text-[#1E1E1E] rounded-[2.5rem] p-10 flex flex-col justify-between">
             <div>
               <span className="text-xs font-bold uppercase tracking-[0.2em] mb-6 block">
                 // 06 Data & Privacy
@@ -193,11 +151,7 @@ const Terms = () => {
             </Link>
           </motion.div>
 
-          {/* 7. Limitation of Liability (Dark) */}
-          <motion.div 
-            variants={itemVariants}
-            className="md:col-span-7 bg-[#1E1E1E] text-white rounded-[2.5rem] p-10 flex flex-col justify-center"
-          >
+          <motion.div variants={itemVariants} className="md:col-span-7 bg-[#1E1E1E] text-white rounded-[2.5rem] p-10 flex flex-col justify-center">
             <span className="text-xs font-bold uppercase tracking-[0.2em] mb-6 block text-gray-400">
               // 07 Limitation of Liability
             </span>
@@ -221,11 +175,7 @@ const Terms = () => {
             </div>
           </motion.div>
 
-          {/* 8. Termination & 9. Contact (Combined Full Width) */}
-          <motion.div 
-            variants={itemVariants}
-            className="md:col-span-12 bg-white border-2 border-[#1E1E1E] rounded-[2.5rem] p-10 flex flex-col md:flex-row gap-10 md:gap-0 justify-between items-start md:items-center shadow-[8px_8px_0px_#1E1E1E]"
-          >
+          <motion.div variants={itemVariants} className="md:col-span-12 bg-white border-2 border-[#1E1E1E] rounded-[2.5rem] p-10 flex flex-col md:flex-row gap-10 md:gap-0 justify-between items-start md:items-center shadow-[8px_8px_0px_#1E1E1E]">
             <div className="md:w-1/2 md:pr-10 md:border-r-2 border-[#1E1E1E]/20">
               <span className="text-xs font-bold uppercase tracking-[0.2em] mb-4 block text-gray-400">
                 // 08 Termination
@@ -248,6 +198,7 @@ const Terms = () => {
 
         </motion.div>
       </div>
+      <Footer />
     </div>
   );
 };

@@ -23,12 +23,10 @@ import Register from "./pages/Auth/Register";
 import { Toaster } from "sonner";
 import EditClient from "./pages/Admin/EditClient";
 import MySubscription from "./pages/Admin/MySubscription";
-import Billing from "./pages/Admin/Billing";
 import Settings from "./pages/Admin/Settings";
 import CalendarPage from "./pages/Admin/CalendarPage";
 import StornoInvoice from "./pages/Admin/StornoInvoice";
 import AnafReporting from "./pages/Admin/AnafReporting";
-
 import About from "./pages/Legal/About";
 import Contact from "./pages/Legal/Contact";
 import Terms from "./pages/Legal/Terms";
@@ -36,9 +34,7 @@ import Privacy from "./pages/Legal/Privacy";
 import CookiePolicy from "./pages/Legal/Cookies";
 import ConsentBanner from "./components/ConsentBanner";
 import Templates from "./pages/Templates";
-import HowItWorks from "./pages/HowItWorks";
 import Pricing from "./pages/Pricing";
-import Blog from "./pages/Blog";
 import AiInsights from "./pages/Admin/AiInsights";
 import DashboardHome from "./pages/Admin/DashboardHome";
 
@@ -67,11 +63,9 @@ const App = () => {
 
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/blog" element={<Blog />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/templates" element={<Templates />} />
-        <Route path="/how-it-works" element={<HowItWorks />} />
-        <Route path="/blog" element={<Blog />} />
+        {/* <Route path="/how-it-works" element={<HowItWorks />} /> */}
 
         {/* Legal */}
         <Route path="/terms" element={<Terms />} />
@@ -94,7 +88,6 @@ const App = () => {
           <Route path="reports" element={<Reports />} />
           <Route path="ai-generator" element={<AIGenerator />} />
           <Route path="subscription" element={<MySubscription/>}/>
-          <Route path="billing" element={<Billing />} />
           <Route path="calendar" element={<CalendarPage />}/>
           <Route path="settings" element={<Settings />}/>
           <Route path="invoices/storno/:id" element={<StornoInvoice />} />

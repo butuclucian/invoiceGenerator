@@ -8,14 +8,13 @@ const AnafReporting = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [currency, setCurrency] = useState("RON");
   
-  // State pentru datele calculate
   const [reportData, setReportData] = useState({
     totalIncome: 0,
-    estimatedExpenses: 0, // Cheltuieli (pot fi introduse sau luate din profil)
+    estimatedExpenses: 0,
     netProfit: 0,
-    impozit: 0, // 10% din profitul net
-    cass: 0,    // Sănătate (calculat la plafoane dacă e cazul)
-    cas: 0,     // Pensie
+    impozit: 0,
+    cass: 0,
+    cas: 0,
     paidInvoicesCount: 0
   });
 
@@ -33,8 +32,6 @@ const AnafReporting = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      
-      // 1. Preluăm facturile și profilul de biling
       const invRes = await API.get("/invoices", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -50,28 +47,21 @@ const AnafReporting = () => {
         console.error("Could not fetch user currency:", e);
       }
 
-      // 2. Filtrăm doar facturile plătite în anul selectat
       const paidInvoicesInYear = invRes.data.filter((inv) => {
         if (inv.status !== "paid") return false;
         const invYear = new Date(inv.date).getFullYear();
         return invYear === parseInt(selectedYear);
       });
 
-      // 3. Adunăm veniturile brute (fără TVA, deoarece taxele se plătesc pe baza subtotalului net)
       const totalIncome = paidInvoicesInYear.reduce((sum, inv) => sum + (inv.subtotal || inv.total), 0);
 
-      // 4. Calcul fiscal simplificat (Sistem Real - PFA / Freelancer România)
-      // Pentru licență considerăm un procent forfetar standard de cheltuieli de 20% sau deductibilitate dacă ai modul de cheltuieli
-      const estimatedExpenses = totalIncome * 0.15; // Estimare cheltuieli deductibile (ex: consumabile, abonamente software)
+      const estimatedExpenses = totalIncome * 0.15;
       const netProfit = totalIncome - estimatedExpenses > 0 ? totalIncome - estimatedExpenses : 0;
       
-      // Taxe România: Impozit pe venit 10%
       const impozit = netProfit * 0.10;
-      
-      // Calcul simplificat Plafoane CASS/CAS (calcul demonstrativ excelent pentru comisie)
       let cass = 0;
       let cas = 0;
-      const salariuMinim2026 = 4000; // Valoare estimativă/teoretică curentă
+      const salariuMinim2026 = 4000;
       const plafon6Salarii = salariuMinim2026 * 6;
       const plafon12Salarii = salariuMinim2026 * 12;
 
@@ -109,9 +99,8 @@ const AnafReporting = () => {
   };
 
   return (
-    <div className="p-8 text-white min-h-screen bg-[#0e0e0e]">
+    <div className="p-8 text-white min-h-screen bg-[#0e0e0e] relative pt-30 space-y-8">
       
-      {/* HEADER */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-semibold flex items-center gap-2">
@@ -123,27 +112,19 @@ const AnafReporting = () => {
           </p>
         </div>
 
-        <button
-          onClick={handleExportData}
-          className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2"
-        >
+        <button onClick={handleExportData} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2">
           <Download size={18} />
           Export Fiscal Data
         </button>
       </div>
 
-      {/* AN FILTER BAR */}
       <div className="flex flex-wrap items-center gap-4 mb-8 bg-[#1a1a1a]/70 border border-white/10 p-4 rounded-xl">
         <div className="flex items-center gap-2">
           <Calendar size={18} className="text-[#80FFF9]" />
           <span className="text-gray-300">Anul fiscal raportat:</span>
         </div>
 
-        <select
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(e.target.value)}
-          className="cursor-pointer bg-[#1a1a1a] border border-white/10 text-gray-200 px-4 py-2 rounded-md focus:border-[#80FFF9] outline-none"
-        >
+        <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="cursor-pointer bg-[#1a1a1a] border border-white/10 text-gray-200 px-4 py-2 rounded-md focus:border-[#80FFF9] outline-none">
           <option value="2026">2026</option>
           <option value="2025">2025</option>
           <option value="2024">2024</option>
@@ -161,7 +142,6 @@ const AnafReporting = () => {
       ) : (
         <div className="space-y-8 max-w-5xl mx-auto">
           
-          {/* GRILA REZUMAT VENITURI */}
           <div className="grid md:grid-cols-3 gap-6">
             <div className="bg-[#1a1a1a]/60 border border-white/10 rounded-xl p-6">
               <span className="text-xs text-gray-400 font-semibold tracking-wider uppercase block mb-1">Venit Brut Realizat</span>
@@ -182,7 +162,6 @@ const AnafReporting = () => {
             </div>
           </div>
 
-          {/* CENTRALIZATOR CASETE DECLARATIA UNICA (ANAF) */}
           <div className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-8">
             <h2 className="text-xl font-semibold text-[#80FFF9] mb-6 flex items-center gap-2 border-b border-white/10 pb-3">
               <Landmark size={20} />
@@ -220,7 +199,6 @@ const AnafReporting = () => {
             </div>
           </div>
 
-          {/* ESTIMARE TAXE DATORATE */}
           <div className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-8">
             <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2 border-b border-white/10 pb-3">
               <Percent size={20} className="text-indigo-400" />

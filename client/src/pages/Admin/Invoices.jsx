@@ -10,31 +10,15 @@ import Template1 from "../../components/invoiceTemplates/Template1";
 import Template2 from "../../components/invoiceTemplates/Template2";
 import Template3 from "../../components/invoiceTemplates/Template3";
 
-// ─── Componenta de preview — randează template-ul ca HTML vizibil ───────────────
 const InvoicePreview = ({ invoice, template, billingProfile }) => {
   if (!invoice || !billingProfile) return null;
 
   const props = { invoice, billingProfile };
-
-  // Scalăm template-ul (794px lățime) la ~280px pentru preview în modal
   const scale = 280 / 794;
 
   return (
-    <div style={{
-      width: "280px",
-      height: `${Math.round(1123 * scale)}px`,
-      overflow: "hidden",
-      position: "relative",
-      borderRadius: "6px",
-      border: "1px solid rgba(255,255,255,0.1)",
-      backgroundColor: "#F5F2EC",
-    }}>
-      <div style={{
-        transform: `scale(${scale})`,
-        transformOrigin: "top left",
-        width: "794px",
-        pointerEvents: "none",
-      }}>
+    <div style={{width: "280px", height: `${Math.round(1123 * scale)}px`, overflow: "hidden", position: "relative", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.1)", backgroundColor: "#F5F2EC",}}>
+      <div style={{transform: `scale(${scale})`, transformOrigin: "top left", width: "794px", pointerEvents: "none",}}>
         {template === 1 && <Template1 {...props} />}
         {template === 2 && <Template2 {...props} />}
         {template === 3 && <Template3 {...props} />}
@@ -42,7 +26,6 @@ const InvoicePreview = ({ invoice, template, billingProfile }) => {
     </div>
   );
 };
-// ─────────────────────────────────────────────────────────────────────────────────
 
 const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
@@ -56,8 +39,6 @@ const Invoices = () => {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState(1);
   const [isDownloading, setIsDownloading] = useState(false);
-
-  // Ref către hidden div-ul folosit pentru generarea PDF-ului
   const hiddenRef = useRef(null);
 
   const { query } = useSearchStore();
@@ -102,7 +83,6 @@ const Invoices = () => {
     fetchInvoices();
   }, []);
 
-  // FILTER
   useEffect(() => {
     let temp = invoices;
 
@@ -134,7 +114,6 @@ const Invoices = () => {
     }
   };
 
-  // ── Download PDF — apelat DOAR la click pe butonul Download ─────────────────
   const handleDownloadPDF = () => {
     const element = hiddenRef.current;
     if (!element) {
@@ -181,9 +160,8 @@ const Invoices = () => {
   const handlePreview = (id) => navigate(`/dashboard/invoices/${id}`);
 
   return (
-    <div className="relative p-8 pt-30 text-white min-h-screen bg-[#0e0e0e]">
+    <div className="p-8 text-white min-h-screen bg-[#0e0e0e] relative pt-30 space-y-8">
 
-      {/* HEADER */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-semibold flex items-center gap-2">
@@ -193,27 +171,19 @@ const Invoices = () => {
           <p className="text-gray-400 text-sm">Manage and track all invoices</p>
         </div>
 
-        <button
-          onClick={() => navigate("/dashboard/invoices/create")}
-          className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2"
-        >
+        <button onClick={() => navigate("/dashboard/invoices/create")} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2">
           <Plus size={18} />
           Create Invoice
         </button>
       </div>
 
-      {/* FILTER BAR */}
       <div className="flex flex-wrap items-center gap-4 mb-8 bg-[#1a1a1a]/70 border border-white/10 p-4 rounded-xl">
         <div className="flex items-center gap-2">
           <Filter size={18} className="text-[#80FFF9]" />
           <span className="text-gray-300">Filter by status:</span>
         </div>
 
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="cursor-pointer bg-[#1a1a1a] border border-white/10 text-gray-200 px-4 py-2 rounded-md"
-        >
+        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="cursor-pointer bg-[#1a1a1a] border border-white/10 text-gray-200 px-4 py-2 rounded-md">
           <option value="all">All</option>
           <option value="draft">Draft</option>
           <option value="sent">Sent</option>
@@ -226,7 +196,6 @@ const Invoices = () => {
         </span>
       </div>
 
-      {/* LIST */}
       {loading ? (
         <div className="flex justify-center items-center py-20">
           <p className="text-gray-400 animate-pulse">Loading invoices...</p>
@@ -240,10 +209,7 @@ const Invoices = () => {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredInvoices.map((inv) => (
-            <div
-              key={inv._id}
-              className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-6 hover:border-[#80FFF9]/40 transition"
-            >
+            <div key={inv._id} className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-6 hover:border-[#80FFF9]/40 transition">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-semibold">{inv.invoice_number}</h2>
                 <span
@@ -271,48 +237,26 @@ const Invoices = () => {
                 </p>
               </div>
 
-              {/* Card buttons */}
               <div className="flex justify-between mt-4">
-                <button
-                  onClick={() => handlePreview(inv._id)}
-                  className="p-2 text-gray-400 hover:text-[#80FFF9] transition"
-                  title="View"
-                >
+                <button onClick={() => handlePreview(inv._id)} className="p-2 text-gray-400 hover:text-[#80FFF9] transition" title="View">
                   <Eye size={18} />
                 </button>
-                <button
-                  onClick={() => navigate(`/dashboard/invoices/${inv._id}/edit`)}
-                  className="p-2 text-gray-400 hover:text-indigo-400 transition"
-                  title="Edit"
-                >
+                <button onClick={() => navigate(`/dashboard/invoices/${inv._id}/edit`)} className="p-2 text-gray-400 hover:text-indigo-400 transition" title="Edit">
                   <Edit size={18} />
                 </button>
                 
-                {/* Butonul Storno - apare doar dacă factura nu este deja stornată (total pozitiv) și e finalizată */}
                 {inv.total > 0 && (inv.status === "sent" || inv.status === "paid") ? (
-                  <button
-                    onClick={() => navigate(`/dashboard/invoices/storno/${inv._id}`)}
-                    className="p-2 text-gray-400 hover:text-red-400 transition"
-                    title="Storno (Reversal)"
-                  >
+                  <button onClick={() => navigate(`/dashboard/invoices/storno/${inv._id}`)} className="p-2 text-gray-400 hover:text-red-400 transition" title="Storno (Reversal)">
                     <RefreshCw size={18} />
                   </button>
                 ) : (
-                  <div className="w-[34px] h-[34px]" /> // Spacer gol pentru a menține alinierea fixă a butoanelor
+                  <div className="w-[34px] h-[34px]" />
                 )}
 
-                <button
-                  onClick={() => handleOpenModal(inv)}
-                  className="p-2 text-gray-400 hover:text-green-400 transition"
-                  title="Download"
-                >
+                <button onClick={() => handleOpenModal(inv)} className="p-2 text-gray-400 hover:text-green-400 transition" title="Download">
                   <Download size={18} />
                 </button>
-                <button
-                  onClick={() => handleDelete(inv._id)}
-                  className="p-2 text-gray-400 hover:text-red-400 transition"
-                  title="Delete"
-                >
+                <button onClick={() => handleDelete(inv._id)} className="p-2 text-gray-400 hover:text-red-400 transition" title="Delete">
                   <Trash2 size={18} />
                 </button>
               </div>
@@ -321,15 +265,10 @@ const Invoices = () => {
         </div>
       )}
 
-      {/* ── TEMPLATE MODAL ──────────────────────────────────────────────────────── */}
       {showTemplateModal && selectedInvoice && billingProfile && (
-        <div
-          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
-          onClick={(e) => { if (e.target === e.currentTarget) handleCloseModal(); }}
-        >
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={(e) => { if (e.target === e.currentTarget) handleCloseModal(); }}>
           <div className="bg-[#141414] border border-white/10 rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
 
-            {/* Modal header */}
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <div>
                 <h2 className="text-xl font-semibold">Choose Template</h2>
@@ -337,22 +276,14 @@ const Invoices = () => {
                   Selectează un template, apoi apasă Download PDF.
                 </p>
               </div>
-              <button
-                onClick={handleCloseModal}
-                className="p-2 text-gray-400 hover:text-white transition rounded-lg hover:bg-white/10"
-              >
+              <button onClick={handleCloseModal} className="p-2 text-gray-400 hover:text-white transition rounded-lg hover:bg-white/10">
                 <X size={20} />
               </button>
             </div>
 
-            {/* Template previews */}
             <div className="p-6 flex gap-6 justify-center flex-wrap">
               {[1, 2, 3].map((tpl) => (
-                <div
-                  key={tpl}
-                  onClick={() => setSelectedTemplate(tpl)}
-                  className="flex flex-col items-center gap-3 cursor-pointer"
-                >
+                <div key={tpl} onClick={() => setSelectedTemplate(tpl)} className="flex flex-col items-center gap-3 cursor-pointer">
                   <div
                     className={`rounded-xl transition-all duration-200 ${
                       selectedTemplate === tpl
@@ -360,11 +291,7 @@ const Invoices = () => {
                         : "opacity-60 hover:opacity-90"
                     }`}
                   >
-                    <InvoicePreview
-                      invoice={selectedInvoice}
-                      template={tpl}
-                      billingProfile={billingProfile}
-                    />
+                    <InvoicePreview invoice={selectedInvoice} template={tpl} billingProfile={billingProfile}/>
                   </div>
                   <div className="flex items-center gap-2">
                     <div
@@ -386,19 +313,11 @@ const Invoices = () => {
               ))}
             </div>
 
-            {/* Modal footer */}
             <div className="flex justify-end gap-3 p-6 border-t border-white/10">
-              <button
-                onClick={handleCloseModal}
-                className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition text-gray-300"
-              >
+              <button onClick={handleCloseModal} className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition text-gray-300">
                 Cancel
               </button>
-              <button
-                onClick={handleDownloadPDF}
-                disabled={isDownloading}
-                className="px-5 py-2.5 rounded-xl bg-indigo-600/30 border border-indigo-600/50 hover:bg-indigo-600/40 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+              <button onClick={handleDownloadPDF} disabled={isDownloading} className="px-5 py-2.5 rounded-xl bg-indigo-600/30 border border-indigo-600/50 hover:bg-indigo-600/40 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                 {isDownloading ? (
                   <>
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -416,7 +335,6 @@ const Invoices = () => {
         </div>
       )}
 
-      {/* ── HIDDEN DIV pentru generarea PDF — în afara viewport-ului ──────────── */}
       {selectedInvoice && billingProfile && (
         <div
           style={{

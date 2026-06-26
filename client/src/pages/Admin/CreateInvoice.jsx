@@ -13,7 +13,7 @@ const CreateInvoice = () => {
 
   const [formData, setFormData] = useState({
     invoice_number: "Loading...",
-    series: "INV", // ✅ Adăugat implicit
+    series: "INV",
     date: new Date().toISOString().split("T")[0],
     due_date: new Date().toISOString().split("T")[0],
     client: "",
@@ -28,12 +28,11 @@ const CreateInvoice = () => {
     recurring: false,
     frequency: "monthly",
     next_billing: "",
-    payment_method: "not_paid", // ✅ Adăugat implicit
+    payment_method: "not_paid",
     paid_amount: 0,
     paid_at: ""
   });
 
-  // Stocăm local sumele doar pentru randarea în UI (deoarece Mongoose nu le are în schemă)
   const [uiAmounts, setUiAmounts] = useState({
     tax_amount: 0,
     discount_amount: 0
@@ -133,8 +132,6 @@ const CreateInvoice = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     const updatedFormData = { ...formData, [name]: value };
-
-    // Recalculăm totalurile dacă se schimbă tax_rate sau discount_rate global din input-uri
     if (name === "tax_rate" || name === "discount_rate") {
       const taxRate = name === "tax_rate" ? parseFloat(value) || 0 : formData.tax_rate;
       const discountRate = name === "discount_rate" ? parseFloat(value) || 0 : formData.discount_rate;
@@ -223,7 +220,6 @@ const CreateInvoice = () => {
 
     setLoading(true);
 
-    // 🛠️ CURĂȚARE DATE DETALII DATE (Prevenire crash MongoDB CastError)
     const payload = { ...formData, currency };
     if (!payload.due_date) delete payload.due_date;
     if (!payload.next_billing) delete payload.next_billing;
@@ -247,8 +243,8 @@ const CreateInvoice = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white px-10 pt-8 pb-32 overflow-hidden">
-      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+    <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-10 overflow-hidden pb-16 p-8 pt-30 space-y-8">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
             <FilePlus2 className="text-[#80FFF9]" size={26} />
@@ -260,8 +256,6 @@ const CreateInvoice = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="max-w-6xl mx-auto space-y-10 relative z-10">
-
-        {/* SECTION 1: INVOICE IDENTIFICATION */}
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold text-indigo-400 uppercase tracking-wider border-b border-white/5 pb-2">
             Invoice Details
@@ -311,7 +305,6 @@ const CreateInvoice = () => {
           </div>
         </div>
 
-        {/* SECTION 2: ITEMS LOGIC */}
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold text-indigo-400 uppercase tracking-wider border-b border-white/5 pb-2 flex justify-between items-center">
             Items Inventory
@@ -347,7 +340,6 @@ const CreateInvoice = () => {
           ))}
         </div>
 
-        {/* SECTION 3: FISCAL & PAYMENT STRATEGY */}
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold text-indigo-400 uppercase tracking-wider border-b border-white/5 pb-2">
             Taxing & Financial Summary
@@ -364,7 +356,6 @@ const CreateInvoice = () => {
             </div>
           </div>
 
-          {/* 💳 NOU: Câmpurile adăugate din model pentru încasări avansate */}
           <div className="grid md:grid-cols-3 gap-6 pt-2">
             <div>
               <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Payment Method</label>
@@ -386,7 +377,6 @@ const CreateInvoice = () => {
             </div>
           </div>
 
-          {/* TOTALS WRAPPER CARD */}
           <div className="mt-4 space-y-2 text-gray-400 bg-[#141414] border border-white/5 p-4 rounded-xl font-mono text-xs max-w-md ml-auto">
             <div className="flex justify-between">
               <span>Subtotal:</span>
@@ -422,7 +412,6 @@ const CreateInvoice = () => {
           </div>
         </div>
 
-        {/* SECTION 4: RECURRING SETTINGS */}
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold text-indigo-400 uppercase tracking-wider border-b border-white/5 pb-2">
             Recurring Invoice Automation
@@ -456,7 +445,6 @@ const CreateInvoice = () => {
           </div>
         </div>
 
-        {/* FIXED FOOTER ACTIONS */}
         <div className="fixed bottom-0 right-0 left-0 md:left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-4 z-40">
           <div className="flex flex-row justify-center items-center gap-3 sm:gap-4 px-4">
             <button type="button" onClick={handleReset} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 border border-white/20 rounded-xl text-xs font-mono uppercase tracking-wider text-gray-300 hover:text-white hover:bg-white/10 transition duration-300">

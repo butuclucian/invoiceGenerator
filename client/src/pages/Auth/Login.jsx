@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from "sonner";
-import { Eye, EyeOff } from "lucide-react"; // Importăm iconițele
+import { Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // Starea pentru vizibilitate
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -45,31 +45,12 @@ const Login = () => {
       <div className='w-full max-w-md mt-30 ml-10'>
         <form onSubmit={handleSubmit} className='flex flex-col gap-3'>
           <label>Email</label>
-          <input 
-            type="email" 
-            name="email" 
-            placeholder="Enter your email address" 
-            value={formData.email} 
-            onChange={handleChange} 
-            className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10' 
-          />
+          <input type="email" name="email" placeholder="Enter your email address" value={formData.email} onChange={handleChange} className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10' />
           
           <label htmlFor="password">Password</label>
-          {/* Container relativ pentru a poziționa iconița */}
           <div className="relative w-full">
-            <input 
-              type={showPassword ? "text" : "password"} 
-              name="password" 
-              placeholder="Enter your password" 
-              value={formData.password} 
-              onChange={handleChange} 
-              className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10 w-full pr-12' 
-            />
-            <button 
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#1E1E1E] hover:text-purple-600 z-10"
-            >
+            <input type={showPassword ? "text" : "password"} name="password" placeholder="Enter your password" value={formData.password} onChange={handleChange} className='border border-[#1E1E1E] rounded-xl py-2 px-4 bg-[#1E1E1E]/10 w-full pr-12' />
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#1E1E1E] hover:text-purple-600 z-10">
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
@@ -87,7 +68,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Imaginile tale de background păstrate */}
       <div className=''>
         <img src="INVBLACK.png" alt="" className='left-300 bottom-180 rotate-20 absolute' />
         <img src="INVBLACK.png" alt="" className='left-315 top-150 rotate-340 absolute' />
