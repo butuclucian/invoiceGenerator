@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import API from "../../utils/api";
 import { toast } from "sonner";
 
-// Componentă internă pentru efectul de scriere la mașină (Typing Effect)
 const TypewriterText = ({ text }) => {
   const [displayedText, setDisplayedText] = React.useState("");
   
@@ -18,7 +17,7 @@ const TypewriterText = ({ text }) => {
       } else {
         clearInterval(interval);
       }
-    }, 2); // Viteza de scriere optimizată pentru rapoarte lungi
+    }, 2);
     return () => clearInterval(interval);
   }, [text]);
 
@@ -28,16 +27,14 @@ const TypewriterText = ({ text }) => {
 const AiInsights = () => {
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState("");
-  
-  // ── STATE-URI PENTRU ISTORIC RAPOARTE ───────────────────────
+
   const [reportHistory, setReportHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
-  // Încarcă istoricul rapoartelor din backend
+
   const fetchReportHistory = async () => {
     setHistoryLoading(true);
     try {
-      // Modifică endpoint-ul dacă ai o rută specifică (ex: /invoices/analytics/ai/history)
       const { data } = await API.get("/invoices/analytics/ai/history");
       if (data.success) {
         setReportHistory(data.history || []);
@@ -57,7 +54,6 @@ const AiInsights = () => {
       if (data.success) {
         setReport(data.report);
         toast.success("Analiza financiară a fost generată cu succes!");
-        // Reîmprospătăm istoricul ca să apară noul raport în listă imediat
         fetchReportHistory();
       } else {
         toast.error("Nu s-a putut genera raportul.");
@@ -70,7 +66,6 @@ const AiInsights = () => {
     }
   };
 
-  // Ștergerea unui raport din istoric
   const handleDeleteHistory = async (id) => {
     try {
       const { data } = await API.delete(`/invoices/analytics/ai/history/${id}`);
@@ -83,52 +78,42 @@ const AiInsights = () => {
     }
   };
 
-  // Vizualizarea unui raport vechi în zona principală
   const handleViewReport = (savedReportText) => {
     setReport(savedReportText);
-    window.scrollTo({ top: 400, behavior: "smooth" }); // Autoscroll lin către raport
+    window.scrollTo({ top: 400, behavior: "smooth" });
     toast.info("S-a încărcat raportul selectat din istoric.");
   };
 
-  // Încărcăm istoricul la montarea componentei
   useEffect(() => {
     fetchReportHistory();
   }, []);
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-[#0d0d0d] text-white pt-24 relative overflow-hidden">
-      {/* Background Glows decorative */}
+    <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-10 overflow-hidden pb-16 p-8 pt-30 space-y-8">
+
       <div className="absolute top-20 right-10 w-72 h-72 bg-teal-500/10 blur-3xl rounded-full pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600/10 blur-3xl rounded-full pointer-events-none" />
 
-      {/* HEADER SECTION */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 border-b border-white/5 pb-6 relative z-10">
+
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
-          <div className="flex items-center gap-2 text-[#80FFF9] mb-1">
-            <Brain size={20} className="animate-pulse" />
-            <span className="text-xs uppercase tracking-widest font-mono font-bold">Business Intelligence</span>
-          </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-500">
+          <div className="text-3xl font-semibold text-white flex items-center gap-2">
+            <Brain className="text-[#80FFF9]" size={26} />
             AI Financial Insights
-          </h1>
-          <p className="text-xs md:text-sm text-gray-400 mt-1">
+          </div>
+          <p className="text-gray-400 text-sm mt-1">
             Analiză strategică locală bazată pe registrul tău de facturi fiscale.
           </p>
         </div>
 
-        <button
-          onClick={generateReport}
-          disabled={loading}
-          className="
-            flex items-center justify-center gap-2 px-5 py-3 
-            bg-gradient-to-r from-teal-500/20 to-indigo-600/20 
+        <button onClick={generateReport} disabled={loading} 
+        className="flex items-center justify-center gap-2 px-5 py-3 
+            bg-linear-to-r from-teal-500/20 to-indigo-600/20 
             hover:from-teal-500/30 hover:to-indigo-600/30 
             border border-teal-500/30 hover:border-teal-400/60 
             rounded-full transition duration-300 font-medium text-sm
             shadow-[0_0_15px_rgba(20,184,166,0.1)] hover:shadow-[0_0_20px_rgba(20,184,166,0.2)]
-            disabled:opacity-50 disabled:cursor-not-allowed
-          "
-        >
+            disabled:opacity-50 disabled:cursor-not-allowed">
           {loading ? (
             <>
               <RefreshCw className="animate-spin text-[#80FFF9]" size={16} />
@@ -137,13 +122,12 @@ const AiInsights = () => {
           ) : (
             <>
               <Sparkles className="text-[#80FFF9]" size={16} />
-              <span>Generează Raport AI</span>
+              <span>Generează Raport</span>
             </>
           )}
         </button>
       </div>
 
-      {/* METRICS INFO GARANȚIE */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 relative z-10">
         <div className="bg-[#151515]/60 border border-white/5 backdrop-blur-xl p-4 rounded-2xl flex items-center gap-3">
           <div className="p-2.5 bg-teal-500/10 border border-teal-500/20 rounded-xl text-teal-400">
@@ -176,7 +160,6 @@ const AiInsights = () => {
         </div>
       </div>
 
-      {/* MAIN REPORT AREA */}
       <div className="relative z-10 mb-12">
         <AnimatePresence mode="wait">
           {!loading && !report && (
@@ -189,8 +172,7 @@ const AiInsights = () => {
               <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mb-4">
                 <Brain size={28} className="text-gray-400" />
               </div>
-              <h3 className="text-lg font-medium text-white mb-2">Gata pentru Analiza Financiară</h3>
-              <p className="text-sm text-gray-400 mb-6 max-w-md">
+              <p className="text-sm text-gray-500">
                 Apasă butonul de mai sus pentru a trimite istoricul tău tranzacțional către modelul neural de limbaj. AI-ul va compila automat indicatorii de performanță.
               </p>
             </motion.div>
@@ -216,7 +198,7 @@ const AiInsights = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="
                 max-w-3xl mx-auto 
-                bg-gradient-to-b from-[#161616]/90 to-[#121212]/90 
+                bg-linear-to-b from-[#161616]/90 to-[#121212]/90 
                 border border-white/10 p-6 md:p-8 rounded-2xl 
                 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl
               "
@@ -237,7 +219,6 @@ const AiInsights = () => {
         </AnimatePresence>
       </div>
 
-      {/* ── SECTION: REPORT HISTORY LOG (Adăugată Nou) ─────────────────────── */}
       <div className="relative z-10 max-w-3xl mx-auto mt-16 border-t border-white/5 pt-10">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
@@ -292,7 +273,6 @@ const AiInsights = () => {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {/* Buton vizualizare raport */}
                     <button
                       onClick={() => handleViewReport(hist.report || hist.content)}
                       className="p-2 text-gray-400 hover:text-[#80FFF9] bg-white/5 hover:bg-white/10 border border-white/5 rounded-lg transition"
@@ -301,7 +281,6 @@ const AiInsights = () => {
                       <Eye size={14} />
                     </button>
 
-                    {/* Buton ștergere raport */}
                     <button
                       onClick={() => handleDeleteHistory(hist._id)}
                       className="p-2 text-gray-500 hover:text-red-400 bg-red-500/5 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 rounded-lg transition"

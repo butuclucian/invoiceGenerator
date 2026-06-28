@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { UserPlus, Edit, Trash2, Mail, Phone, Building2, MapPin, Users,} from "lucide-react";
+import { UserPlus, Edit, Trash2, Mail, Phone, Building2, MapPin, Users, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import API from "../../utils/api";
 import { useSearchStore } from "../../store/useSearchStore";
 
@@ -10,7 +11,6 @@ const Clients = () => {
   const [filteredClients, setFilteredClients] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
   const { query } = useSearchStore();
 
   const fetchClients = async () => {
@@ -20,130 +20,93 @@ const Clients = () => {
       setClients(data);
       setFilteredClients(data);
     } catch (err) {
-      toast.error("Failed to load clients");
+      toast.error("Eroare la încărcarea clienților");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchClients();
-  }, []);
-
+  useEffect(() => { fetchClients(); }, []);
 
   useEffect(() => {
-    if (!query.trim()) {
-      setFilteredClients(clients);
-      return;
-    }
-
     const q = query.toLowerCase();
-
-    const results = clients.filter((c) => {
-      return (
-        c.name?.toLowerCase().includes(q) ||
-        c.email?.toLowerCase().includes(q) ||
-        c.phone?.toLowerCase().includes(q) ||
-        c.company?.toLowerCase().includes(q) ||
-        c.address?.toLowerCase().includes(q)
-      );
-    });
-
+    const results = clients.filter((c) => 
+      c.name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || 
+      c.company?.toLowerCase().includes(q)
+    );
     setFilteredClients(results);
   }, [query, clients]);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this client?")) return;
-
+    if (!window.confirm("Sigur ștergi acest client?")) return;
     try {
       await API.delete(`/clients/${id}`);
       setClients((prev) => prev.filter((c) => c._id !== id));
-      toast.success("Client deleted successfully!");
-    } catch (err) {
-      toast.error("Failed to delete client");
-    }
+      toast.success("Client șters!");
+    } catch (err) { toast.error("Eroare la ștergere"); }
   };
 
   return (
-    <div className="p-8 text-white min-h-screen bg-[#0e0e0e] relative pt-30 space-y-8">
-      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+    <div className="p-8 pt-30 min-h-screen bg-[#0e0e0e] text-white">
+      {/* Background Glow */}
+      <div className="absolute top-20 right-20 w-96 h-96 bg-indigo-500/5 blur-3xl rounded-full pointer-events-none" />
+
+      <div className="flex flex-col md:flex-row items-center justify-between mb-10">
         <div>
-          <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
-            <Users className="text-[#80FFF9]" size={26} />
-            Clients
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <Users className="text-[#80FFF9]" /> Clienți
           </h1>
-          <p className="text-gray-400 text-sm">Manage your business contacts</p>
+          <p className="text-gray-400 mt-1">Gestionare portofoliu clienți</p>
         </div>
 
-        <button onClick={() => navigate("/dashboard/clients/add")} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2">
-          <UserPlus size={18} />
-          Add Client
+        <button 
+          onClick={() => navigate("/dashboard/clients/add")} 
+          className="px-6 py-3 rounded-2xl bg-[#80FFF9]/10 border border-[#80FFF9]/20 hover:bg-[#80FFF9]/20 transition flex items-center gap-2 font-medium"
+        >
+          <UserPlus size={18} /> Adaugă Client
         </button>
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center py-20 text-gray-400">
-          Loading clients...
-        </div>
-      ) : filteredClients.length === 0 ? (
-        <div className="text-center py-16 border border-dashed border-white/20 rounded-xl bg-[#1a1a1a]/60">
-          <UserPlus className="w-16 h-16 text-white/20 mx-auto mb-3" />
-          <h3 className="text-lg font-medium text-gray-300">No clients found</h3>
-          <p className="text-sm text-gray-500 mt-1">
-            Try adding a new client to get started.
-          </p>
-        </div>
+        <div className="text-center py-20 text-gray-500">Se încarcă...</div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <motion.div 
+          initial={{ opacity: 0 }} 
+          animate={{ opacity: 1 }} 
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
           {filteredClients.map((client) => (
-            <div key={client._id} className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-6 hover:border-[#80FFF9]/40 transition-all shadow-md shadow-indigo-500/5" >
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-semibold text-white">
-                  {client.name}
-                </h2>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => navigate(`/dashboard/clients/${client._id}/edit`) } className="p-2 text-gray-400 hover:text-indigo-400 transition" title="Edit" >
-                    <Edit size={18} />
-                  </button>
-
-                  <button onClick={() => handleDelete(client._id)} className="p-2 text-gray-400 hover:text-red-400 transition" title="Delete" >
-                    <Trash2 size={18} />
-                  </button>
+            <motion.div 
+              layout
+              key={client._id} 
+              className="group bg-[#151515]/60 border border-white/5 backdrop-blur-xl p-6 rounded-3xl hover:border-white/10 transition-all hover:shadow-[0_0_30px_rgba(0,0,0,0.3)]"
+            >
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h2 className="text-xl font-bold">{client.name}</h2>
+                  <p className="text-xs text-gray-500 font-mono mt-0.5">{client.company || "Fără companie"}</p>
                 </div>
-
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
+                  <button onClick={() => navigate(`/dashboard/clients/${client._id}/edit`)} className="p-2 bg-white/5 rounded-lg hover:bg-white/10"><Edit size={14}/></button>
+                  <button onClick={() => handleDelete(client._id)} className="p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20"><Trash2 size={14}/></button>
+                </div>
               </div>
 
-              <div className="space-y-2 text-sm text-gray-300">
-                <div className="flex items-center gap-2">
-                  <Mail size={14} className="text-[#80FFF9]" />
-                  <span>{client.email}</span>
-                </div>
-
-                {client.phone && (
-                  <div className="flex items-center gap-2">
-                    <Phone size={14} className="text-[#80FFF9]" />
-                    <span>{client.phone}</span>
+              <div className="space-y-3">
+                {[
+                  { icon: Mail, val: client.email },
+                  { icon: Phone, val: client.phone },
+                  { icon: MapPin, val: client.address }
+                ].filter(item => item.val).map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-3 text-sm text-gray-400">
+                    <div className="p-1.5 bg-white/5 rounded-md text-[#80FFF9]"><item.icon size={14} /></div>
+                    {item.val}
                   </div>
-                )}
-
-                {client.company && (
-                  <div className="flex items-center gap-2">
-                    <Building2 size={14} className="text-[#80FFF9]" />
-                    <span>{client.company}</span>
-                  </div>
-                )}
-
-                {client.address && (
-                  <div className="flex items-center gap-2">
-                    <MapPin size={14} className="text-[#80FFF9]" />
-                    <span>{client.address}</span>
-                  </div>
-                )}
+                ))}
               </div>
-
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );

@@ -163,8 +163,6 @@ const Sidebar = ({ isMobile = false, closeSidebar }) => {
 
       </div>
 
-
-
     </motion.aside>
   );
 };

@@ -99,9 +99,12 @@ const AnafReporting = () => {
   };
 
   return (
-    <div className="p-8 text-white min-h-screen bg-[#0e0e0e] relative pt-30 space-y-8">
+    <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-10 overflow-hidden pb-16 p-8 pt-30 space-y-8">
+      <div className="absolute top-20 right-10 w-72 h-72 bg-teal-500/10 blur-3xl rounded-full pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600/10 blur-3xl rounded-full pointer-events-none" />
+
       
-      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-semibold flex items-center gap-2">
             <FileSpreadsheet className="text-[#80FFF9]" size={26} />

@@ -76,9 +76,12 @@ const Reports = () => {
     .slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white px-10 pt-8 pb-16">
+    <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-10 overflow-hidden pb-16 p-8 pt-30 space-y-8">
+      <div className="absolute top-20 right-10 w-72 h-72 bg-teal-500/10 blur-3xl rounded-full pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600/10 blur-3xl rounded-full pointer-events-none" />
+
       {/* Header */}
-      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         {/* title+ subtitle */}
         <div>
           <h1 className="text-3xl font-semibold text-white flex items-center gap-2">

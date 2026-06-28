@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Brain, Loader2, FileText, RotateCcw, Download, Lock, Sparkles,
-  Plus, Trash2, ChevronDown, ChevronUp, AlertCircle, CheckCircle2,
-  Clock, Settings, X, Edit2,
-} from "lucide-react";
+import { Brain, Loader2, FileText, RotateCcw, Download, Lock, Sparkles, Plus, Trash2, ChevronDown, ChevronUp, AlertCircle, CheckCircle2, Clock, Settings, X, Edit2,} from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
@@ -13,7 +9,6 @@ import API from "../../utils/api";
 import logo from "../../assets/invoicelogo.png";
 import AiHistoryLog from "./AiHistoryLog";
 
-// ── Prețuri default (sincronizate cu backend-ul) ──────────────────────────────
 const DEFAULT_PRICES = [
   { service: "web design", price: 500 },
   { service: "web development", price: 800 },
@@ -30,7 +25,6 @@ const DEFAULT_PRICES = [
   { service: "consulting", price: 80 },
 ];
 
-// ── Badge status ──────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
   const map = {
     draft: { label: "Draft", icon: Clock, cls: "bg-gray-500/20 text-gray-400 border-gray-500/30" },
@@ -47,7 +41,6 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-// ── Card rezultat invoice ──────────────────────────────────────────────────────
 const InvoiceResultCard = ({ result, onProcess }) => {
   const { invoice, ai_status, missing_fields = [], items_with_unknown_price = [] } = result;
   const [expanded, setExpanded] = useState(false);
@@ -59,7 +52,6 @@ const InvoiceResultCard = ({ result, onProcess }) => {
         : "border-amber-500/30 hover:border-amber-500/50"
     }`}>
 
-      {/* Card header */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -85,7 +77,6 @@ const InvoiceResultCard = ({ result, onProcess }) => {
         </div>
       </div>
 
-      {/* Missing fields warning */}
       {missing_fields.length > 0 && (
         <div className="flex items-start gap-2 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 mb-3">
           <AlertCircle size={14} className="text-amber-400 mt-0.5 shrink-0" />
@@ -96,7 +87,6 @@ const InvoiceResultCard = ({ result, onProcess }) => {
         </div>
       )}
 
-      {/* Unknown prices warning */}
       {items_with_unknown_price.length > 0 && (
         <div className="flex items-start gap-2 bg-orange-500/10 border border-orange-500/20 rounded-lg p-3 mb-3">
           <AlertCircle size={14} className="text-orange-400 mt-0.5 shrink-0" />
@@ -107,12 +97,7 @@ const InvoiceResultCard = ({ result, onProcess }) => {
         </div>
       )}
 
-      {/* Items preview */}
-      <button
-        type="button"
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between text-xs text-gray-400 hover:text-gray-200 transition mb-2"
-      >
+      <button type="button" onClick={() => setExpanded(!expanded)} className="w-full flex items-center justify-between text-xs text-gray-400 hover:text-gray-200 transition mb-2" >
         <span>{invoice.items?.length || 0} servicii/produse</span>
         {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
       </button>
@@ -135,12 +120,8 @@ const InvoiceResultCard = ({ result, onProcess }) => {
         </div>
       )}
 
-      {/* Review & Approve Button */}
-      <button
-        type="button"
-        onClick={() => onProcess(result)}
-        className="w-full mt-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 text-indigo-300 transition"
-      >
+
+      <button type="button" onClick={() => onProcess(result)} className="w-full mt-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 text-indigo-300 transition" >
         <Edit2 size={14} />
         Revizuiește & Emite Factura
       </button>
@@ -148,7 +129,7 @@ const InvoiceResultCard = ({ result, onProcess }) => {
   );
 };
 
-// ── Componenta principală ─────────────────────────────────────────────────────
+
 const AIGenerator = () => {
   const navigate = useNavigate();
   const [text, setText] = useState("");
@@ -157,7 +138,6 @@ const AIGenerator = () => {
   const [plan, setPlan] = useState("Free");
   const [checking, setChecking] = useState(true);
 
-  // Price editor
   const [showPrices, setShowPrices] = useState(false);
   const [prices, setPrices] = useState(DEFAULT_PRICES);
   const [newService, setNewService] = useState("");
@@ -181,9 +161,8 @@ const AIGenerator = () => {
     checkSubscription();
   }, []);
 
-  // ── Generare Locală cu Ollama ───────────────────────────────────────────────
   const handleExtract = async () => {
-    if (!text.trim()) { toast.error("Introduce text mai întâi!"); return; }
+    if (!text.trim()) { toast.error("Introdu un text!"); return; }
 
     setLoading(true);
     try {
@@ -199,9 +178,9 @@ const AIGenerator = () => {
       if (data?.success) {
         setResults((prev) => [data, ...prev]);
         const statusMsg = {
-          ready: "✅ Document compilat de LLM complet!",
-          pending_review: "⚠️ Date parțiale — necesită revizuirea prețurilor.",
-          draft: "📋 Structură salvată ca draft.",
+          ready: "Document compilat de LLM complet!",
+          pending_review: "Date parțiale — necesită revizuirea prețurilor.",
+          draft: "Structură salvată ca draft.",
         };
         toast.success(statusMsg[data.ai_status] || "Document compilat local!");
         setText("");
@@ -243,7 +222,6 @@ const AIGenerator = () => {
     setResults((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  // ── Price editor helpers ─────────────────────────────────────────────────────
   const handleAddPrice = () => {
     if (!newService.trim() || !newPrice) return;
     setPrices((prev) => [...prev, { service: newService.trim().toLowerCase(), price: Number(newPrice) }]);
@@ -267,12 +245,12 @@ const AIGenerator = () => {
     );
   }
 
-  // Blocajele legate de planul subscripției au fost eliminate complet.
-  // Interfața se va afișa din start pentru toți utilizatorii în modul local de dezvoltare.
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white px-6 md:px-10 py-10">
+    <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-10 overflow-hidden pb-16 p-8 pt-30 space-y-8">
 
-      {/* Header */}
+      <div className="absolute top-20 right-10 w-72 h-72 bg-teal-500/10 blur-3xl rounded-full pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600/10 blur-3xl rounded-full pointer-events-none" />
+
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
@@ -280,24 +258,20 @@ const AIGenerator = () => {
             AI Invoice Generator (Ollama Local)
           </h1>
           <p className="text-gray-400 text-sm mt-1">
-            Introduce orice text — email, mesaj, cerere — și AI-ul local generează structura facturii securizat.
+            Introdu orice text - email, mesaj, și AI-ul local generează structura facturii securizat.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <div className="px-4 py-2 rounded-full border border-[#80FFF9]/30 bg-[#80FFF9]/10 text-[#80FFF9] text-sm">
             Local LLM Active ({plan})
           </div>
-          <button
-            onClick={() => setShowPrices(!showPrices)}
-            className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-gray-300 text-sm transition"
-          >
+          <button onClick={() => setShowPrices(!showPrices)} className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-gray-300 text-sm transition" >
             <Settings size={15} />
             Prețuri
           </button>
         </div>
       </div>
 
-      {/* ── Price editor panel ──────────────────────────────────────────────────── */}
       {showPrices && (
         <div className="mb-8 bg-[#141414] border border-white/10 rounded-2xl overflow-hidden">
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
@@ -318,18 +292,9 @@ const AIGenerator = () => {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
               {prices.map((p, idx) => (
                 <div key={idx} className="flex items-center gap-2 bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-2">
-                  <input
-                    value={p.service}
-                    onChange={(e) => handlePriceChange(idx, "service", e.target.value)}
-                    className="flex-1 bg-transparent text-sm text-gray-200 outline-none min-w-0"
-                  />
+                  <input value={p.service} onChange={(e) => handlePriceChange(idx, "service", e.target.value)} className="flex-1 bg-transparent text-sm text-gray-200 outline-none min-w-0" />
                   <span className="text-gray-500 text-sm">€</span>
-                  <input
-                    type="number"
-                    value={p.price}
-                    onChange={(e) => handlePriceChange(idx, "price", e.target.value)}
-                    className="w-20 bg-transparent text-sm text-[#80FFF9] text-right outline-none"
-                  />
+                  <input type="number" value={p.price} onChange={(e) => handlePriceChange(idx, "price", e.target.value)} className="w-20 bg-transparent text-sm text-[#80FFF9] text-right outline-none" />
                   <button onClick={() => handleRemovePrice(idx)} className="text-gray-600 hover:text-red-400 transition">
                     <Trash2 size={13} />
                   </button>
@@ -338,24 +303,9 @@ const AIGenerator = () => {
             </div>
 
             <div className="flex items-center gap-3 mt-2">
-              <input
-                value={newService}
-                onChange={(e) => setNewService(e.target.value)}
-                placeholder="Nume serviciu..."
-                className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 outline-none focus:border-[#80FFF9]/50 placeholder-gray-600"
-              />
-              <input
-                type="number"
-                value={newPrice}
-                onChange={(e) => setNewPrice(e.target.value)}
-                placeholder="€"
-                className="w-24 bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-2 text-sm text-[#80FFF9] outline-none focus:border-[#80FFF9]/50 placeholder-gray-600"
-              />
-              <button
-                onClick={handleAddPrice}
-                disabled={!newService.trim() || !newPrice}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 text-indigo-300 text-sm transition disabled:opacity-40 disabled:cursor-not-allowed"
-              >
+              <input value={newService} onChange={(e) => setNewService(e.target.value)} placeholder="Nume serviciu..." className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 outline-none focus:border-[#80FFF9]/50 placeholder-gray-600" />
+              <input type="number" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} placeholder="€" className="w-24 bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-2 text-sm text-[#80FFF9] outline-none focus:border-[#80FFF9]/50 placeholder-gray-600" />
+              <button onClick={handleAddPrice} disabled={!newService.trim() || !newPrice} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 text-indigo-300 text-sm transition disabled:opacity-40 disabled:cursor-not-allowed" >
                 <Plus size={15} />
                 Adaugă
               </button>
@@ -364,40 +314,23 @@ const AIGenerator = () => {
         </div>
       )}
 
-      {/* ── Textarea + buttons ──────────────────────────────────────────────────── */}
       <div className="max-w-4xl mx-auto mb-10">
         <div className="relative">
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={`Introdu orice text... Exemple:\n• "Salut, sunt firma SC Laptop SRL, am nevoie de web design cu 7 pagini și o analiză UI/UX."\n• "Hi, I need a landing page and SEO optimization for my shop. Contact: john@shop.com"`}
-            className="w-full h-52 bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-4 text-gray-200 placeholder-gray-600 focus:border-[#80FFF9]/50 outline-none transition resize-none text-sm leading-relaxed"
-          />
+          <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder={`Introdu orice text... \n• "Salut, sunt firma SC Laptop SRL, am nevoie de web design cu 7 pagini și o analiză UI/UX."\n• "Hi, I need a landing page and SEO optimization for my shop. Contact: john@shop.com"`} className="w-full h-52 bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-4 text-gray-200 placeholder-gray-600 focus:border-[#80FFF9]/50 outline-none transition resize-none text-sm leading-relaxed"/>
           {text && (
-            <button
-              onClick={() => setText("")}
-              className="absolute top-3 right-3 text-gray-600 hover:text-gray-400 transition"
-            >
+            <button onClick={() => setText("")} className="absolute top-3 right-3 text-gray-600 hover:text-gray-400 transition">
               <X size={16} />
             </button>
           )}
         </div>
 
         <div className="flex justify-center gap-4 mt-5">
-          <button
-            onClick={handleReset}
-            disabled={loading}
-            className="flex items-center gap-2 px-5 py-2.5 border border-white/20 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition disabled:opacity-50 text-sm"
-          >
+          <button onClick={handleReset} disabled={loading} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 border border-white/20 rounded-xl text-xs font-mono uppercase tracking-wider text-gray-300 hover:text-white hover:bg-white/10 transition duration-300">
             <RotateCcw size={15} />
-            Reset tot
+            Reset
           </button>
 
-          <button
-            onClick={handleExtract}
-            disabled={loading || !text.trim()}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-          >
+          <button onClick={handleExtract} disabled={loading || !text.trim()} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-teal-500/20 to-indigo-600/20 hover:from-teal-500/30 hover:to-indigo-600/30 border border-teal-500/30 hover:border-teal-400/60 text-xs font-mono uppercase tracking-wider text-[#80FFF9] font-bold shadow-lg transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
             {loading ? (
               <><Loader2 className="animate-spin" size={15} /> Compiling...</>
             ) : (
@@ -407,7 +340,6 @@ const AIGenerator = () => {
         </div>
       </div>
 
-      {/* ── Results grid ─────────────────────────────────────────────────────────── */}
       {results.length > 0 && (
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-5">
@@ -433,10 +365,7 @@ const AIGenerator = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {results.map((result, idx) => (
               <div key={idx} className="relative">
-                <button
-                  onClick={() => handleRemoveResult(idx)}
-                  className="absolute -top-2 -right-2 z-10 w-6 h-6 rounded-full bg-[#1a1a1a] border border-white/20 flex items-center justify-center text-gray-500 hover:text-red-400 hover:border-red-400/40 transition"
-                >
+                <button onClick={() => handleRemoveResult(idx)} className="absolute -top-2 -right-2 z-10 w-6 h-6 rounded-full bg-[#1a1a1a] border border-white/20 flex items-center justify-center text-gray-500 hover:text-red-400 hover:border-red-400/40 transition">
                   <X size={12} />
                 </button>
                 <InvoiceResultCard result={result} onProcess={handleProcessInvoice} />
@@ -446,7 +375,6 @@ const AIGenerator = () => {
         </div>
       )}
 
-      {/* Empty state */}
       {results.length === 0 && !loading && (
         <div className="max-w-4xl mx-auto text-center py-12 border border-dashed border-white/10 rounded-2xl">
           <Brain size={40} className="text-white/10 mx-auto mb-3" />

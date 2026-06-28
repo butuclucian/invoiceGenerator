@@ -44,6 +44,9 @@ const DashboardHome = () => {
 
   return (
     <div className="p-8 pt-30 space-y-8">
+      <div className="absolute top-20 right-10 w-72 h-72 bg-teal-500/10 blur-3xl rounded-full pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600/10 blur-3xl rounded-full pointer-events-none" />
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {kpis.map((k, i) => (
           <div key={i} className="bg-[#1a1a1a]/80 p-6 rounded-2xl border border-white/10 flex items-center justify-between shadow-lg">
