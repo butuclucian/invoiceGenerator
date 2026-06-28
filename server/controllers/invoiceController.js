@@ -315,13 +315,13 @@ ${JSON.stringify(compactInvoicesData, null, 2)}
 
 Generează un raport financiar strategic. Structura trebuie să conțină strict următoarele 3 secțiuni relevante, iar titlul fiecărei categorii trebuie scris EXACT cu tag-ul HTML de bold, fără asteriscuri sau emoticoane:
 
-<b>1. Predictie Cashflow si Rulaj</b>
+1. Predictie Cashflow si Rulaj
 (Oferă o estimare sau o concluzie privind volumul total al încasărilor pe baza facturilor plătite versus cele pending/overdue și o prognoză scurtă).
 
-<b>2. Analiza Comportamentului Clientilor</b>
+2. Analiza Comportamentului Clientilor
 (Identifică pe nume dacă există clienți cu facturi restante sau care reprezintă un procent prea mare din venituri - risc de concentrare).
 
-<b>3. Recomandari Strategice Active</b>
+3. Recomandari Strategice Active
 (Oferă 2-3 sfaturi clare: ex. reducerea termenelor de plată, trimiterea de remindere, diversificare).
 
 Răspunde direct în limba română. Fii concis, profesional și folosește un ton analitic premium. Nu adăuga introduceri inutile, emoticoane sau text în afara structurii cerute.
