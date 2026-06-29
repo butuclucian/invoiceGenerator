@@ -6,11 +6,9 @@ import User from "../models/User.js";
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// creeaza o sesiune de checkout pentru upgrade
 export const createCheckoutSession = async (req, res) => {
   try {
     const { plan } = req.body;
-    const normalizedPlan = plan?.toLowerCase();
 
     if (!plan) {
       return res.status(400).json({ message: "Planul este obligatoriu." });
@@ -23,8 +21,9 @@ export const createCheckoutSession = async (req, res) => {
         ? process.env.STRIPE_PRICE_ENTERPRISE
         : process.env.STRIPE_PRICE_PRO;
 
-    if (!priceId)
+    if (!priceId) {
       return res.status(400).json({ message: "Invalid subscription plan" });
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
