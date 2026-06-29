@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Brain, Sparkles, RefreshCw, BarChart2,Lock, Sparkles, ShieldCheck, FileText, Trash2, Eye, Calendar } from "lucide-react";
+import { Brain, Sparkles, RefreshCw, BarChart2,Lock, ShieldCheck, FileText, Trash2, Eye, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "../../utils/api";
 import { toast } from "sonner";
