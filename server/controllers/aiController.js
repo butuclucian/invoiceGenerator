@@ -37,7 +37,7 @@ const SERVICE_PRICES = {
   "editare video": 300,
 };
 
-// ── 1. FUNCTIA PENTRU INTERFAȚĂ (Ruta HTTP POST /api/ai/generate) ────────────
+
 export const generateInvoiceFromText = async (req, res) => {
   try {
     const { text, customPrices } = req.body;
@@ -241,7 +241,6 @@ export const generateInvoiceFromText = async (req, res) => {
   }
 };
 
-// ── 2. FUNCTIA INTERNĂ PENTRU BACKGROUND EMAIL WORKER ───────────────────────
 export const generateInvoiceFromTextInternal = async (text, fallbackEmail = null, userId = null) => {
   try {
     if (fallbackEmail && (
@@ -422,7 +421,6 @@ export const generateInvoiceFromTextInternal = async (text, fallbackEmail = null
   }
 };
 
-// ── EXTRAGERE ISTORIC FACTURI AI ─────────────────────────────────────────────
 export const getAiGenerationHistory = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -445,7 +443,6 @@ export const getAiGenerationHistory = async (req, res) => {
   }
 };
 
-// ── ȘTERGERE FACTURĂ DIN ISTORIC ─────────────────────────────────────────────
 export const deleteAiInvoice = async (req, res) => {
   try {
     const userId = req.user._id;

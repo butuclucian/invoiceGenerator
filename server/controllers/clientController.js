@@ -10,7 +10,7 @@ export const getClients = async (req, res) => {
   }
 };
 
-// 2. Extrage un singur client după ID-ul său
+
 export const getClientById = async (req, res) => {
   try {
     const client = await Client.findById(req.params.id);
@@ -21,7 +21,7 @@ export const getClientById = async (req, res) => {
   }
 };
 
-// 3. Creare Client (Manual din interfață)
+
 export const createClient = async (req, res) => {
   try {
     const { name, brand, cui, reg_com, client_code, is_tva_payer, address, city, county, country, iban, bank, contact_person, email, phone} = req.body;
@@ -51,12 +51,10 @@ export const createClient = async (req, res) => {
 
     res.status(201).json(newClient);
   } catch (err) {
-    console.error("Eroare la crearea manuală a clientului:", err.message);
     res.status(500).json({ message: "Failed to create client", error: err.message });
   }
 };
 
-// 4. Actualizare date client
 export const updateClient = async (req, res) => {
   try {
     const updated = await Client.findByIdAndUpdate( req.params.id,  req.body, 

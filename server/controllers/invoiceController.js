@@ -49,19 +49,8 @@ export const getInvoiceById = async (req, res) => {
 
 export const createInvoice = async (req, res) => {
   try {
-    console.log("[HTTP Frontend Request Body]:", req.body);
-    console.log("[HTTP Frontend User ID din Token]:", req.user?._id);
-
     const { client, invoice_number, date, due_date, status, ...rest } = req.body;
-
-    const invoiceData = {
-      user: req.user._id,
-      date: date ? new Date(date) : new Date(),
-      due_date: due_date ? new Date(due_date) : null,
-      status: status || "draft",
-      ...rest,
-    };
-
+    const invoiceData = { user: req.user._id, date: date ? new Date(date) : new Date(), due_date: due_date ? new Date(due_date) : null, status: status || "draft", ...rest };
     if (status === "pending") {
       if (client) invoiceData.client = client;
       invoiceData.invoice_number = invoice_number || `AI-PENDING-${Date.now()}`;
@@ -70,42 +59,26 @@ export const createInvoice = async (req, res) => {
       if (!client) {
         return res.status(400).json({ message: "Client selection is required for manual invoices." });
       }
-
       invoiceData.invoice_number = invoice_number || `INV-MANUAL-${Date.now()}`;
-
       const existingClient = await Client.findById(client);
       if (!existingClient) {
         return res.status(404).json({ message: "Selected client not found in database." });
       }
-
       invoiceData.client = existingClient._id;
     }
-
     let newInvoice = await Invoice.create(invoiceData);
-    console.log("✅ Factură salvată cu succes în MongoDB! ID:", newInvoice._id);
-
     if (newInvoice.status === "sent" && newInvoice.client) {
       newInvoice = await Invoice.findById(newInvoice._id).populate("client");
-      
       if (newInvoice.client) {
         try {
-          console.log(`[HTTP Create] Se inițiază trimiterea e-mailului manual pentru factura proaspăt emisă: ${newInvoice.invoice_number}`);
           await sendInvoiceEmail(newInvoice, newInvoice.client);
-          console.log("✉️ [HTTP Create] Factura manuală a fost preluată și expediată cu succes prin Resend!");
         } catch (mailErr) {
-          console.error("❌ [HTTP Create Mail Error] Serviciul Resend a respins livrarea:", mailErr.message);
+          console.error("[HTTP Create Mail Error] Serviciul Resend a respins livrarea:", mailErr.message);
         }
       }
     }
-
-    res.status(201).json({
-      success: true,
-      message: status === "pending" ? "AI request saved as pending" : "Invoice created successfully",
-      invoice: newInvoice,
-    });
-
+    res.status(201).json({ success: true, message: status === "pending" ? "AI request saved as pending" : "Invoice created successfully", invoice: newInvoice });
   } catch (err) {
-    console.error("❌ Invoice create error:", err);
     res.status(500).json({ message: "Failed to create invoice", error: err.message });
   }
 };

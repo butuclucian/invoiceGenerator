@@ -28,6 +28,7 @@ const billingProfileSchema = new mongoose.Schema({
 
   bank: String,
   iban: String,
+  cif: String,
   swift: String,
 
   vat_rate: {
