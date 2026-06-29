@@ -54,6 +54,7 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
   doc.text(`Date: ${formatDate(invoice.date)}`, 140, y);
   doc.text(`Due: ${formatDate(invoice.due_date)}`, 140, y + 6);
 
+  // asc
   y += 20;
 
   const items = invoice.items?.map(i => [
