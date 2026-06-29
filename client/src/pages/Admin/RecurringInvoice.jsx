@@ -87,11 +87,6 @@ const RecurringInvoice = () => {
             Manage and track your automatically repeating invoices
           </p>
         </div>
-
-        <button onClick={() => toast.info("Add Recurring Invoice (coming soon)")} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2 text-sm sm:text-base" >
-          <Plus size={18} />
-          Add Recurring Invoice
-        </button>
       </div>
 
       {loading ? (

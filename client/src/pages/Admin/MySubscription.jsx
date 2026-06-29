@@ -51,12 +51,16 @@ const MySubscription = () => {
       <div className="absolute top-20 right-10 w-72 h-72 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600/10 blur-3xl rounded-full pointer-events-none" />
 
-      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
-        <h1 className="text-3xl font-extrabold flex items-center gap-3">
-          <Crown className="text-[#80FFF9]" size={30} />
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
+            <Crown className="text-[#80FFF9]" size={30} />
           My Subscription
-        </h1>
-        <p className="text-gray-400 mt-2 text-sm">Gestionează planul tău, facturarea și accesul la funcțiile AI.</p>
+          </h1>
+          <p className="text-gray-400 text-sm mt-1">
+            Gestionează planul tău, facturarea și accesul la funcțiile AI.
+          </p>
+        </div>
       </div>
 
       <motion.div 
@@ -67,7 +71,7 @@ const MySubscription = () => {
           <div>
             <h2 className="text-sm uppercase tracking-widest text-gray-500 font-bold mb-2">Plan Curent</h2>
             <div className="flex items-center gap-3">
-              <span className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+              <span className="text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-white to-gray-400">
                 {plan}
               </span>
               <span className={`px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase ${isActive ? 'bg-teal-500/10 text-teal-400 border border-teal-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>

@@ -94,9 +94,6 @@ const AnafReporting = () => {
     calculateAnafData();
   }, [selectedYear]);
 
-  const handleExportData = () => {
-    toast.success(`Export completat pentru DU-${selectedYear}.csv! (Simulat)`);
-  };
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-10 overflow-hidden pb-16 p-8 pt-30 space-y-8">
@@ -114,11 +111,6 @@ const AnafReporting = () => {
             Generare date pentru Declarația Unică și centralizator venituri anuale
           </p>
         </div>
-
-        <button onClick={handleExportData} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2">
-          <Download size={18} />
-          Export Fiscal Data
-        </button>
       </div>
 
       <div className="flex flex-wrap items-center gap-4 mb-8 bg-[#1a1a1a]/70 border border-white/10 p-4 rounded-xl">

@@ -262,9 +262,6 @@ const AIGenerator = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="px-4 py-2 rounded-full border border-[#80FFF9]/30 bg-[#80FFF9]/10 text-[#80FFF9] text-sm">
-            Local LLM Active ({plan})
-          </div>
           <button onClick={() => setShowPrices(!showPrices)} className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-gray-300 text-sm transition" >
             <Settings size={15} />
             Prețuri

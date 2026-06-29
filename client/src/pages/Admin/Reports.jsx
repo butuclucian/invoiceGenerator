@@ -113,6 +113,12 @@ const Reports = () => {
                   border: "1px solid #333",
                   borderRadius: "8px",
                 }}
+                itemStyle={{
+                  color: "#fff",
+                }}
+                labelStyle={{
+                  color: "#fff",
+                }}
               />
               <Legend />
             </PieChart>
