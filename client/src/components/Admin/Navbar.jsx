@@ -1,5 +1,16 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Bell, X, Check, LogOut, ArrowLeft, Settings, Search, User2, MessageSquare, Menu } from "lucide-react";
+import {
+  Bell,
+  X,
+  Check,
+  LogOut,
+  ArrowLeft,
+  Settings,
+  Search,
+  User2,
+  MessageSquare,
+  Menu,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import API from "../../utils/api";
@@ -9,10 +20,10 @@ import { useNavigate } from "react-router-dom";
 const Navbar = ({ openSidebar }) => {
   const navigate = useNavigate();
   const { query, setQuery } = useSearchStore();
-  
+
   const popupRef = useRef(null);
   const userMenuRef = useRef(null);
-  
+
   const [notifications, setNotifications] = useState([]);
   const [hasUnread, setHasUnread] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
@@ -21,7 +32,6 @@ const Navbar = ({ openSidebar }) => {
   const [subscription, setSubscription] = useState(null);
 
   const currentPlan = subscription?.plan || "Free";
-
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -33,7 +43,6 @@ const Navbar = ({ openSidebar }) => {
     fetchUser();
   }, []);
 
-
   useEffect(() => {
     const fetchSub = async () => {
       try {
@@ -43,7 +52,6 @@ const Navbar = ({ openSidebar }) => {
     };
     fetchSub();
   }, []);
-
 
   const fetchNotifications = async () => {
     try {
@@ -59,15 +67,17 @@ const Navbar = ({ openSidebar }) => {
 
       const invRes = await API.get("/invoices");
       const invoicesList = Array.isArray(invRes.data) ? invRes.data : [];
-      
-      const aiPendingInvoices = invoicesList.filter(inv => inv.status === 'pending');
 
-      const aiNotifications = aiPendingInvoices.map(inv => ({
+      const aiPendingInvoices = invoicesList.filter(
+        (inv) => inv.status === "pending",
+      );
+
+      const aiNotifications = aiPendingInvoices.map((inv) => ({
         _id: `ai-${inv._id}`,
         isAiGenerated: true,
         read: false,
         message: "Factură nouă extrasă automat din email",
-        invoice: inv
+        invoice: inv,
       }));
 
       const combined = [...aiNotifications, ...allNotifications];
@@ -75,7 +85,7 @@ const Navbar = ({ openSidebar }) => {
       setNotifications(combined);
       setHasUnread(combined.some((n) => !n.read));
     } catch (error) {
-      console.error("Eroare la sincronizarea notificărilor în Navbar:", error);
+      console.error(error);
     }
   };
 
@@ -84,7 +94,6 @@ const Navbar = ({ openSidebar }) => {
     const interval = setInterval(fetchNotifications, 15000);
     return () => clearInterval(interval);
   }, []);
-
 
   const handleMarkAsRead = async () => {
     try {
@@ -102,7 +111,6 @@ const Navbar = ({ openSidebar }) => {
 
   return (
     <>
-      {/* NAVBAR */}
       <motion.nav
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -120,14 +128,11 @@ const Navbar = ({ openSidebar }) => {
           md:left-64
         "
       >
-        {/* Background Glow */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-[500px] h-40 bg-indigo-600/20 blur-3xl rounded-full" />
         </div>
 
-        {/* LEFT SIDE */}
         <div className="flex items-center gap-3 relative z-20">
-          {/* MOBILE MENU */}
           <button
             className="md:hidden p-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10"
             onClick={openSidebar}
@@ -135,7 +140,6 @@ const Navbar = ({ openSidebar }) => {
             <Menu className="text-[#80FFF9]" size={22} />
           </button>
 
-          {/* GO HOME */}
           <button
             onClick={() => navigate(-1)}
             className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10"
@@ -145,7 +149,6 @@ const Navbar = ({ openSidebar }) => {
           </button>
         </div>
 
-        {/* SEARCH (DESKTOP) */}
         <div className="hidden md:flex relative z-20">
           <div className="flex items-center bg-white/5 px-4 py-2 rounded-full border border-white/10 w-72 hover:bg-white/10">
             <Search size={18} className="text-gray-400" />
@@ -159,9 +162,7 @@ const Navbar = ({ openSidebar }) => {
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
         <div className="flex items-center gap-4 md:gap-6 relative z-20">
-          {/* NOTIFICATIONS */}
           <div className="relative" ref={popupRef}>
             <button
               onClick={() => setShowPopup(!showPopup)}
@@ -193,7 +194,9 @@ const Navbar = ({ openSidebar }) => {
                 >
                   <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-medium text-white">Notifications</h3>
+                      <h3 className="text-sm font-medium text-white">
+                        Notifications
+                      </h3>
                       <span className="text-[10px] bg-teal-500/10 text-teal-400 px-2 py-0.5 rounded-full font-medium">
                         {notifications.length} active
                       </span>
@@ -227,17 +230,22 @@ const Navbar = ({ openSidebar }) => {
                           key={note._id}
                           onClick={() => {
                             if (note.invoice?._id) {
-                              // Ruta corectă de dashboard folosită în aplicația ta
-                              navigate(`/dashboard/invoices/${note.invoice._id}`);
+                              navigate(
+                                `/dashboard/invoices/${note.invoice._id}`,
+                              );
                               setShowPopup(false);
                             }
                           }}
                           className={`w-full text-left p-4 border-b border-white/5 hover:bg-white/5 rounded-xl transition flex flex-col gap-1 ${
-                            note.isAiGenerated ? "border-l-2 border-l-amber-500 bg-amber-500/5" : (!note.read && "bg-white/5")
+                            note.isAiGenerated
+                              ? "border-l-2 border-l-amber-500 bg-amber-500/5"
+                              : !note.read && "bg-white/5"
                           }`}
                         >
                           <div className="flex justify-between items-start w-full">
-                            <p className={`text-sm font-medium ${note.isAiGenerated ? "text-amber-400" : "text-[#80FFF9]"}`}>
+                            <p
+                              className={`text-sm font-medium ${note.isAiGenerated ? "text-amber-400" : "text-[#80FFF9]"}`}
+                            >
                               {note.message}
                             </p>
                             {note.isAiGenerated && (
@@ -249,14 +257,31 @@ const Navbar = ({ openSidebar }) => {
 
                           {note.invoice && (
                             <div className="mt-1 space-y-0.5 text-xs text-gray-400">
-                              <p>Invoice: <span className="text-gray-200 font-mono">{note.invoice.invoice_number}</span></p>
-                              <p>Client: <span className="text-gray-200 font-medium">{note.invoice.client?.name || "Unknown"}</span></p>
-                              <p>Amount: <span className="text-teal-400 font-medium">${Number(note.invoice.total).toFixed(2)}</span></p>
+                              <p>
+                                Invoice:{" "}
+                                <span className="text-gray-200 font-mono">
+                                  {note.invoice.invoice_number}
+                                </span>
+                              </p>
+                              <p>
+                                Client:{" "}
+                                <span className="text-gray-200 font-medium">
+                                  {note.invoice.client?.name || "Unknown"}
+                                </span>
+                              </p>
+                              <p>
+                                Amount:{" "}
+                                <span className="text-teal-400 font-medium">
+                                  ${Number(note.invoice.total).toFixed(2)}
+                                </span>
+                              </p>
                             </div>
                           )}
-                          
+
                           {note.isAiGenerated && (
-                            <span className="text-[10px] text-gray-500 mt-1 italic">Click pentru a verifica și aproba datele fiscale</span>
+                            <span className="text-[10px] text-gray-500 mt-1 italic">
+                              Click pentru a verifica și aproba datele fiscale
+                            </span>
                           )}
                         </button>
                       ))
@@ -267,7 +292,6 @@ const Navbar = ({ openSidebar }) => {
             </AnimatePresence>
           </div>
 
-          {/* USER MENU */}
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -280,8 +304,8 @@ const Navbar = ({ openSidebar }) => {
                   currentPlan === "Pro"
                     ? "text-[#80FFF9] border-[#80FFF9]/40 bg-[#80FFF9]/10"
                     : currentPlan === "Enterprise"
-                    ? "text-[#CB52D4] border-[#CB52D4]/40 bg-[#CB52D4]/10"
-                    : "text-gray-300 border-white/10 bg-white/5"
+                      ? "text-[#CB52D4] border-[#CB52D4]/40 bg-[#CB52D4]/10"
+                      : "text-gray-300 border-white/10 bg-white/5"
                 }`}
               >
                 {currentPlan}
@@ -316,7 +340,9 @@ const Navbar = ({ openSidebar }) => {
                   </div>
 
                   <button
-                    onClick={() => (window.location.href = "/dashboard/settings")}
+                    onClick={() =>
+                      (window.location.href = "/dashboard/settings")
+                    }
                     className="w-full flex items-center gap-2 px-2 py-2 text-gray-300 hover:bg-white/5 hover:text-white rounded-md transition"
                   >
                     <Settings size={16} /> Settings

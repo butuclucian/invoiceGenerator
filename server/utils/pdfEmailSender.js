@@ -26,9 +26,6 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
 
   let y = 40;
 
-  // =========================
-  // INVOICE HEADER (EU STYLE)
-  // =========================
   doc
     .font("Helvetica-Bold")
     .fontSize(24)
@@ -41,7 +38,6 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
     .fillColor(gray)
     .text(`#${invoice.invoice_number}`, 40, y + 28);
 
-  // Company (right side)
   doc
     .font("Helvetica-Bold")
     .fontSize(12)
@@ -54,16 +50,12 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
   if (business.fiscal_code) doc.text(`VAT: ${business.fiscal_code}`, 350, y + 32);
   if (business.iban) doc.text(`IBAN: ${business.iban}`, 350, y + 48);
 
-  // separator
   doc
     .moveTo(40, 115)
     .lineTo(555, 115)
     .strokeColor(lightGray)
     .stroke();
 
-  // =========================
-  // BILL TO + META (EU STYLE)
-  // =========================
   y = 135;
 
   doc.font("Helvetica-Bold").fillColor(accent).fontSize(11).text("BILL TO", 40, y);
@@ -74,7 +66,6 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
   if (c.address) doc.text(c.address, 40, y + 33);
   if (c.email) doc.text(c.email, 40, y + 48);
 
-  // right side metadata (exact EU template logic)
   doc.font("Helvetica-Bold").fillColor("#111").text("DETAILS", 350, y);
 
   doc.font("Helvetica").fillColor(gray);
@@ -90,12 +81,8 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
     y + 33
   );
 
-  // =========================
-  // TABLE (autoTable replacement)
-  // =========================
   y = 220;
 
-  // header
   doc.rect(40, y, 515, 25).fill(accent);
 
   doc
@@ -129,9 +116,6 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
     y += rowHeight;
   });
 
-  // =========================
-  // TOTAL SECTION (EU STYLE)
-  // =========================
   y += 20;
 
   const vat = invoice.tax_amount || 0;
@@ -152,9 +136,6 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
   doc.text("TOTAL", 370, y);
   doc.text(`${invoice.total.toFixed(2)} ${currency}`, 460, y);
 
-  // =========================
-  // FOOTER (EU STYLE CLEAN)
-  // =========================
   doc
     .font("Helvetica")
     .fontSize(9)
@@ -177,19 +158,15 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
 
 export const sendInvoiceEmail = async (invoice, client) => {
   if (!client?.email) {
-    console.warn("⚠️ [EmailService] Client has no email, skipping email send.");
+    console.warn("[EmailService] Client has no email, skipping email send.");
     return;
   }
 
   try {
-    console.log(`[EmailService] Se generează PDF-ul pentru factura ${invoice.invoice_number || 'draft'}...`);
     const pdfPath = await generateInvoicePDF(invoice, client);
 
-    // Citirea fișierului PDF generat temporar din memoria Docker și conversia în Base64
     const pdfData = fs.readFileSync(pdfPath);
     const pdfBase64 = pdfData.toString("base64");
-
-    console.log(`[EmailService] Se expediază e-mailul prin Resend către adresa de test...`);
     
     const response = await resend.emails.send({
       from: "onboarding@resend.dev",
@@ -213,29 +190,28 @@ export const sendInvoiceEmail = async (invoice, client) => {
       `,
       attachments: [
         {
-          filename: `Invoice_${invoice.series || 'INV'}-${invoice.invoice_number}.pdf`,
+          filename: `Invoice_${invoice.invoice_number}.pdf`,
           content: pdfBase64,
         },
       ],
     });
 
     if (response.error) {
-      console.error("❌ [EmailService] Resend validation error:", response.error);
       throw new Error(response.error.message || "Resend failed to deliver email");
     } else {
-      console.log("\x1b[32m✉️ [EmailService] Invoice email sent successfully via Resend to butuclucian04@gmail.com!\x1b[0m");
+      console.log("[EmailService] Invoice email sent successfully via Resend to butuclucian04@gmail.com!");
     }
 
 
     fs.unlink(pdfPath, (err) => {
-      if (err) console.warn("⚠️ [EmailService] Could not delete temp PDF:", err.message);
-      else console.log("🧹 [EmailService] Temp PDF deleted successfully from workspace.");
+      if (err) console.warn("[EmailService] Could not delete temp PDF:", err.message);
+      else console.log("[EmailService] Temp PDF deleted successfully from workspace.");
     });
 
     return response;
 
   } catch (error) {
-    console.error("❌ [EmailService] Fatal error sending invoice email:", error.message || error);
+    console.error("[EmailService] Fatal error sending invoice email:", error.message || error);
     throw error; 
   }
 };

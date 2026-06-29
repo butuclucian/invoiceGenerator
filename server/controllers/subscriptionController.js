@@ -40,7 +40,6 @@ export const createCheckoutSession = async (req, res) => {
 
     res.json({ url: session.url });
   } catch (error) {
-    console.error("Stripe session error:", error);
     res.status(500).json({ message: "Failed to create checkout session" });
   }
 };
@@ -56,23 +55,16 @@ export const handleWebhook = async (req, res) => {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
-    console.error("❌ Webhook signature verification failed:", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   const data = event.data.object;
 
   try {
-    console.log(`📥 [Webhook] Eveniment primit: ${event.type}`);
-
     switch (event.type) {
       case "checkout.session.completed": {
-        // Obținem email-ul din surse multiple pentru siguranță
         const email = data.customer_email || data.customer_details?.email;
         const planMeta = data.metadata?.plan || "pro";
-
-        console.log(`🔍 Caut user cu email: ${email}`);
-        
         const user = await User.findOne({ email: email?.toLowerCase() });
 
         if (user) {
@@ -88,9 +80,8 @@ export const handleWebhook = async (req, res) => {
             },
             { upsert: true, new: true }
           );
-          console.log(`✅ Subscription actualizat în DB pentru ${user.email}`);
         } else {
-          console.error(`❌ EROARE: Nu am găsit niciun user cu emailul: ${email}`);
+          console.error(`EROARE: Nu am găsit niciun user cu emailul: ${email}`);
         }
         break;
       }
@@ -101,7 +92,7 @@ export const handleWebhook = async (req, res) => {
             { stripeSubscriptionId: subId },
             { status: "Cancelled" }
         );
-        if (sub) console.log("✅ Abonament anulat în DB");
+        if (sub) console.log("Abonament anulat în DB");
         break;
       }
 
@@ -111,12 +102,10 @@ export const handleWebhook = async (req, res) => {
 
     res.status(200).json({ received: true });
   } catch (err) {
-    console.error("❌ Webhook handling failed:", err);
     res.status(500).send("Webhook handler error");
   }
 };
 
-// 3. Obbine datele curente ale subscriptiei
 export const getMySubscription = async (req, res) => {
   try {
     const sub = await Subscription.findOne({ user: req.user._id });
@@ -125,12 +114,11 @@ export const getMySubscription = async (req, res) => {
     }
     res.json(sub);
   } catch (err) {
-    console.error("getMySubscription error:", err);
     res.status(500).json({ message: "Failed to fetch subscription data" });
   }
 };
 
-// 4. Anuleaza abonamentul activ
+
 export const cancelSubscription = async (req, res) => {
   try {
     const sub = await Subscription.findOne({ user: req.user._id });
@@ -143,12 +131,11 @@ export const cancelSubscription = async (req, res) => {
 
     res.json({ message: "Subscription cancelled successfully" });
   } catch (err) {
-    console.error("Cancel subscription error:", err);
     res.status(500).json({ message: "Failed to cancel subscription" });
   }
 };
 
-//  5. Open Billing Portal
+
 export const createBillingPortal = async (req, res) => {
   try {
     const sub = await Subscription.findOne({ user: req.user._id });
@@ -162,12 +149,11 @@ export const createBillingPortal = async (req, res) => {
 
     res.json({ url: portalSession.url });
   } catch (err) {
-    console.error("Billing portal error:", err);
     res.status(500).json({ message: "Failed to create billing portal session" });
   }
 };
 
-// 6. Fetch Stripe invoices for user
+
 export const getInvoices = async (req, res) => {
   try {
     const sub = await Subscription.findOne({ user: req.user._id });
@@ -181,7 +167,6 @@ export const getInvoices = async (req, res) => {
 
     res.json(invoices.data);
   } catch (err) {
-    console.error("Invoice fetch error:", err);
     res.status(500).json({ message: "Failed to fetch invoices" });
   }
 };

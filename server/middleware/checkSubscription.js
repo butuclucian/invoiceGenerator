@@ -10,7 +10,6 @@ export const checkSubscription = async (req, res, next) => {
     }
     next();
   } catch (err) {
-    console.error("checkSubscription error:", err);
     res.status(500).json({ message: "Subscription check failed" });
   }
 };

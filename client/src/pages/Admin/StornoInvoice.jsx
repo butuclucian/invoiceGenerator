@@ -91,7 +91,6 @@ const StornoInvoice = () => {
         });
 
       } catch (err) {
-        console.error("Failed to initialize storno invoice:", err);
         toast.error("Could not load original invoice data");
       }
     };
@@ -118,7 +117,6 @@ const StornoInvoice = () => {
       toast.success(`Storno invoice ${formData.invoice_number} generated successfully!`);
       navigate("/dashboard/invoices");
     } catch (err) {
-      console.error("Create storno invoice error:", err.response?.data || err);
       toast.error(err.response?.data?.message || "Failed to save storno invoice");
     } finally {
       setLoading(false);

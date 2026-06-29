@@ -61,12 +61,11 @@ app.use("/api/billing-profile", billingRoutes);
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`\x1b[36m🚀 [Backend] Server running on port ${PORT}\x1b[0m`);
+  console.log(`Server started on port ${PORT}`);
   startEmailWorker();
 });
 
 cron.schedule("0 * * * *", async () => {
-  console.log("⏰ [Cron] Se pornește verificarea automată a scadențelor...");
   try {
     const users = await User.find();
     for (const user of users) {
@@ -75,8 +74,7 @@ cron.schedule("0 * * * *", async () => {
         { status: () => ({ json: () => {} }) }
       );
     }
-    console.log("✅ [Cron] Notificările automate au fost procesate cu succes.");
   } catch (error) {
-    console.error("❌ [Cron Error] Eroare în execuția jobului orar:", error);
+    console.error(error);
   }
 });

@@ -4,12 +4,10 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// /api/clients
 router.route("/")
-  .get(protect, getClients)
+ .get(protect, getClients)
   .post(protect, createClient);
 
-// /api/clients/:id
 router.route("/:id")
   .get(protect, getClientById)
   .put(protect, updateClient)

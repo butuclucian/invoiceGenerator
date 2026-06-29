@@ -7,10 +7,7 @@ export const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const navigate = useNavigate();
 
-  // Backend URL from .env
   const API_BASE_URL = import.meta.env.VITE_API_URL;
-
-  // Axios instance secured with JWT from localStorage
   const secureAxios = axios.create({
     baseURL: API_BASE_URL,
   });

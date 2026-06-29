@@ -37,7 +37,6 @@ const SERVICE_PRICES = {
   "editare video": 300,
 };
 
-
 export const generateInvoiceFromText = async (req, res) => {
   try {
     const { text, customPrices } = req.body;
@@ -53,7 +52,7 @@ export const generateInvoiceFromText = async (req, res) => {
     };
 
     const priceListText = Object.entries(activePrices)
-      .map(([service, price]) => `- ${service}: ${price} EUR`)
+      .map(([service, price]) => `- ${service}: ${price} RON`)
       .join("\n");
 
     const prompt = `You are an AI that extracts invoice data from any text (emails, messages, requests).
@@ -130,7 +129,6 @@ export const generateInvoiceFromText = async (req, res) => {
     try {
       parsedData = JSON.parse(cleanOutput);
     } catch (parseError) {
-      console.error("Eroare parsare JSON de la AI:", cleanOutput);
       return res.status(422).json({ message: "AI generated an invalid JSON syntax structure. Try again." });
     }
 
@@ -236,7 +234,6 @@ export const generateInvoiceFromText = async (req, res) => {
       items_with_unknown_price,
     });
   } catch (error) {
-    console.error("Invoice Generation Error:", error);
     return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
@@ -247,17 +244,15 @@ export const generateInvoiceFromTextInternal = async (text, fallbackEmail = null
       fallbackEmail.toLowerCase() === "lucianbutuc16@gmail.com" || 
       fallbackEmail.toLowerCase() === "contact@rymvisuals.ro"
     )) {
-      console.log(`\x1b[33m⚠️ [AI Worker Avoided Loop] Ignorăm e-mailul trimis de sistem: ${fallbackEmail}\x1b[0m`);
       return null;
     }
 
-    if (text.includes("Generat automat din email") || text.includes("Factura ta InvoiceGenAI")) {
-      console.log("\x1b[33m⚠️ [AI Worker Avoided Loop] Ignorăm e-mailul deoarece este o notificare generată de aplicație.\x1b[0m");
+    if (text.includes("Automated generated from email") || text.includes("Your invoice InvoiceGenAi")) {
       return null;
     }
 
     const priceListText = Object.entries(SERVICE_PRICES)
-      .map(([service, price]) => `- ${service}: ${price} EUR`)
+      .map(([service, price]) => `- ${service}: ${price} RON`)
       .join("\n");
 
     const prompt = `You are an AI that extracts invoice data from any text (emails, messages, requests).
@@ -322,8 +317,7 @@ export const generateInvoiceFromTextInternal = async (text, fallbackEmail = null
     outputText = result.response || "";
 
     if (!outputText || !outputText.trim()) {
-      console.log("Ollama a întors un răspuns gol pentru email.");
-      return null;
+      return res.status(400).json({ message: "Ollama returned empty response" });
     }
 
     const cleanOutput = textResponse => {
@@ -413,11 +407,10 @@ export const generateInvoiceFromTextInternal = async (text, fallbackEmail = null
 
     const populatedWorkerInvoice = await Invoice.findById(newInvoice._id).populate("client");
 
-    console.log(`\x1b[32m[AI Worker] Factură salvată cu succes din email! ID: ${newInvoice._id}\x1b[0m`);
     return newInvoice;
 
   } catch (err) {
-    console.error("Eroare gravă în funcția internă AI Worker:", err);
+    console.error(err);
   }
 };
 
@@ -438,7 +431,6 @@ export const getAiGenerationHistory = async (req, res) => {
       history
     });
   } catch (error) {
-    console.error("Error fetching AI history:", error);
     return res.status(500).json({ message: "Nu s-a putut prelua istoricul AI." });
   }
 };
@@ -459,7 +451,6 @@ export const deleteAiInvoice = async (req, res) => {
       message: "Documentul preliminar a fost eliminat din istoric cu succes."
     });
   } catch (error) {
-    console.error("Error deleting AI invoice:", error);
-    return res.status(500).json({ message: "Eroare la ștergerea documentului." });
+    return res.status(500).json({ message: "Error deleting AI invoice" });
   }
 };

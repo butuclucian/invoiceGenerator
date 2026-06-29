@@ -1,7 +1,6 @@
 import Notification from "../models/Notification.js";
 import Invoice from "../models/Invoice.js";
 
-
 export const generateNearDueNotifications = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -38,21 +37,17 @@ export const generateNearDueNotifications = async (req, res) => {
           inv.client?.name || "Unknown Client"
         } ${dueText}`;
 
-        // CREATE NOTIFICATION IN DATABASE
         const note = await Notification.create({
           user: userId,
           invoice: inv._id,
           message,
         });
-
         created.push(note);
-
       }
     }
 
     res.status(200).json({ success: true, created });
   } catch (error) {
-    console.error("Error generating notifications:", error);
     res.status(500).json({ message: "Failed to generate notifications" });
   }
 };
@@ -70,7 +65,6 @@ export const getUserNotifications = async (req, res) => {
 
     res.status(200).json(notifications);
   } catch (error) {
-    console.error("Error fetching notifications:", error);
     res.status(500).json({ message: "Failed to fetch notifications" });
   }
 };

@@ -1,6 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { DollarSign, TrendingUp, CreditCard, FileText, Calculator,} from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer,} from "recharts";
+import {
+  DollarSign,
+  TrendingUp,
+  CreditCard,
+  FileText,
+  Calculator,
+} from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import API from "../../utils/api";
 import { toast } from "sonner";
 
@@ -35,7 +49,7 @@ const Accounting = () => {
     .reduce((sum, inv) => sum + (inv.total || 0), 0);
 
   const outstandingCount = invoices.filter(
-    (inv) => inv.status === "sent" || inv.status === "overdue"
+    (inv) => inv.status === "sent" || inv.status === "overdue",
   ).length;
 
   const expenses = 0;
@@ -102,7 +116,7 @@ const Accounting = () => {
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-10 overflow-hidden pb-16 p-8 pt-30 space-y-8">
-<div className="absolute top-20 right-10 w-72 h-72 bg-teal-500/10 blur-3xl rounded-full pointer-events-none" />
+      <div className="absolute top-20 right-10 w-72 h-72 bg-teal-500/10 blur-3xl rounded-full pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600/10 blur-3xl rounded-full pointer-events-none" />
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
@@ -152,8 +166,18 @@ const Accounting = () => {
               }}
             />
             <Legend />
-            <Line type="monotone" dataKey="income" stroke="#80FFF9" strokeWidth={2} />
-            <Line type="monotone" dataKey="expenses" stroke="#ff6b6b" strokeWidth={2} />
+            <Line
+              type="monotone"
+              dataKey="income"
+              stroke="#80FFF9"
+              strokeWidth={2}
+            />
+            <Line
+              type="monotone"
+              dataKey="expenses"
+              stroke="#ff6b6b"
+              strokeWidth={2}
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -190,10 +214,10 @@ const Accounting = () => {
                         t.status === "paid"
                           ? "bg-green-500/10 text-green-400"
                           : t.status === "sent"
-                          ? "bg-yellow-500/10 text-yellow-400"
-                          : t.status === "overdue"
-                          ? "bg-red-500/10 text-red-400"
-                          : "bg-gray-500/10 text-gray-400"
+                            ? "bg-yellow-500/10 text-yellow-400"
+                            : t.status === "overdue"
+                              ? "bg-red-500/10 text-red-400"
+                              : "bg-gray-500/10 text-gray-400"
                       }`}
                     >
                       {t.status}
@@ -206,10 +230,12 @@ const Accounting = () => {
           </table>
         </div>
 
-        {/* MOBILE VERSION — CARD LIST */}
         <div className="md:hidden flex flex-col gap-4">
           {recentTransactions.map((t) => (
-            <div key={t.id} className="p-4 rounded-xl border border-white/10 bg-[#121212] shadow-lg" >
+            <div
+              key={t.id}
+              className="p-4 rounded-xl border border-white/10 bg-[#121212] shadow-lg"
+            >
               <div className="flex justify-between">
                 <p className="text-[#80FFF9] font-semibold">{t.amount}</p>
                 <span
@@ -217,10 +243,10 @@ const Accounting = () => {
                     t.status === "paid"
                       ? "bg-green-500/10 text-green-400"
                       : t.status === "sent"
-                      ? "bg-yellow-500/10 text-yellow-400"
-                      : t.status === "overdue"
-                      ? "bg-red-500/10 text-red-400"
-                      : "bg-gray-500/10 text-gray-400"
+                        ? "bg-yellow-500/10 text-yellow-400"
+                        : t.status === "overdue"
+                          ? "bg-red-500/10 text-red-400"
+                          : "bg-gray-500/10 text-gray-400"
                   }`}
                 >
                   {t.status}
@@ -232,7 +258,6 @@ const Accounting = () => {
             </div>
           ))}
         </div>
-
       </div>
     </div>
   );

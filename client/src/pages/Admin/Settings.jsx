@@ -317,7 +317,6 @@ const Settings = () => {
               <input type="text" placeholder="ex. BRD" value={billing.bank} onChange={(e) => setBilling({ ...billing, bank: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200 focus:outline-none focus:border-[#80FFF9]/30"/>
             </div>
 
-            {/* Logo URL */}
             <div className="md:col-span-3">
               <label className="text-gray-400 text-sm">Invoice Logo URL</label>
               <input type="text" placeholder="https://example.com/logo.png" value={billing.logo} onChange={(e) => setBilling({ ...billing, logo: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200 focus:outline-none focus:border-[#80FFF9]/30"/>
@@ -333,8 +332,6 @@ const Settings = () => {
           </button>
         </div>
 
-
-        {/* SECȚIUNEA PERICULOASĂ: STERGERE CONT */}
         <div className="flex justify-end">
           <button
             onClick={handleDelete}

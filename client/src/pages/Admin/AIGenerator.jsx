@@ -293,7 +293,7 @@ const AIGenerator = () => {
               {prices.map((p, idx) => (
                 <div key={idx} className="flex items-center gap-2 bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-2">
                   <input value={p.service} onChange={(e) => handlePriceChange(idx, "service", e.target.value)} className="flex-1 bg-transparent text-sm text-gray-200 outline-none min-w-0" />
-                  <span className="text-gray-500 text-sm">€</span>
+                  <span className="text-gray-500 text-sm">RON</span>
                   <input type="number" value={p.price} onChange={(e) => handlePriceChange(idx, "price", e.target.value)} className="w-20 bg-transparent text-sm text-[#80FFF9] text-right outline-none" />
                   <button onClick={() => handleRemovePrice(idx)} className="text-gray-600 hover:text-red-400 transition">
                     <Trash2 size={13} />
@@ -304,7 +304,7 @@ const AIGenerator = () => {
 
             <div className="flex items-center gap-3 mt-2">
               <input value={newService} onChange={(e) => setNewService(e.target.value)} placeholder="Nume serviciu..." className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 outline-none focus:border-[#80FFF9]/50 placeholder-gray-600" />
-              <input type="number" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} placeholder="€" className="w-24 bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-2 text-sm text-[#80FFF9] outline-none focus:border-[#80FFF9]/50 placeholder-gray-600" />
+              <input type="number" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} placeholder="RON" className="w-24 bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-2 text-sm text-[#80FFF9] outline-none focus:border-[#80FFF9]/50 placeholder-gray-600" />
               <button onClick={handleAddPrice} disabled={!newService.trim() || !newPrice} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 text-indigo-300 text-sm transition disabled:opacity-40 disabled:cursor-not-allowed" >
                 <Plus size={15} />
                 Adaugă
@@ -330,9 +330,9 @@ const AIGenerator = () => {
             Reset
           </button>
 
-          <button onClick={handleExtract} disabled={loading || !text.trim()} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-teal-500/20 to-indigo-600/20 hover:from-teal-500/30 hover:to-indigo-600/30 border border-teal-500/30 hover:border-teal-400/60 text-xs font-mono uppercase tracking-wider text-[#80FFF9] font-bold shadow-lg transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+          <button onClick={handleExtract} disabled={loading || !text.trim()} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 rounded-xl bg-linear-to-r from-teal-500/20 to-indigo-600/20 hover:from-teal-500/30 hover:to-indigo-600/30 border border-teal-500/30 hover:border-teal-400/60 text-xs font-mono uppercase tracking-wider text-[#80FFF9] font-bold shadow-lg transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
             {loading ? (
-              <><Loader2 className="animate-spin" size={15} /> Compiling...</>
+              <><Loader2 className="animate-spin" size={15} /> Se generează...</>
             ) : (
               <><FileText size={15} /> Generează Invoice</>
             )}

@@ -48,7 +48,6 @@ const Clients = () => {
 
   return (
     <div className="p-8 pt-30 min-h-screen bg-[#0e0e0e] text-white">
-      {/* Background Glow */}
       <div className="absolute top-20 right-20 w-96 h-96 bg-indigo-500/5 blur-3xl rounded-full pointer-events-none" />
 
       <div className="flex flex-col md:flex-row items-center justify-between mb-10">

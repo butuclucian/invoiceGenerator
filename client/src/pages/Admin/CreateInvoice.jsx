@@ -121,7 +121,7 @@ const CreateInvoice = () => {
         }
 
       } catch (err) {
-        console.error("Failed to initialize invoice form:", err);
+        console.error(err);
         toast.error("Could not load required form data from server");
       }
     };
@@ -235,7 +235,7 @@ const CreateInvoice = () => {
       }
       navigate("/dashboard/invoices");
     } catch (err) {
-      console.error("Create invoice error:", err.response?.data || err);
+      console.error(err.response?.data || err);
       toast.error(err.response?.data?.message || "Failed to save invoice");
     } finally {
       setLoading(false);

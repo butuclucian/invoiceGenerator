@@ -16,7 +16,7 @@ const Home = () => {
       })
       .catch((err) => {
         setIsLoggedIn(false);
-        console.error("Eroare la verificarea token-ului:", err.response?.data || err.message);
+        console.error(err.response?.data || err.message);
       });
   }, []);
 

@@ -33,7 +33,6 @@ const Reports = () => {
     );
   }
 
-  //  Invoice Status Data
   const statusCounts = invoices.reduce((acc, inv) => {
     acc[inv.status] = (acc[inv.status] || 0) + 1;
     return acc;
@@ -44,7 +43,6 @@ const Reports = () => {
     value: statusCounts[key],
   }));
 
-  // Revenue Over Time (monthly totals)
   const monthlyRevenue = {};
   invoices.forEach((inv) => {
     if (inv.status === "paid" && inv.date) {
@@ -60,7 +58,6 @@ const Reports = () => {
     total,
   }));
 
-  // Top Clients by Revenue
   const clientTotals = {};
   invoices.forEach((inv) => {
     if (inv.client && inv.total) {
@@ -80,9 +77,7 @@ const Reports = () => {
       <div className="absolute top-20 right-10 w-72 h-72 bg-teal-500/10 blur-3xl rounded-full pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600/10 blur-3xl rounded-full pointer-events-none" />
 
-      {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
-        {/* title+ subtitle */}
         <div>
           <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
             <BarChart3 className="text-[#80FFF9]" size={26} />
@@ -95,12 +90,9 @@ const Reports = () => {
 
       </div>
 
-      {/* Charts Grid */}
       <div className="grid lg:grid-cols-2 gap-8">
 
-        {/* Invoice Status Pie Chart */}
         <div className="bg-[#1a1a1a]/80 p-6 rounded-xl border border-white/10 shadow-lg shadow-indigo-500/10">
-          {/* title */}
           <div className="flex items-center gap-2 mb-4">
             <PieIcon className="text-[#80FFF9]" size={20} />
             <h2 className="text-xl font-semibold text-white">
@@ -108,7 +100,6 @@ const Reports = () => {
             </h2>
           </div>
 
-          {/* container */}
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
@@ -129,9 +120,7 @@ const Reports = () => {
 
         </div>
 
-        {/* Revenue Over Time */}
         <div className="bg-[#1a1a1a]/80 p-6 rounded-xl border border-white/10 shadow-lg shadow-indigo-500/10">
-          {/* title */}
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="text-[#80FFF9]" size={20} />
             <h2 className="text-xl font-semibold text-white">
@@ -139,7 +128,6 @@ const Reports = () => {
             </h2>
           </div>
 
-          {/* container */}
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={revenueData}>
               <XAxis dataKey="month" stroke="#888" />
@@ -158,17 +146,13 @@ const Reports = () => {
 
         </div>
 
-        {/* Top Clients by Revenue */}
         <div className="bg-[#1a1a1a]/80 p-6 rounded-xl border border-white/10 shadow-lg shadow-indigo-500/10 lg:col-span-2">
-          {/* title */}
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="text-[#80FFF9]" size={20} />
             <h2 className="text-xl font-semibold text-white">
               Top Clients by Total Invoiced
             </h2>
           </div>
-
-          {/* container */}
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={clientData} layout="vertical" margin={{ left: 60 }}>
               <XAxis type="number" stroke="#888" />

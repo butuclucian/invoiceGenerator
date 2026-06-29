@@ -27,7 +27,6 @@ const stats = [
 const Stats = () => {
   return (
     <section id="features" className="py-24 relative overflow-hidden">
-      {/* Background Glow */}
       <div className="absolute inset-0 blur-[120px]" />
 
       <div className="max-w-6xl mx-auto px-6 relative z-10 text-center">
@@ -39,7 +38,6 @@ const Stats = () => {
           efficiency powered by Gemini AI.
         </p>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-12 max-w-4xl mx-auto">
           {stats.map((item, index) => (
             <div
@@ -49,7 +47,7 @@ const Stats = () => {
               <div className="mb-3 flex items-center justify-center w-12 h-12 rounded-full bg-white/10 border border-white/20 group-hover:bg-[#80FFF9]/10 transition">
                 {item.icon}
               </div>
-              <div className="text-4xl font-bold bg-gradient-to-r from-[#80FFF9] to-[#CB52D4] bg-clip-text text-transparent">
+              <div className="text-4xl font-bold bg-linear-to-r from-[#80FFF9] to-[#CB52D4] bg-clip-text text-transparent">
                 {item.value}
               </div>
               <div className="text-white/70 mt-2 text-sm font-light">

@@ -48,11 +48,9 @@ const MySubscription = () => {
 
   return (
     <div className="p-8 text-white min-h-screen bg-[#0e0e0e] relative pt-30 space-y-8">
-      {/* Background Glows */}
       <div className="absolute top-20 right-10 w-72 h-72 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600/10 blur-3xl rounded-full pointer-events-none" />
 
-      {/* HEADER */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <h1 className="text-3xl font-extrabold flex items-center gap-3">
           <Crown className="text-[#80FFF9]" size={30} />
@@ -61,7 +59,6 @@ const MySubscription = () => {
         <p className="text-gray-400 mt-2 text-sm">Gestionează planul tău, facturarea și accesul la funcțiile AI.</p>
       </div>
 
-      {/* ACTIVE PLAN CARD */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
         className="max-w-4xl mx-auto bg-[#121212]/60 border border-white/10 backdrop-blur-xl p-8 rounded-2xl mb-12 shadow-2xl"
@@ -98,7 +95,6 @@ const MySubscription = () => {
         </div>
       </motion.div>
 
-      {/* UPGRADE TIERS */}
       <div className="max-w-4xl mx-auto">
         <h3 className="text-xl font-bold mb-6 text-center">Upgrade la un nivel superior</h3>
         <div className="grid md:grid-cols-2 gap-6">

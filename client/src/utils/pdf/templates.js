@@ -1,6 +1,6 @@
 export const renderEUTemplate = async (doc, invoice, b, h) => {
   const { accent, gray, formatDate, autoTable } = h;
-  const currency = b.currency || "EUR";
+  const currency = b.currency || "RON";
   const c = invoice.client || {};
 
   let y = 20;
@@ -66,7 +66,7 @@ export const renderEUTemplate = async (doc, invoice, b, h) => {
 
 export const renderUSTemplate = async (doc, invoice, b, h) => {
   const { accent, gray, formatDate, autoTable } = h;
-  const currency = b.currency || "USD";
+  const currency = b.currency || "RON";
   const c = invoice.client || {};
 
   let y = 20;
@@ -147,7 +147,7 @@ export const renderGlobalTemplate = async (doc, invoice, b, h) => {
 
 export const renderEnterpriseTemplate = async (doc, invoice, b, h) => {
   const { accent, QRCode, autoTable } = h;
-  const currency = b.currency || "EUR";
+  const currency = b.currency || "RON";
 
   let y = 20;
 

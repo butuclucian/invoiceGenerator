@@ -3,7 +3,7 @@ const Template2 = ({ invoice, billingProfile }) => {
 
   const b = billingProfile;
   const cl = invoice.client || {};
-  const currency = b.currency || "GBP";
+  const currency = b.currency || "RON";
 
   const fmt = (d) => {
     if (!d) return "-";

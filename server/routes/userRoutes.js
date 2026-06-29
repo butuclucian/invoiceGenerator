@@ -24,7 +24,6 @@ router.post("/sync", async (req, res) => {
 
     res.status(200).json({ message: "User synced successfully", user });
   } catch (err) {
-    console.error("Error syncing user:", err);
     res.status(500).json({ message: "Server error syncing user" });
   }
 });
@@ -42,7 +41,6 @@ router.post("/save-push-token", protect, async (req, res) => {
 
     res.json({ message: "Push token saved successfully" });
   } catch (err) {
-    console.error("Error saving push token:", err);
     res.status(500).json({ message: "Server error" });
   }
 });

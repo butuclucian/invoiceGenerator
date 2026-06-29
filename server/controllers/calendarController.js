@@ -1,11 +1,9 @@
 import CalendarEvent from "../models/CalendarEvent.js";
 
-
 export const getEvents = async (req, res) => {
   const events = await CalendarEvent.find({ user: req.user._id }).sort("date");
   res.json(events);
 };
-
 
 export const addEvent = async (req, res) => {
   const { date, time, title } = req.body;
@@ -19,7 +17,6 @@ export const addEvent = async (req, res) => {
 
   res.json(event);
 };
-
 
 export const updateEvent = async (req, res) => {
   const { date, time, title } = req.body;

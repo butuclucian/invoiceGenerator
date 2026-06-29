@@ -68,7 +68,7 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// ── 3. PRELUARE PROFIL ───────────────────────────────────────────────────────
+
 export const getProfile = async (req, res) => {
   try {
     if (!req.user) {
@@ -86,7 +86,6 @@ export const getProfile = async (req, res) => {
   }
 };
 
-// ── 4. ACTUALIZARE PROFIL ────────────────────────────────────────────────────
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -114,12 +113,11 @@ export const updateProfile = async (req, res) => {
       token: generateToken(updated._id),
     });
   } catch (err) {
-    console.error("Update Profile Error:", err);
     res.status(500).json({ message: "Failed to update profile." });
   }
 };
 
-// ── 5. ȘTERGERE CONT ȘI DATE ASOCIATE ────────────────────────────────────────
+
 export const deleteAccount = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -137,12 +135,10 @@ export const deleteAccount = async (req, res) => {
     });
 
   } catch (err) {
-    console.error("Delete Account Error:", err);
     res.status(500).json({ message: "Failed to delete account." });
   }
 };
 
-// ── 6. ACTUALIZARE PAROLĂ (FIXĂ) ─────────────────────────────────────────────
 export const updatePassword = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -155,8 +151,6 @@ export const updatePassword = async (req, res) => {
     const user = await User.findById(userId);
     if (!user)
       return res.status(404).json({ message: "User not found." });
-
-    // 🔥 Sincronizare și aici cu bcrypt direct
     const isMatch = await bcrypt.compare(oldPassword, user.password);
     if (!isMatch)
       return res.status(400).json({ message: "Old password is incorrect." });
@@ -169,7 +163,6 @@ export const updatePassword = async (req, res) => {
       message: "Password updated successfully.",
     });
   } catch (err) {
-    console.error("Update Password Error:", err);
     res.status(500).json({ message: "Failed to update password." });
   }
 };

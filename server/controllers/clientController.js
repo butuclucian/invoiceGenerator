@@ -68,7 +68,6 @@ export const updateClient = async (req, res) => {
   }
 };
 
-// 5. Ștergere client
 export const deleteClient = async (req, res) => {
   try {
     const deleted = await Client.findByIdAndDelete(req.params.id);

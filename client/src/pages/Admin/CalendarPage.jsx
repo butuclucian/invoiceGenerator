@@ -17,7 +17,6 @@ const CalendarPage = () => {
 
   const formattedDate = format(selectedDate, "yyyy-MM-dd");
 
-  // FETCH EVENTS FROM BACKEND
   const fetchEvents = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -35,10 +34,10 @@ const CalendarPage = () => {
     fetchEvents();
   }, []);
 
-  // Events for selected day
+
   const dayEvents = events.filter((n) => n.date === formattedDate);
 
-  // Events for month
+
   const monthEvents = useMemo(() => {
     const month = selectedDate.getMonth();
     const year = selectedDate.getFullYear();
@@ -48,14 +47,13 @@ const CalendarPage = () => {
     });
   }, [events, selectedDate]);
 
-  // ADD or EDIT EVENT
+
   const addNote = async () => {
     if (!newNote.time || !newNote.title)
       return toast.error("Please complete all fields!");
 
     const token = localStorage.getItem("token");
 
-    // --------- EDIT MODE ---------
     if (editingEventId) {
       try {
         const { data } = await API.put(
@@ -83,7 +81,6 @@ const CalendarPage = () => {
       return;
     }
 
-    // --------- ADD MODE ---------
     try {
       const { data } = await API.post(
         "/calendar",
@@ -104,7 +101,6 @@ const CalendarPage = () => {
     }
   };
 
-  // DELETE EVENT
   const deleteNote = async (id) => {
     try {
       const token = localStorage.getItem("token");

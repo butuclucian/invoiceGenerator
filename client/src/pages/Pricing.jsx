@@ -134,7 +134,6 @@ const Pricing = () => {
                 </div>
               )}
 
-              {/* Titlu & Descriere */}
               <div className="mb-10">
                 <span className={`text-xs font-bold uppercase tracking-widest mb-4 block ${plan.darkTheme ? "text-gray-400" : "text-gray-500"}`}>
                   // {plan.name}
@@ -144,7 +143,6 @@ const Pricing = () => {
                 </p>
               </div>
 
-              {/* Preț */}
               <div className="mb-10 flex items-baseline gap-2">
                 <span className="text-6xl lg:text-7xl font-black tracking-tighter">
                   ${isAnnual ? plan.annualPrice : plan.monthlyPrice}
