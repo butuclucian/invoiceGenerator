@@ -19,6 +19,6 @@ router.route("/:id")
 
 router.get("/analytics/ai", protect, getAiFinancialAnalytics);
 router.get("/analytics/ai/history", protect, getAiReportHistory);
-router.delete("/analytics/ai/history/:id")
+router.delete("/analytics/ai/history/:id", protect, deleteAiReport)
 
 export default router;
