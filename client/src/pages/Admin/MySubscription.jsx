@@ -25,22 +25,23 @@ const MySubscription = () => {
     }
   };
 
-  const handleAction = async (endpoint) => {
-    setActionLoading(true);
-    try {
-      const { data } = await API.post(`/subscription/${endpoint}`);
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        toast.success("Acțiune finalizată cu succes!");
-        fetchSubscription();
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Eroare la procesare.");
-    } finally {
-      setActionLoading(false);
+  const handleAction = async (endpoint, payload = {}) => {
+  setActionLoading(true);
+  try {
+    const { data } = await API.post(`/subscription/${endpoint}`, payload);
+    
+    if (data?.url) {
+      window.location.href = data.url;
+    } else {
+      toast.success("Acțiune finalizată cu succes!");
+      fetchSubscription();
     }
-  };
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Eroare la procesare.");
+  } finally {
+    setActionLoading(false);
+  }
+};
 
   const plan = subscription?.plan || "Free";
   const isActive = subscription?.status === "Active";
@@ -110,7 +111,7 @@ const MySubscription = () => {
               <h4 className="text-lg font-bold">{tier.name}</h4>
               <p className="text-sm text-gray-400 mb-6">{tier.desc}</p>
               <button 
-                onClick={() => handleAction("create-checkout-session")}
+                onClick={() => handleAction("create-checkout-session", { plan: tier.name.toLowerCase() })}
                 className={`w-full py-3 rounded-xl bg-gradient-to-r from-${tier.color}-600/20 to-indigo-600/20 border border-${tier.color}-500/30 hover:bg-${tier.color}-600/30 transition text-sm font-medium`}
               >
                 Activează {tier.name}

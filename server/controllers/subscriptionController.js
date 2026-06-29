@@ -12,6 +12,12 @@ export const createCheckoutSession = async (req, res) => {
     const { plan } = req.body;
     const normalizedPlan = plan?.toLowerCase();
 
+    if (!plan) {
+      return res.status(400).json({ message: "Planul este obligatoriu." });
+    }
+
+    const normalizedPlan = plan.toLowerCase();
+
     const priceId =
       normalizedPlan === "enterprise"
         ? process.env.STRIPE_PRICE_ENTERPRISE
