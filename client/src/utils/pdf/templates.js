@@ -1,6 +1,6 @@
 export const renderEUTemplate = async (doc, invoice, b, h) => {
   const { accent, gray, formatDate, autoTable } = h;
-  const currency = b.currency || "RON";
+  const currency = b.currency || "EUR";
   const c = invoice.client || {};
 
   let y = 20;

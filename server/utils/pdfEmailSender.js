@@ -6,10 +6,9 @@ dotenv.config();
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// const accent = [58 / 255, 110 / 255, 165 / 255];
-// const lightGray = "#dddddd";
-const accent = hexToRgb("#0f6c91");
-const gray = [60, 60, 60];
+const accent = [58 / 255, 110 / 255, 165 / 255];
+const lightGray = "#dddddd";
+
 
 const generateInvoicePDF = (invoice, client, business = {}) => {
   const pdfPath = `./invoice_${invoice.invoice_number}.pdf`;
@@ -18,9 +17,12 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
 
   doc.pipe(writeStream);
 
-  const { accent, gray, formatDate, autoTable } = h;
-  const currency = b.currency || "RON";
-  const c = invoice.client || {};
+  const accent = "#3A6EA5";
+  const gray = "#374151";
+  const lightGray = "#E5E7EB";
+
+  const currency = business.currency || "EUR";
+  const c = invoice.client || client || {};
 
   let y = 40;
 
