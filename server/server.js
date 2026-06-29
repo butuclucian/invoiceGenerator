@@ -25,18 +25,6 @@ dotenv.config();
 connectDB();
 
 const app = express();
-app.set("trust proxy", 1); // Necesar pentru deployment (Render/Vercel)
-
-// 1. WEBHOOK - Trebuie să fie primul și cu body-parser raw
-app.post(
-  "/api/subscription/webhook",
-  bodyParser.raw({ type: "application/json" }),
-  handleWebhook
-);
-
-// 2. Middleware-uri (doar acum parșăm JSON pentru restul rutelor)
-app.use(express.json());
-app.use(morgan("dev"));
 app.use(
   cors({
     origin: "*",
@@ -45,8 +33,18 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
+app.set("trust proxy", 1);
 
-// 3. Rute API
+
+app.post(
+  "/api/subscription/webhook",
+  bodyParser.raw({ type: "application/json" }),
+  handleWebhook
+);
+
+app.use(express.json());
+app.use(morgan("dev"));
+
 app.get("/", (req, res) => {
   res.send("invoiceGenAI API is running stable...");
 });
@@ -67,7 +65,6 @@ app.listen(PORT, "0.0.0.0", () => {
   startEmailWorker();
 });
 
-// 4. Cron Job
 cron.schedule("0 * * * *", async () => {
   console.log("⏰ [Cron] Se pornește verificarea automată a scadențelor...");
   try {
