@@ -316,3 +316,19 @@ export const getAiReportHistory = async (req, res) => {
     });
   }
 };
+
+export const deleteAiReport = async(req,res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+    const deletedReport = await Report.findOneAndDelete({ _id: id, user: userId });
+
+    if (!deletedReport) {
+      return res.status(404).json({ success: false, message: "Raportul nu a fost găsit" });
+    }
+
+    res.status(200).json({ success: true, message: "Raport șters cu succes" });
+  } catch (error) {
+    res.status(500).json({error: error.message });
+  }
+}

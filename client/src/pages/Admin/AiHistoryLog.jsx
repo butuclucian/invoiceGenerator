@@ -25,16 +25,17 @@ const AiHistoryLog = () => {
   };
 
   const handleDelete = async (id) => {
-    try {
-      const { data } = await API.delete(`/ai/history/${id}`);
-      if (data.success) {
-        toast.success("Factura a fost ștearsă din istoric.");
-        setHistoryItems((prev) => prev.filter((item) => item._id !== id));
-      }
-    } catch (error) {
-      toast.error("Nu s-a putut șterge documentul.");
+  try {
+    const { data } = await API.delete(`/invoices/analytics/ai/history/${id}`); 
+    if (data.success) {
+      toast.success("Factura a fost ștearsă din istoric.");
+      setHistoryItems((prev) => prev.filter((item) => item._id !== id));
     }
-  };
+  } catch (error) {
+    console.error("Eroare detaliată:", error.response);
+    toast.error("Nu s-a putut șterge documentul.");
+  }
+};
 
   useEffect(() => {
     fetchHistory();
