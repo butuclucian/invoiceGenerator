@@ -109,6 +109,7 @@ const AnafReporting = () => {
           </h1>
           <p className="text-gray-400 text-sm">
             Generare date pentru Declarația Unică și centralizator venituri anuale
+            {/* asdsa */}
           </p>
         </div>
       </div>
