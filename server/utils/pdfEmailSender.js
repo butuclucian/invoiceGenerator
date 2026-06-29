@@ -9,136 +9,186 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const accent = [58 / 255, 110 / 255, 165 / 255];
 const lightGray = "#dddddd";
 
-// design pdf
-const generateInvoicePDF = (invoice, client) => {
+
+const generateInvoicePDF = (invoice, client, business = {}) => {
   const pdfPath = `./invoice_${invoice.invoice_number}.pdf`;
   const doc = new PDFDocument({ margin: 40 });
   const writeStream = fs.createWriteStream(pdfPath);
+
   doc.pipe(writeStream);
 
   const accent = "#3A6EA5";
-  const gray = "#3C3C3C";
+  const gray = "#4B5563";
   const lightGray = "#E5E7EB";
 
-  //HEADER (LOGO + TITLU + LINIE)
-  try {
-    doc.image("server/assets/logo.png", 40, 30, { width: 30 });
-  } catch {
-    console.warn("Missing logo, skipping image");
-  }
+  const currency = business.currency || invoice.currency || "EUR";
 
+  const c = client || {};
+
+  let y = 40;
+
+  // =========================
+  // HEADER
+  // =========================
   doc
     .font("Helvetica-Bold")
     .fontSize(22)
-    .fillColor("black")
-    .text("BillForge AI", 80, 32);
+    .fillColor(accent)
+    .text("INVOICE", 40, y);
+
   doc
     .font("Helvetica")
     .fontSize(10)
-    .fillColor("#666")
-    .text("Smart Invoice Generator", 80, 50);
+    .fillColor(gray)
+    .text(`#${invoice.invoice_number}`, 40, y + 28);
 
-  doc.moveTo(40, 70).lineTo(555, 70).strokeColor(lightGray).stroke();
+  // Company info (right side)
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(12)
+    .fillColor("#111")
+    .text(business.business_name || "Company", 350, y);
 
-  // COMPANY & CLIENT INFO 
-  let y = 90;
-  doc.fontSize(13).fillColor(accent).font("Helvetica-Bold").text("From:", 40, y);
-  doc.fontSize(11).fillColor(gray).font("Helvetica");
-  y += 16;
-  doc.text("invoiceGenAI Inc.", 40, y);
-  doc.text("123 Innovation Blvd", 40, (y += 14));
-  doc.text("Timișoara, Romania", 40, (y += 14));
-  doc.text("support@invoicegen.ai", 40, (y += 14));
+  doc.font("Helvetica").fontSize(10).fillColor(gray);
 
-  let rightY = 90;
-  const c = client || {};
-  doc.font("Helvetica-Bold").fillColor(accent).text("Bill To:", 330, rightY);
+  if (business.address) doc.text(business.address, 350, y + 15);
+  if (business.fiscal_code) doc.text(`VAT: ${business.fiscal_code}`, 350, y + 30);
+  if (business.iban) doc.text(`IBAN: ${business.iban}`, 350, y + 45);
+
+  // separator
+  doc
+    .moveTo(40, 110)
+    .lineTo(555, 110)
+    .strokeColor(lightGray)
+    .stroke();
+
+  // =========================
+  // CLIENT + INFO
+  // =========================
+  y = 130;
+
+  doc.font("Helvetica-Bold").fontSize(11).fillColor(accent).text("BILL TO", 40, y);
+
+  doc.font("Helvetica").fontSize(10).fillColor(gray);
+
+  doc.text(c.name || "Client", 40, y + 18);
+  if (c.company) doc.text(c.company, 40, y + 33);
+  if (c.address) doc.text(c.address, 40, y + 48);
+  if (c.email) doc.text(c.email, 40, y + 63);
+
+  // invoice meta (right side)
+  doc
+    .font("Helvetica-Bold")
+    .fillColor("#111")
+    .text("Invoice Details", 350, y);
+
   doc.font("Helvetica").fillColor(gray);
-  rightY += 16;
-  doc.text(c.name || "Unknown Client", 330, rightY);
-  if (c.company && c.company !== c.name) doc.text(c.company, 330, (rightY += 14));
-  if (c.email) doc.text(c.email, 330, (rightY += 14));
-  if (c.phone) doc.text(c.phone, 330, (rightY += 14));
-  if (c.address) doc.text(c.address, 330, (rightY += 14));
 
-  // INVOICE INFO 
-  const infoY = Math.max(y, rightY) + 25;
-  doc.font("Helvetica-Bold").fillColor(accent).text("Invoice Details:", 40, infoY);
-  doc.font("Helvetica").fillColor(gray);
-  doc.text(`Invoice Number: ${invoice.invoice_number}`, 40, infoY + 15);
-  doc.text(`Date: ${new Date(invoice.date).toLocaleDateString()}`, 40, infoY + 30);
+  doc.text(`Date: ${new Date(invoice.date).toLocaleDateString()}`, 350, y + 18);
   doc.text(
-    `Due Date: ${
-      invoice.due_date ? new Date(invoice.due_date).toLocaleDateString() : "-"
+    `Due: ${
+      invoice.due_date
+        ? new Date(invoice.due_date).toLocaleDateString()
+        : "-"
     }`,
-    40,
-    infoY + 45
+    350,
+    y + 33
   );
-  doc.text(`Status: ${invoice.status}`, 40, infoY + 60);
 
-  // TABLE HEADER 
-  const tableY = infoY + 90;
-  doc.rect(40, tableY, 520, 25).fill(accent);
-  doc.fillColor("white").font("Helvetica-Bold").fontSize(12);
-  doc.text("Description", 50, tableY + 7);
-  doc.text("Quantity", 280, tableY + 7);
-  doc.text("Unit Price", 380, tableY + 7);
-  doc.text("Total", 480, tableY + 7);
+  doc.text(`Status: ${invoice.status}`, 350, y + 48);
 
+  // =========================
+  // TABLE HEADER
+  // =========================
+  y = 220;
+
+  doc.rect(40, y, 515, 25).fill(accent);
+
+  doc
+    .fillColor("white")
+    .font("Helvetica-Bold")
+    .fontSize(10)
+    .text("Description", 50, y + 8)
+    .text("Qty", 300, y + 8)
+    .text("Price", 370, y + 8)
+    .text("Total", 460, y + 8);
+
+  // =========================
   // TABLE ROWS
-  let rowY = tableY + 25;
-  doc.font("Helvetica").fontSize(11);
+  // =========================
+  y += 25;
 
-  invoice.items.forEach((item, i) => {
-    const bg = i % 2 === 0 ? "#F5F7FA" : "#FFFFFF";
-    doc.rect(40, rowY, 520, 20).fill(bg);
+  doc.font("Helvetica").fontSize(10);
+
+  let subtotal = 0;
+
+  (invoice.items || []).forEach((item, i) => {
+    const rowHeight = 22;
+
+    if (i % 2 === 0) {
+      doc.rect(40, y, 515, rowHeight).fill("#F9FAFB");
+    }
+
     doc.fillColor(gray);
-    doc.text(item.description, 50, rowY + 5, { width: 200 });
-    doc.text(String(item.quantity), 290, rowY + 5);
-    doc.text(`$${item.unit_price.toFixed(2)}`, 380, rowY + 5);
-    doc.text(`$${item.total.toFixed(2)}`, 480, rowY + 5);
-    rowY += 20;
+
+    doc.text(item.description, 50, y + 7, { width: 240 });
+    doc.text(String(item.quantity), 300, y + 7);
+    doc.text(`${item.unit_price.toFixed(2)} ${currency}`, 370, y + 7);
+    doc.text(`${item.total.toFixed(2)} ${currency}`, 460, y + 7);
+
+    subtotal += item.total;
+    y += rowHeight;
   });
 
+  // =========================
   // TOTALS
-  rowY += 15;
-  doc.font("Helvetica-Bold").fillColor(accent).text("Summary", 390, rowY);
-  doc.font("Helvetica").fillColor(gray).fontSize(11);
-  rowY += 15;
-  doc.text("Subtotal:", 390, rowY);
-  doc.text(`$${invoice.subtotal.toFixed(2)}`, 480, rowY, { align: "right" });
-  rowY += 15;
-  doc.text("Tax Rate:", 390, rowY);
-  doc.text(`${invoice.tax_rate}%`, 480, rowY, { align: "right" });
-  rowY += 15;
-  doc.text("Discount:", 390, rowY);
-  doc.text(`${invoice.discount_rate}%`, 480, rowY, { align: "right" });
-  rowY += 20;
-  doc.font("Helvetica-Bold").fillColor(accent).fontSize(13);
-  doc.text("Total:", 390, rowY);
-  doc.text(`$${invoice.total.toFixed(2)}`, 480, rowY, { align: "right" });
+  // =========================
+  y += 20;
 
-  // NOTES
-  if (invoice.notes) {
-    rowY += 40;
-    doc.font("Helvetica-Bold").fillColor(accent).text("Notes:", 40, rowY);
-    doc.font("Helvetica").fillColor(gray).fontSize(11);
-    doc.text(invoice.notes, 40, rowY + 15, { width: 500 });
-  }
+  const vat = invoice.tax_amount || 0;
+  const discount = invoice.discount_amount || 0;
 
-  // SIGNATURES
-  const signY = rowY + 70;
-  doc.moveTo(80, signY).lineTo(220, signY).strokeColor(lightGray).stroke();
-  doc.moveTo(330, signY).lineTo(470, signY).strokeColor(lightGray).stroke();
-  doc.fontSize(10).fillColor("#666");
-  doc.text("Client Signature", 110, signY + 5);
-  doc.text("Authorized Signature", 355, signY + 5);
+  doc
+    .font("Helvetica")
+    .fontSize(10)
+    .fillColor(gray);
 
-  // FOOTER 
-  doc.fontSize(9).fillColor("#999");
-  doc.text("Generated by invoiceGenAI • www.invoicegen.ai", 40, 780, {
-    align: "center",
-  });
+  doc.text("Subtotal:", 370, y);
+  doc.text(`${subtotal.toFixed(2)} ${currency}`, 460, y);
+
+  y += 15;
+
+  doc.text(`VAT (${invoice.tax_rate || 0}%)`, 370, y);
+  doc.text(`${vat.toFixed(2)} ${currency}`, 460, y);
+
+  y += 15;
+
+  doc.text("Discount:", 370, y);
+  doc.text(`${discount.toFixed(2)} ${currency}`, 460, y);
+
+  y += 20;
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(12)
+    .fillColor(accent)
+    .text("TOTAL", 370, y);
+
+  doc.text(`${invoice.total.toFixed(2)} ${currency}`, 460, y);
+
+  // =========================
+  // FOOTER
+  // =========================
+  doc
+    .font("Helvetica")
+    .fontSize(9)
+    .fillColor("#9CA3AF")
+    .text(
+      "This invoice was generated electronically and is valid without signature.",
+      40,
+      780,
+      { align: "center", width: 515 }
+    );
 
   doc.end();
 
@@ -148,10 +198,7 @@ const generateInvoicePDF = (invoice, client) => {
   });
 };
 
-
-
 export const sendInvoiceEmail = async (invoice, client) => {
-  // Verificăm dacă structura de client conține o adresă de e-mail validă
   if (!client?.email) {
     console.warn("⚠️ [EmailService] Client has no email, skipping email send.");
     return;
@@ -169,16 +216,15 @@ export const sendInvoiceEmail = async (invoice, client) => {
     
     const response = await resend.emails.send({
       from: "onboarding@resend.dev",
-      // FORȚAT: Conturile gratuite Resend în mod Sandbox acceptă doar adresa ta confirmată la înregistrare
       to: "butuclucian04@gmail.com", 
-      subject: `Factură nouă emisă de invoiceGenAI: ${invoice.series || 'INV'}-${invoice.invoice_number}`,
+      subject: `Factură nouă emisă de invoiceGenAI: ${invoice.invoice_number}`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 12px;">
           <h2 style="color: #4F46E5; text-align: center;">Hello ${client.name || "Client"},</h2>
           <p style="text-align: center; font-size: 15px;">You’ve received a new invoice from <b>invoiceGenAI</b>.</p>
           
           <div style="margin: 20px auto; max-width: 400px; background: #f9f9f9; padding: 20px; border-radius: 10px; border-left: 4px solid #4F46E5;">
-            <p style="margin: 5px 0;"><b>Invoice Number:</b> ${invoice.series || 'INV'}-${invoice.invoice_number}</p>
+            <p style="margin: 5px 0;"><b>Invoice Number:</b> ${invoice.invoice_number}</p>
             <p style="margin: 5px 0;"><b>Total Amount:</b> ${invoice.total?.toFixed(2)} ${invoice.currency || 'RON'}</p>
             <p style="margin: 5px 0;"><b>Due Date:</b> ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('ro-RO') : "—"}</p>
           </div>
@@ -196,7 +242,6 @@ export const sendInvoiceEmail = async (invoice, client) => {
       ],
     });
 
-    // Gestionarea erorilor returnate direct în interiorul obiectului response de către Resend
     if (response.error) {
       console.error("❌ [EmailService] Resend validation error:", response.error);
       throw new Error(response.error.message || "Resend failed to deliver email");
@@ -204,7 +249,7 @@ export const sendInvoiceEmail = async (invoice, client) => {
       console.log("\x1b[32m✉️ [EmailService] Invoice email sent successfully via Resend to butuclucian04@gmail.com!\x1b[0m");
     }
 
-    // Ștergerea fișierului PDF temporar pentru a păstra containerul Docker curat
+
     fs.unlink(pdfPath, (err) => {
       if (err) console.warn("⚠️ [EmailService] Could not delete temp PDF:", err.message);
       else console.log("🧹 [EmailService] Temp PDF deleted successfully from workspace.");
@@ -214,7 +259,6 @@ export const sendInvoiceEmail = async (invoice, client) => {
 
   } catch (error) {
     console.error("❌ [EmailService] Fatal error sending invoice email:", error.message || error);
-    // Transmitem eroarea mai departe pentru a bloca execuția greșită a controllerului HTTP
     throw error; 
   }
 };
