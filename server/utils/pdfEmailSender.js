@@ -18,21 +18,20 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
   doc.pipe(writeStream);
 
   const accent = "#3A6EA5";
-  const gray = "#4B5563";
+  const gray = "#374151";
   const lightGray = "#E5E7EB";
 
-  const currency = business.currency || invoice.currency || "EUR";
-
-  const c = client || {};
+  const currency = business.currency || "EUR";
+  const c = invoice.client || client || {};
 
   let y = 40;
 
   // =========================
-  // HEADER
+  // INVOICE HEADER (EU STYLE)
   // =========================
   doc
     .font("Helvetica-Bold")
-    .fontSize(22)
+    .fontSize(24)
     .fillColor(accent)
     .text("INVOICE", 40, y);
 
@@ -42,7 +41,7 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
     .fillColor(gray)
     .text(`#${invoice.invoice_number}`, 40, y + 28);
 
-  // Company info (right side)
+  // Company (right side)
   doc
     .font("Helvetica-Bold")
     .fontSize(12)
@@ -51,36 +50,32 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
 
   doc.font("Helvetica").fontSize(10).fillColor(gray);
 
-  if (business.address) doc.text(business.address, 350, y + 15);
-  if (business.fiscal_code) doc.text(`VAT: ${business.fiscal_code}`, 350, y + 30);
-  if (business.iban) doc.text(`IBAN: ${business.iban}`, 350, y + 45);
+  if (business.address) doc.text(business.address, 350, y + 16);
+  if (business.fiscal_code) doc.text(`VAT: ${business.fiscal_code}`, 350, y + 32);
+  if (business.iban) doc.text(`IBAN: ${business.iban}`, 350, y + 48);
 
   // separator
   doc
-    .moveTo(40, 110)
-    .lineTo(555, 110)
+    .moveTo(40, 115)
+    .lineTo(555, 115)
     .strokeColor(lightGray)
     .stroke();
 
   // =========================
-  // CLIENT + INFO
+  // BILL TO + META (EU STYLE)
   // =========================
-  y = 130;
+  y = 135;
 
-  doc.font("Helvetica-Bold").fontSize(11).fillColor(accent).text("BILL TO", 40, y);
+  doc.font("Helvetica-Bold").fillColor(accent).fontSize(11).text("BILL TO", 40, y);
 
-  doc.font("Helvetica").fontSize(10).fillColor(gray);
+  doc.font("Helvetica").fillColor(gray).fontSize(10);
 
   doc.text(c.name || "Client", 40, y + 18);
-  if (c.company) doc.text(c.company, 40, y + 33);
-  if (c.address) doc.text(c.address, 40, y + 48);
-  if (c.email) doc.text(c.email, 40, y + 63);
+  if (c.address) doc.text(c.address, 40, y + 33);
+  if (c.email) doc.text(c.email, 40, y + 48);
 
-  // invoice meta (right side)
-  doc
-    .font("Helvetica-Bold")
-    .fillColor("#111")
-    .text("Invoice Details", 350, y);
+  // right side metadata (exact EU template logic)
+  doc.font("Helvetica-Bold").fillColor("#111").text("DETAILS", 350, y);
 
   doc.font("Helvetica").fillColor(gray);
 
@@ -95,30 +90,24 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
     y + 33
   );
 
-  doc.text(`Status: ${invoice.status}`, 350, y + 48);
-
   // =========================
-  // TABLE HEADER
+  // TABLE (autoTable replacement)
   // =========================
   y = 220;
 
+  // header
   doc.rect(40, y, 515, 25).fill(accent);
 
   doc
     .fillColor("white")
     .font("Helvetica-Bold")
     .fontSize(10)
-    .text("Description", 50, y + 8)
+    .text("Service", 50, y + 8)
     .text("Qty", 300, y + 8)
     .text("Price", 370, y + 8)
     .text("Total", 460, y + 8);
 
-  // =========================
-  // TABLE ROWS
-  // =========================
   y += 25;
-
-  doc.font("Helvetica").fontSize(10);
 
   let subtotal = 0;
 
@@ -129,29 +118,25 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
       doc.rect(40, y, 515, rowHeight).fill("#F9FAFB");
     }
 
-    doc.fillColor(gray);
+    doc.fillColor(gray).font("Helvetica").fontSize(10);
 
-    doc.text(item.description, 50, y + 7, { width: 240 });
-    doc.text(String(item.quantity), 300, y + 7);
-    doc.text(`${item.unit_price.toFixed(2)} ${currency}`, 370, y + 7);
-    doc.text(`${item.total.toFixed(2)} ${currency}`, 460, y + 7);
+    doc.text(item.description, 50, y + 6, { width: 240 });
+    doc.text(String(item.quantity), 300, y + 6);
+    doc.text(`${item.unit_price.toFixed(2)} ${currency}`, 370, y + 6);
+    doc.text(`${item.total.toFixed(2)} ${currency}`, 460, y + 6);
 
     subtotal += item.total;
     y += rowHeight;
   });
 
   // =========================
-  // TOTALS
+  // TOTAL SECTION (EU STYLE)
   // =========================
   y += 20;
 
   const vat = invoice.tax_amount || 0;
-  const discount = invoice.discount_amount || 0;
 
-  doc
-    .font("Helvetica")
-    .fontSize(10)
-    .fillColor(gray);
+  doc.font("Helvetica").fontSize(10).fillColor(gray);
 
   doc.text("Subtotal:", 370, y);
   doc.text(`${subtotal.toFixed(2)} ${currency}`, 460, y);
@@ -161,23 +146,14 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
   doc.text(`VAT (${invoice.tax_rate || 0}%)`, 370, y);
   doc.text(`${vat.toFixed(2)} ${currency}`, 460, y);
 
-  y += 15;
-
-  doc.text("Discount:", 370, y);
-  doc.text(`${discount.toFixed(2)} ${currency}`, 460, y);
-
   y += 20;
 
-  doc
-    .font("Helvetica-Bold")
-    .fontSize(12)
-    .fillColor(accent)
-    .text("TOTAL", 370, y);
-
+  doc.font("Helvetica-Bold").fillColor(accent).fontSize(13);
+  doc.text("TOTAL", 370, y);
   doc.text(`${invoice.total.toFixed(2)} ${currency}`, 460, y);
 
   // =========================
-  // FOOTER
+  // FOOTER (EU STYLE CLEAN)
   // =========================
   doc
     .font("Helvetica")
@@ -197,6 +173,7 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
     writeStream.on("error", reject);
   });
 };
+
 
 export const sendInvoiceEmail = async (invoice, client) => {
   if (!client?.email) {
