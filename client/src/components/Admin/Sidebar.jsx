@@ -30,10 +30,10 @@ const Sidebar = ({ isMobile = false, closeSidebar }) => {
       <div className="flex flex-col flex-1 overflow-y-auto py-7 px-4">
         <div className="flex flex-col mb-10 relative z-20">
           <div className="flex items-center gap-3 px-2">
-            <img src="invoicelogo.png" className="w-9 h-9 rounded-full" />
+            <img src="/invoicelogo.png" className="w-9 h-9 rounded-full" />
             <div>
-              <p className="font-semibold text-sm">InvoiceGenAI</p>
-              <p className="text-xs text-gray-400">AI-Powered Invoicing</p>
+              <p className="font-semibold text-sm">InvoiceGenAi</p>
+              <p className="text-xs text-gray-400">Future of Invoicing</p>
             </div>
           </div>
         </div>
