@@ -240,7 +240,33 @@ const AIGenerator = () => {
   if (checking) {
     return (
       <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center text-gray-400">
-        Checking subscription...
+        <Loader2 className="animate-spin" size={24} />
+      </div>
+    );
+  }
+
+  if (plan !== "Enterprise") {
+    return (
+      <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center p-4">
+        <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Lock className="text-indigo-400" size={32} />
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">
+            Acces Enterprise Necesar
+          </h2>
+          <p className="text-gray-400 text-sm mb-6">
+            Funcționalitatea de generare facturi cu AI (Ollama Local) este
+            disponibilă exclusiv pentru utilizatorii cu abonament{" "}
+            <b>Enterprise</b>.
+          </p>
+          <button
+            onClick={() => navigate("/dashboard/upgrade")}
+            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition"
+          >
+            Treci la Enterprise
+          </button>
+        </div>
       </div>
     );
   }
