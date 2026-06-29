@@ -83,7 +83,7 @@ const Clients = () => {
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <h2 className="text-xl font-bold">{client.name}</h2>
-                  <p className="text-xs text-gray-500 font-mono mt-0.5">{client.company || "Fără companie"}</p>
+                  <p className="text-xs text-gray-500 font-mono mt-0.5">{client.brand}</p>
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
                   <button onClick={() => navigate(`/dashboard/clients/${client._id}/edit`)} className="p-2 bg-white/5 rounded-lg hover:bg-white/10"><Edit size={14}/></button>
