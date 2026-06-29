@@ -247,24 +247,38 @@ const AIGenerator = () => {
 
   if (plan !== "Enterprise") {
     return (
-      <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center p-4">
-        <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Background blobs pentru a se potrivi cu restul paginii */}
+        <div className="absolute top-20 right-10 w-72 h-72 bg-teal-500/10 blur-3xl rounded-full pointer-events-none" />
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600/10 blur-3xl rounded-full pointer-events-none" />
+
+        <div className="relative bg-[#141414]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl">
+          <div className="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-indigo-500/20">
             <Lock className="text-indigo-400" size={32} />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">
+
+          <h2 className="text-xl font-semibold text-white mb-3">
             Acces Enterprise Necesar
           </h2>
-          <p className="text-gray-400 text-sm mb-6">
-            Funcționalitatea de generare facturi cu AI (Ollama Local) este
-            disponibilă exclusiv pentru utilizatorii cu abonament{" "}
-            <b>Enterprise</b>.
+
+          <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+            Funcționalitatea de <b>generare facturi AI</b> rulează local și este
+            disponibilă exclusiv utilizatorilor din planul <b>Enterprise</b>.
           </p>
+
           <button
-            onClick={() => navigate("/dashboard/upgrade")}
-            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition"
+            onClick={() => navigate("/dashboard/subscription")}
+            className="w-full py-3 bg-white hover:bg-gray-100 text-black rounded-xl font-semibold transition flex items-center justify-center gap-2"
           >
-            Treci la Enterprise
+            <Sparkles size={16} />
+            Upgrade la Enterprise
+          </button>
+
+          <button
+            onClick={() => navigate(-1)}
+            className="mt-4 text-gray-500 hover:text-gray-300 text-xs transition"
+          >
+            Înapoi la Dashboard
           </button>
         </div>
       </div>
