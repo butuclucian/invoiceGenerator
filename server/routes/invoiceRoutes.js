@@ -1,6 +1,7 @@
 import express from "express";
 import { getInvoices, createInvoice, updateInvoice, deleteInvoice, getInvoiceById, getNearDueInvoices, approveAndIssueInvoice, getAiFinancialAnalytics, getAiReportHistory, deleteAiReport} from "../controllers/invoiceController.js";
 import { protect } from "../middleware/authMiddleware.js";
+import { checkProSubscription } from "../middleware/checkSubscription.js";
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ router.route("/:id")
   .put(protect, updateInvoice)
   .delete(protect, deleteInvoice);
 
-router.get("/analytics/ai", protect, getAiFinancialAnalytics);
+router.get("/analytics/ai", protect,checkProSubscription, getAiFinancialAnalytics);
 router.get("/analytics/ai/history", protect, getAiReportHistory);
 router.delete("/analytics/ai/history/:id", protect, deleteAiReport)
 

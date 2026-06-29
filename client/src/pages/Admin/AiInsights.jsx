@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Brain, Sparkles, RefreshCw, BarChart2, ShieldCheck, FileText, Trash2, Eye, Calendar } from "lucide-react";
+import { Brain, Sparkles, RefreshCw, BarChart2,Lock, Sparkles, ShieldCheck, FileText, Trash2, Eye, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "../../utils/api";
 import { toast } from "sonner";
@@ -27,9 +27,28 @@ const TypewriterText = ({ text }) => {
 const AiInsights = () => {
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState("");
-
   const [reportHistory, setReportHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [plan, setPlan] = useState("Free");
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    const checkSubscription = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) { setPlan("Free"); setChecking(false); return; }
+        const { data } = await API.get("/subscription/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setPlan(data?.plan || "Free");
+      } catch {
+        setPlan("Free");
+      } finally {
+        setChecking(false);
+      }
+    };
+    checkSubscription();
+  }, []);
 
 
   const fetchReportHistory = async () => {
@@ -87,6 +106,48 @@ const AiInsights = () => {
   useEffect(() => {
     fetchReportHistory();
   }, []);
+
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center text-gray-400">
+        <Loader2 className="animate-spin" size={24} />
+      </div>
+    );
+  }
+
+  const isAllowed = ["Pro", "Enterprise"].includes(plan);
+
+  if (!isAllowed) {
+      return (
+        <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center p-4 relative overflow-hidden">
+          <div className="absolute top-20 right-10 w-72 h-72 bg-teal-500/10 blur-3xl rounded-full pointer-events-none" />
+          <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600/10 blur-3xl rounded-full pointer-events-none" />
+  
+          <div className="relative bg-[#141414]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl">
+            <div className="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-indigo-500/20">
+              <Lock className="text-indigo-400" size={32} />
+            </div>
+  
+            <h2 className="text-xl font-semibold text-white mb-3">
+              Acces Pro/Enterprise Necesar
+            </h2>
+  
+            <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+              Funcționalitatea de <b>generare raport financiar</b> rulează local și este
+              disponibilă exclusiv utilizatorilor din planul <b>Pro</b> sau <b>Enterprise</b>.
+            </p>
+  
+            <button
+              onClick={() => navigate("/dashboard/subscription")}
+              className="w-full py-3 bg-white hover:bg-gray-100 text-black rounded-xl font-semibold transition flex items-center justify-center gap-2"
+            >
+              <Sparkles size={16} />
+              Upgrade
+            </button>
+          </div>
+        </div>
+      );
+    }
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white px-4 sm:px-10 overflow-hidden pb-16 p-8 pt-30 space-y-8">

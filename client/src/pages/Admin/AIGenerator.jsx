@@ -248,7 +248,6 @@ const AIGenerator = () => {
   if (plan !== "Enterprise") {
     return (
       <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center p-4 relative overflow-hidden">
-        {/* Background blobs pentru a se potrivi cu restul paginii */}
         <div className="absolute top-20 right-10 w-72 h-72 bg-teal-500/10 blur-3xl rounded-full pointer-events-none" />
         <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600/10 blur-3xl rounded-full pointer-events-none" />
 
@@ -272,13 +271,6 @@ const AIGenerator = () => {
           >
             <Sparkles size={16} />
             Upgrade la Enterprise
-          </button>
-
-          <button
-            onClick={() => navigate(-1)}
-            className="mt-4 text-gray-500 hover:text-gray-300 text-xs transition"
-          >
-            Înapoi la Dashboard
           </button>
         </div>
       </div>
