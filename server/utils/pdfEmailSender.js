@@ -7,46 +7,38 @@ dotenv.config();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const generateInvoicePDF = (invoice, billingProfile) => {
-
   const pdfPath = `./invoice_${invoice.invoice_number}.pdf`;
 
-  const doc = new PDFDocument({ margin: 50, size: 'A4' });
+  const doc = new PDFDocument({ margin: 50, size: "A4" });
 
   const writeStream = fs.createWriteStream(pdfPath);
-
-
 
   const b = billingProfile;
 
   const cl = invoice.client || {};
 
+  console.log("========== BILLING PROFILE ==========");
+  console.log(b);
+
+  console.log("========== CLIENT ==========");
+  console.log(cl);
+
+  console.log("========== INVOICE ==========");
+  console.log(invoice);
+
   const currency = b.currency || "RON";
-
-
 
   const items = invoice.items || [];
 
-
-
   const discountAmount = invoice.discount_rate
-
     ? (invoice.subtotal * invoice.discount_rate) / 100
-
     : 0;
-
-
 
   const taxAmount = invoice.tax_rate
-
     ? ((invoice.subtotal - discountAmount) * invoice.tax_rate) / 100
-
     : 0;
 
-
-
   doc.pipe(writeStream);
-
-
 
   const bgColor = "#F5F2EC";
 
@@ -54,13 +46,13 @@ const generateInvoicePDF = (invoice, billingProfile) => {
 
   const gray = "#555555";
 
-
-
   doc.rect(0, 0, 600, 900).fill(bgColor);
 
-  
-
-  doc.fillColor(textColor).font("Helvetica-Bold").fontSize(36).text("FACTURA", { align: "center" });
+  doc
+    .fillColor(textColor)
+    .font("Helvetica-Bold")
+    .fontSize(36)
+    .text("FACTURA", { align: "center" });
 
   doc.moveDown(0.5);
 
@@ -68,11 +60,13 @@ const generateInvoicePDF = (invoice, billingProfile) => {
 
   doc.moveDown(2);
 
-
-
   const startY = doc.y;
 
-  doc.fontSize(10).font("Helvetica-Bold").fillColor(textColor).text("Furnizor", 50, startY);
+  doc
+    .fontSize(10)
+    .font("Helvetica-Bold")
+    .fillColor(textColor)
+    .text("Furnizor", 50, startY);
 
   doc.font("Helvetica").fontSize(9).fillColor(textColor);
 
@@ -92,11 +86,13 @@ const generateInvoicePDF = (invoice, billingProfile) => {
 
   doc.text(b.bank || "Nume bancă indisponibil", 50, doc.y + 2);
 
-
-
   const clientY = doc.y + 20;
 
-  doc.fontSize(10).font("Helvetica-Bold").fillColor(textColor).text("Client", 50, clientY);
+  doc
+    .fontSize(10)
+    .font("Helvetica-Bold")
+    .fillColor(textColor)
+    .text("Client", 50, clientY);
 
   doc.font("Helvetica").fontSize(9).fillColor(textColor);
 
@@ -116,33 +112,39 @@ const generateInvoicePDF = (invoice, billingProfile) => {
 
   doc.text(cl.bank || "nume bancă indisponibil", 50, doc.y + 2);
 
-  doc.text(cl.contact_person || "persoană de contact indisponibilă", 50, doc.y + 2);
+  doc.text(
+    cl.contact_person || "persoană de contact indisponibilă",
+    50,
+    doc.y + 2,
+  );
 
   doc.text(cl.email || "email indisponibil", 50, doc.y + 2);
 
-
-
   doc.font("Helvetica-Bold").text("Detalii Factura", 350, startY);
 
-  doc.font("Helvetica").text(`Nr. Factura ${invoice.invoice_number}`, 350, startY + 12);
+  doc
+    .font("Helvetica")
+    .text(`Nr. Factura ${invoice.invoice_number}`, 350, startY + 12);
 
-  doc.text(`Data ${new Date(invoice.date).toLocaleDateString("en-GB")}`, 350, startY + 24);
+  doc.text(
+    `Data ${new Date(invoice.date).toLocaleDateString("en-GB")}`,
+    350,
+    startY + 24,
+  );
 
-  doc.text(`Scadenta ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString("en-GB") : "-"}`, 350, startY + 36);
-
-
+  doc.text(
+    `Scadenta ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString("en-GB") : "-"}`,
+    350,
+    startY + 36,
+  );
 
   doc.moveDown(4);
-
-
 
   let y = doc.y;
 
   doc.moveTo(50, y).lineTo(545, y).stroke();
 
   y += 10;
-
-  
 
   doc.font("Helvetica-Bold").fontSize(9).fillColor(gray);
 
@@ -156,18 +158,13 @@ const generateInvoicePDF = (invoice, billingProfile) => {
 
   doc.text("Total", 490, y);
 
-  
-
   y += 15;
 
   doc.moveTo(50, y).lineTo(545, y).stroke();
 
   y += 10;
 
-
-
   (invoice.items || []).forEach((item, i) => {
-
     doc.fillColor(textColor).font("Helvetica").fontSize(9);
 
     doc.text(String(i + 1).padStart(2, "0"), 50, y);
@@ -181,24 +178,17 @@ const generateInvoicePDF = (invoice, billingProfile) => {
     doc.text(`${item.total.toFixed(2)}`, 490, y);
 
     y += 20;
-
   });
-
-
 
   y += 20;
 
   doc.font("Helvetica").fontSize(9).fillColor(gray);
-
-  
 
   doc.text("Subtotal:", 350, y);
 
   doc.text(`${(invoice.subtotal || 0).toFixed(2)} ${currency}`, 490, y);
 
   y += 15;
-
-  
 
   const finalTax = invoice.taxAmount ?? taxAmount ?? 0;
 
@@ -220,22 +210,14 @@ const generateInvoicePDF = (invoice, billingProfile) => {
 
   doc.text(`${(invoice.total || 0).toFixed(2)} ${currency}`, 490, y);
 
-
-
   doc.end();
 
-
-
   return new Promise((resolve, reject) => {
-
     writeStream.on("finish", () => resolve(pdfPath));
 
     writeStream.on("error", reject);
-
   });
-
 };
-
 
 
 export { generateInvoicePDF };
