@@ -145,7 +145,7 @@ const Navbar = ({ openSidebar }) => {
             className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10"
           >
             <ArrowLeft size={18} className="text-[#80FFF9]" />
-            <span className="text-sm text-gray-200">Back</span>
+            <span className="text-sm text-gray-200">Înapoi</span>
           </button>
         </div>
 
@@ -154,7 +154,7 @@ const Navbar = ({ openSidebar }) => {
             <Search size={18} className="text-gray-400" />
             <input
               type="text"
-              placeholder="Search invoices, clients..."
+              placeholder="Caută facturi, clienți..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="bg-transparent w-full outline-none ml-3 text-gray-200 text-sm"
@@ -195,7 +195,7 @@ const Navbar = ({ openSidebar }) => {
                   <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
                     <div className="flex items-center gap-2">
                       <h3 className="text-sm font-medium text-white">
-                        Notifications
+                        Notificări
                       </h3>
                       <span className="text-[10px] bg-teal-500/10 text-teal-400 px-2 py-0.5 rounded-full font-medium">
                         {notifications.length} active
@@ -207,7 +207,7 @@ const Navbar = ({ openSidebar }) => {
                         onClick={handleMarkAsRead}
                         className="flex items-center gap-1 text-[12px] text-gray-400 hover:text-[#80FFF9] transition"
                       >
-                        <Check size={14} /> Mark all read
+                        <Check size={14} /> Marchează-le ca citite
                       </button>
                     )}
 
@@ -222,7 +222,7 @@ const Navbar = ({ openSidebar }) => {
                   <div className="max-h-64 overflow-y-auto mt-1 space-y-0.5">
                     {notifications.length === 0 ? (
                       <div className="p-6 text-center text-gray-500 text-xs">
-                        No notifications yet.
+                        Nicio notificare momentan.
                       </div>
                     ) : (
                       notifications.map((note) => (
@@ -250,7 +250,7 @@ const Navbar = ({ openSidebar }) => {
                             </p>
                             {note.isAiGenerated && (
                               <span className="text-[9px] font-mono uppercase bg-amber-400/10 text-amber-400 px-1.5 py-0.5 rounded border border-amber-400/20 tracking-wider">
-                                Review AI
+                                Vericiare IA
                               </span>
                             )}
                           </div>
@@ -266,7 +266,7 @@ const Navbar = ({ openSidebar }) => {
                               <p>
                                 Client:{" "}
                                 <span className="text-gray-200 font-medium">
-                                  {note.invoice.client?.name || "Unknown"}
+                                  {note.invoice.client?.name || "Necunoscut"}
                                 </span>
                               </p>
                               <p>
@@ -333,7 +333,7 @@ const Navbar = ({ openSidebar }) => {
 
                     <div>
                       <p className="text-white font-medium text-sm">
-                        {userData?.name || "Unnamed User"}
+                        {userData?.name || "Utilizator Necunoscut"}
                       </p>
                       <p className="text-gray-400 text-xs">{userData?.email}</p>
                     </div>
@@ -345,14 +345,14 @@ const Navbar = ({ openSidebar }) => {
                     }
                     className="w-full flex items-center gap-2 px-2 py-2 text-gray-300 hover:bg-white/5 hover:text-white rounded-md transition"
                   >
-                    <Settings size={16} /> Settings
+                    <Settings size={16} /> Setări
                   </button>
 
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center gap-2 px-2 py-2 mt-1 text-red-400 hover:bg-red-600/20 rounded-md transition"
                   >
-                    <LogOut size={16} /> Logout
+                    <LogOut size={16} /> Deconectare
                   </button>
                 </motion.div>
               )}

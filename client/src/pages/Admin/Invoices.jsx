@@ -59,7 +59,7 @@ const Invoices = () => {
       setLoading(true);
 
       const token = localStorage.getItem("token");
-      if (!token) return toast.error("You must be logged in to view invoices");
+      if (!token) return toast.error("Trebuie să fii conectat pentru a vizualiza facturile");
 
       const invRes = await API.get("/invoices", {
         headers: { Authorization: `Bearer ${token}` },
@@ -72,8 +72,7 @@ const Invoices = () => {
       setFilteredInvoices(invRes.data);
       if (billRes.data) setBillingProfile(billRes.data);
     } catch (err) {
-      console.error("Fetch error:", err);
-      toast.error("Failed to load invoices or billing profile");
+      toast.error("Eroare la încărcarea facturilor");
     } finally {
       setLoading(false);
     }
@@ -107,17 +106,17 @@ const Invoices = () => {
       await API.delete(`/invoices/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Invoice deleted successfully");
+      toast.success("Factură a fost ștearsă cu succes");
       fetchInvoices();
     } catch {
-      toast.error("Failed to delete invoice");
+      toast.error("Eroare la ștergerea facturii selectate");
     }
   };
 
   const handleDownloadPDF = () => {
     const element = hiddenRef.current;
     if (!element) {
-      toast.error("Preview not ready, please try again.");
+      toast.error("Previzualizarea nu este pregătită, încearcă din nou!");
       return;
     }
 
@@ -142,7 +141,7 @@ const Invoices = () => {
       })
       .catch(() => {
         setIsDownloading(false);
-        toast.error("Failed to generate PDF");
+        toast.error("Eroare la generarea PDF-ului");
       });
   };
 
@@ -161,7 +160,7 @@ const Invoices = () => {
 
   return (
     <div className="p-8 text-white min-h-screen bg-[#0e0e0e] relative pt-30 space-y-8">
-<div className="absolute top-20 right-10 w-72 h-72 bg-teal-500/10 blur-3xl rounded-full pointer-events-none" />
+      <div className="absolute top-20 right-10 w-72 h-72 bg-teal-500/10 blur-3xl rounded-full pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600/10 blur-3xl rounded-full pointer-events-none" />
 
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
@@ -170,48 +169,58 @@ const Invoices = () => {
             <FileText className="text-[#80FFF9]" size={26} />
             Invoices
           </h1>
-          <p className="text-gray-400 text-sm">Manage and track all invoices</p>
+          <p className="text-gray-400 text-sm mt-3">Gestionează și urmărește toate facturile</p>
         </div>
 
-        <button onClick={() => navigate("/dashboard/invoices/create")} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2">
+        <button
+          onClick={() => navigate("/dashboard/invoices/create")}
+          className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2"
+        >
           <Plus size={18} />
-          Create Invoice
+          Crează Factură
         </button>
       </div>
 
       <div className="flex flex-wrap items-center gap-4 mb-8 bg-[#1a1a1a]/70 border border-white/10 p-4 rounded-xl">
         <div className="flex items-center gap-2">
           <Filter size={18} className="text-[#80FFF9]" />
-          <span className="text-gray-300">Filter by status:</span>
+          <span className="text-gray-300">Filtrare după status:</span>
         </div>
 
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="cursor-pointer bg-[#1a1a1a] border border-white/10 text-gray-200 px-4 py-2 rounded-md">
-          <option value="all">All</option>
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="cursor-pointer bg-[#1a1a1a] border border-white/10 text-gray-200 px-4 py-2 rounded-md"
+        >
+          <option value="all">Toate</option>
           <option value="draft">Draft</option>
-          <option value="sent">Sent</option>
-          <option value="paid">Paid</option>
-          <option value="overdue">Overdue</option>
+          <option value="sent">Trimise</option>
+          <option value="paid">Plătite</option>
+          <option value="overdue">Restante</option>
         </select>
 
         <span className="text-gray-400 text-sm">
-          Showing {filteredInvoices.length} of {invoices.length}
+          Se afișează {filteredInvoices.length} din {invoices.length}
         </span>
       </div>
 
       {loading ? (
         <div className="flex justify-center items-center py-20">
-          <p className="text-gray-400 animate-pulse">Loading invoices...</p>
+          <p className="text-gray-400 animate-pulse">Se încarcă facturile...</p>
         </div>
       ) : filteredInvoices.length === 0 ? (
         <div className="text-center py-16 border border-dashed border-white/20 rounded-xl bg-[#1a1a1a]/60">
           <FileText className="w-16 h-16 text-white/20 mx-auto mb-3" />
-          <h3 className="text-lg font-medium text-gray-300">No invoices</h3>
-          <p className="text-sm text-gray-500">Try creating one!</p>
+          <h3 className="text-lg font-medium text-gray-300">Nicio Factură!</h3>
+          <p className="text-sm text-gray-500 mt-3">Încearcă să creezi o factură!</p>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredInvoices.map((inv) => (
-            <div key={inv._id} className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-6 hover:border-[#80FFF9]/40 transition">
+            <div
+              key={inv._id}
+              className="bg-[#1a1a1a]/80 border border-white/10 rounded-xl p-6 hover:border-[#80FFF9]/40 transition"
+            >
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-semibold">{inv.invoice_number}</h2>
                 <span
@@ -219,46 +228,77 @@ const Invoices = () => {
                     inv.status === "paid"
                       ? "bg-green-500/20 text-green-400"
                       : inv.status === "sent"
-                      ? "bg-blue-500/20 text-blue-400"
-                      : inv.status === "draft"
-                      ? "bg-gray-500/20 text-gray-400"
-                      : "bg-red-500/20 text-red-400"
+                        ? "bg-blue-500/20 text-blue-400"
+                        : inv.status === "draft"
+                          ? "bg-gray-500/20 text-gray-400"
+                          : "bg-red-500/20 text-red-400"
                   }`}
                 >
                   {inv.status}
                 </span>
               </div>
 
-              <p className="text-sm text-gray-400 mb-1">{inv.client?.name || "Unknown Client"}</p>
-              <p className="text-xs text-gray-500 mb-2">{inv.client?.email || "no-email@example.com"}</p>
+              <p className="text-sm text-gray-400 mb-1">
+                {inv.client?.name || "Unknown Client"}
+              </p>
+              <p className="text-xs text-gray-500 mb-2">
+                {inv.client?.email || "no-email@example.com"}
+              </p>
 
               <div className="border-t border-white/10 pt-3 flex items-center justify-between">
                 <p className="text-gray-400 text-sm">Total</p>
-                <p className={`font-semibold ${inv.total < 0 ? "text-red-400" : "text-[#80FFF9]"}`}>
+                <p
+                  className={`font-semibold ${inv.total < 0 ? "text-red-400" : "text-[#80FFF9]"}`}
+                >
                   {formatCurrency(inv.total, billingProfile?.currency)}
                 </p>
               </div>
 
               <div className="flex justify-between mt-4">
-                <button onClick={() => handlePreview(inv._id)} className="p-2 text-gray-400 hover:text-[#80FFF9] transition" title="View">
+                <button
+                  onClick={() => handlePreview(inv._id)}
+                  className="p-2 text-gray-400 hover:text-[#80FFF9] transition"
+                  title="View"
+                >
                   <Eye size={18} />
                 </button>
-                <button onClick={() => navigate(`/dashboard/invoices/${inv._id}/edit`)} className="p-2 text-gray-400 hover:text-indigo-400 transition" title="Edit">
+                <button
+                  onClick={() =>
+                    navigate(`/dashboard/invoices/${inv._id}/edit`)
+                  }
+                  className="p-2 text-gray-400 hover:text-indigo-400 transition"
+                  title="Edit"
+                >
                   <Edit size={18} />
                 </button>
-                
-                {inv.total > 0 && (inv.status === "sent" || inv.status === "paid") ? (
-                  <button onClick={() => navigate(`/dashboard/invoices/storno/${inv._id}`)} className="p-2 text-gray-400 hover:text-red-400 transition" title="Storno (Reversal)">
+
+                {inv.total > 0 &&
+                (inv.status === "sent" || inv.status === "paid") ? (
+                  <button
+                    onClick={() =>
+                      navigate(`/dashboard/invoices/storno/${inv._id}`)
+                    }
+                    className="p-2 text-gray-400 hover:text-red-400 transition"
+                    title="Storno (Reversal)"
+                  >
                     <RefreshCw size={18} />
                   </button>
                 ) : (
                   <div className="w-[34px] h-[34px]" />
                 )}
 
-                <button onClick={() => handleOpenModal(inv)} className="p-2 text-gray-400 hover:text-green-400 transition" title="Download">
+                <button
+                  onClick={() => handleOpenModal(inv)}
+                  className="p-2 text-gray-400 hover:text-green-400 transition"
+                  title="Download"
+                >
                   <Download size={18} />
                 </button>
-                <button onClick={() => handleDelete(inv._id)} className="p-2 text-gray-400 hover:text-red-400 transition" title="Delete">
+                <button
+                  onClick={() => handleDelete(inv._id)}
+                  className="p-2 text-gray-400 hover:text-red-400 transition"
+                  title="Delete"
+                >
                   <Trash2 size={18} />
                 </button>
               </div>
@@ -268,24 +308,35 @@ const Invoices = () => {
       )}
 
       {showTemplateModal && selectedInvoice && billingProfile && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={(e) => { if (e.target === e.currentTarget) handleCloseModal(); }}>
+        <div
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) handleCloseModal();
+          }}
+        >
           <div className="bg-[#141414] border border-white/10 rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
-
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <div>
-                <h2 className="text-xl font-semibold">Choose Template</h2>
+                <h2 className="text-xl font-semibold">Alege șablonul</h2>
                 <p className="text-gray-400 text-sm mt-1">
-                  Selectează un template, apoi apasă Download PDF.
+                  Selectează un șablon, apoi apasă Download PDF.
                 </p>
               </div>
-              <button onClick={handleCloseModal} className="p-2 text-gray-400 hover:text-white transition rounded-lg hover:bg-white/10">
+              <button
+                onClick={handleCloseModal}
+                className="p-2 text-gray-400 hover:text-white transition rounded-lg hover:bg-white/10"
+              >
                 <X size={20} />
               </button>
             </div>
 
             <div className="p-6 flex gap-6 justify-center flex-wrap">
               {[1, 2, 3].map((tpl) => (
-                <div key={tpl} onClick={() => setSelectedTemplate(tpl)} className="flex flex-col items-center gap-3 cursor-pointer">
+                <div
+                  key={tpl}
+                  onClick={() => setSelectedTemplate(tpl)}
+                  className="flex flex-col items-center gap-3 cursor-pointer"
+                >
                   <div
                     className={`rounded-xl transition-all duration-200 ${
                       selectedTemplate === tpl
@@ -293,7 +344,11 @@ const Invoices = () => {
                         : "opacity-60 hover:opacity-90"
                     }`}
                   >
-                    <InvoicePreview invoice={selectedInvoice} template={tpl} billingProfile={billingProfile}/>
+                    <InvoicePreview
+                      invoice={selectedInvoice}
+                      template={tpl}
+                      billingProfile={billingProfile}
+                    />
                   </div>
                   <div className="flex items-center gap-2">
                     <div
@@ -305,10 +360,12 @@ const Invoices = () => {
                     />
                     <span
                       className={`text-sm transition-colors ${
-                        selectedTemplate === tpl ? "text-[#80FFF9]" : "text-gray-400"
+                        selectedTemplate === tpl
+                          ? "text-[#80FFF9]"
+                          : "text-gray-400"
                       }`}
                     >
-                      Template {tpl}
+                      Șablonul {tpl}
                     </span>
                   </div>
                 </div>
@@ -316,19 +373,26 @@ const Invoices = () => {
             </div>
 
             <div className="flex justify-end gap-3 p-6 border-t border-white/10">
-              <button onClick={handleCloseModal} className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition text-gray-300">
+              <button
+                onClick={handleCloseModal}
+                className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition text-gray-300"
+              >
                 Cancel
               </button>
-              <button onClick={handleDownloadPDF} disabled={isDownloading} className="px-5 py-2.5 rounded-xl bg-indigo-600/30 border border-indigo-600/50 hover:bg-indigo-600/40 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              <button
+                onClick={handleDownloadPDF}
+                disabled={isDownloading}
+                className="px-5 py-2.5 rounded-xl bg-indigo-600/30 border border-indigo-600/50 hover:bg-indigo-600/40 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 {isDownloading ? (
                   <>
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Generating...
+                    Se Generează...
                   </>
                 ) : (
                   <>
                     <Download size={16} />
-                    Download PDF
+                    Descarcă PDF
                   </>
                 )}
               </button>
@@ -349,13 +413,22 @@ const Invoices = () => {
         >
           <div ref={hiddenRef}>
             {selectedTemplate === 1 && (
-              <Template1 invoice={selectedInvoice} billingProfile={billingProfile} />
+              <Template1
+                invoice={selectedInvoice}
+                billingProfile={billingProfile}
+              />
             )}
             {selectedTemplate === 2 && (
-              <Template2 invoice={selectedInvoice} billingProfile={billingProfile} />
+              <Template2
+                invoice={selectedInvoice}
+                billingProfile={billingProfile}
+              />
             )}
             {selectedTemplate === 3 && (
-              <Template3 invoice={selectedInvoice} billingProfile={billingProfile} />
+              <Template3
+                invoice={selectedInvoice}
+                billingProfile={billingProfile}
+              />
             )}
           </div>
         </div>

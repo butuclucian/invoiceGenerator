@@ -39,12 +39,12 @@ const Sidebar = ({ isMobile = false, closeSidebar }) => {
         </div>
 
         <p className="text-[11px] uppercase tracking-wider text-gray-500 mb-2 px-2 relative z-20">
-          Overview
+          Prezentare
         </p>
 
         <NavLink to="/dashboard" end className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md mb-1 transition-all relative z-20 ${ isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }` } >
           <LayoutDashboard size={18} />
-          Dashboard
+          Principal
         </NavLink>
 
         <div className="my-5 border-b border-white/10 relative z-20" />
@@ -56,7 +56,7 @@ const Sidebar = ({ isMobile = false, closeSidebar }) => {
         <button onClick={() => toggleMenu("clients")} className="flex items-center justify-between w-full px-4 py-2 rounded-md text-gray-300 hover:bg-white/10 hover:text-white transition-all relative z-20" >
           <div className="flex items-center gap-3">
             <Users size={18} />
-            Clients
+            Clienți
           </div>
           {openMenu.clients ? <ChevronUp /> : <ChevronDown />}
         </button>
@@ -67,14 +67,14 @@ const Sidebar = ({ isMobile = false, closeSidebar }) => {
               className={({ isActive }) =>
                 `flex items-center gap-2 px-2 py-2 rounded-md ${
                   isActive ? "text-[#80FFF9]" : "text-gray-400 hover:text-white"}`}>
-              <UserPlus size={16} /> Add Client
+              <UserPlus size={16} /> Adaugă Clienți
             </NavLink>
 
             <NavLink to="/dashboard/clients" end
               className={({ isActive }) =>
                 `flex items-center gap-2 px-2 py-2 rounded-md ${
                   isActive ? "text-[#80FFF9]" : "text-gray-400 hover:text-white"}`}>
-              <Users size={16} /> All Clients
+              <Users size={16} /> Toți Clienții
             </NavLink>
           </div>
         )}
@@ -82,7 +82,7 @@ const Sidebar = ({ isMobile = false, closeSidebar }) => {
         <button onClick={() => toggleMenu("invoices")} className="mt-2 flex items-center justify-between w-full px-4 py-2 rounded-md text-gray-300 hover:bg-white/10 hover:text-white relative z-20" >
           <div className="flex items-center gap-3">
             <FileText size={18} />
-            Invoices
+            Facturi
           </div>
           {openMenu.invoices ? <ChevronUp /> : <ChevronDown />}
         </button>
@@ -92,7 +92,7 @@ const Sidebar = ({ isMobile = false, closeSidebar }) => {
             <NavLink to="/dashboard/invoices/create" end className={({ isActive }) =>
               `flex items-center gap-2 px-2 py-2 rounded-md ${
                 isActive ? "text-[#80FFF9]" : "text-gray-400 hover:text-white" }`}>
-              <FilePlus2 size={16} /> Create Invoice
+              <FilePlus2 size={16} /> Crează Factură
             </NavLink>
 
             <NavLink to="/dashboard/invoices" end className={({ isActive }) =>
@@ -100,13 +100,13 @@ const Sidebar = ({ isMobile = false, closeSidebar }) => {
                 isActive ? "text-[#80FFF9]" : "text-gray-400 hover:text-white"
               }`
             }>
-              <FileText size={16} /> All Invoices
+              <FileText size={16} /> Toate Facturile
             </NavLink>
 
             <NavLink to="/dashboard/invoices/recurring" end className={({ isActive }) =>
               `flex items-center gap-2 px-2 py-2 rounded-md ${
                 isActive ? "text-[#80FFF9]" : "text-gray-400 hover:text-white"}`}>
-              <Repeat size={16} /> Recurring
+              <Repeat size={16} /> Recurente
             </NavLink>
           </div>
         )}
@@ -114,51 +114,51 @@ const Sidebar = ({ isMobile = false, closeSidebar }) => {
         <div className="my-5 border-b border-white/10 relative z-20" />
 
         <p className="text-[11px] uppercase tracking-wider text-gray-500 mb-2 px-2 relative z-20">
-          Activity
+          Activitate
         </p>
 
         <NavLink to="/dashboard/accounting" className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md mb-1 relative z-20 ${ isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }` } >
-          <Calculator size={18} /> Accounting
+          <Calculator size={18} /> Gestiune
         </NavLink>
 
         <NavLink to="/dashboard/reports" className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md mb-1 relative z-20 ${ isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }` } >
-          <BarChart3 size={18} /> Reports
+          <BarChart3 size={18} /> Rapoarte
         </NavLink>
 
         <NavLink to="/dashboard/anaf-reports" className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md relative z-20 ${ isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }` } >
-          <FileSpreadsheet size={18} /> ANAF Reporting
+          <FileSpreadsheet size={18} /> Raport ANAF 
         </NavLink>
 
         <div className="my-5 border-b border-white/10 relative z-20" />
 
         <p className="text-[11px] uppercase tracking-wider text-gray-500 mb-2 px-2 relative z-20">
-          Others
+          Unelte IA
         </p>
 
         <NavLink to="/dashboard/ai-generator" className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md relative z ${isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }`} >
-          <Sparkles size={18} /> AI Generator
+          <Sparkles size={18} /> Generator IA
         </NavLink>
 
         <NavLink to="/dashboard/ai-insights" className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md relative z ${isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }`} >
-          <BarChart4 size={18} /> AI Insights
+          <BarChart4 size={18} /> Rapoarte IA
         </NavLink>
 
+        <div className="my-5 border-b border-white/10 relative z-20" />
+
+        <p className="text-[11px] uppercase tracking-wider text-gray-500 mb-2 px-2 relative z-20">
+          Altele
+        </p>
+
         <NavLink to="/dashboard/subscription" className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md relative z ${isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }`} >
-          <CreditCard size={18} /> My Subscription
+          <CreditCard size={18} /> Abonamente
         </NavLink>
 
         <NavLink to="/dashboard/calendar" className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md relative z ${isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }`} >
           <Calendar1Icon size={18} /> Calendar
         </NavLink>
 
-        <div className="my-5 border-b border-white/10 relative z-20" />
-
-        <p className="text-[11px] uppercase tracking-wider text-gray-500 mb-2 px-2 relative z-20">
-          Settings
-        </p>
-
         <NavLink to="/dashboard/settings" className={({ isActive }) => `flex items-center gap-3 px-4 py-2 rounded-md relative z ${isActive ? "bg-[#80FFF9]/15 text-[#80FFF9]" : "text-gray-300 hover:bg-white/10 hover:text-white" }` }>
-          <SettingsIcon size={18} /> Settings
+          <SettingsIcon size={18} /> Setări
         </NavLink>
 
       </div>

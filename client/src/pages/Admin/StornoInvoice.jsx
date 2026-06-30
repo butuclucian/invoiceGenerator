@@ -35,7 +35,7 @@ const StornoInvoice = () => {
       try {
         const invoiceId = id || location.state?.invoiceId;
         if (!invoiceId) {
-          toast.error("No invoice ID provided for storno");
+          toast.error("Nu a fost furnizat numărul facturii pentru stornare");
           navigate("/dashboard/invoices");
           return;
         }
@@ -54,7 +54,7 @@ const StornoInvoice = () => {
           const paddedNumber = String(realInvoicesCount + 1).padStart(4, "0");
           nextInvoiceNumber = `INV-${paddedNumber}`;
         } catch (invErr) {
-          console.error("Failed to calculate next invoice number:", invErr);
+          console.error(invErr);
         }
 
         const stornoItems = originalInvoice.items.map(item => {
@@ -91,7 +91,7 @@ const StornoInvoice = () => {
         });
 
       } catch (err) {
-        toast.error("Could not load original invoice data");
+        toast.error("Nu se pot încărca datele facturii");
       }
     };
 
@@ -104,7 +104,7 @@ const StornoInvoice = () => {
 
   const handleReset = () => {
     if (!initialInvoice) return;
-    toast.info("Form reset to original storno values");
+    toast.info("Resetează formularul la valorile inițiale ale storno-ului");
     window.location.reload();
   };
 
@@ -114,10 +114,10 @@ const StornoInvoice = () => {
 
     try {
       await API.post("/invoices", formData);
-      toast.success(`Storno invoice ${formData.invoice_number} generated successfully!`);
+      toast.success(`Factura de stornare ${formData.invoice_number} a fost generată cu succs!`);
       navigate("/dashboard/invoices");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to save storno invoice");
+      toast.error(err.response?.data?.message || "Eroare la salvarea facturii de stornare");
     } finally {
       setLoading(false);
     }
@@ -130,10 +130,10 @@ const StornoInvoice = () => {
         <div>
           <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
             <RefreshCw className="text-[#80FFF9]" size={26} />
-            Storno Invoice
+            Stornare Factură
           </h1>
-          <p className="text-gray-400 text-sm">
-            Issue a reversal or credit note for an existing invoice with negative values
+          <p className="text-gray-400 text-sm mt-3">
+            Emite o notă de credit sau storno pentru o factură existentă, cu valori negative.
           </p>
         </div>
       </div>
@@ -141,7 +141,7 @@ const StornoInvoice = () => {
       <form onSubmit={handleSubmit} className="max-w-6xl mx-auto space-y-12">
         <section>
           <h2 className="text-xl font-semibold mb-4 text-[#80FFF9] border-b border-white/10 pb-2">
-            Storno Reference Details
+            Detalii referință storno
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
             <div>
@@ -155,7 +155,7 @@ const StornoInvoice = () => {
             </div>
 
             <div>
-              <label className="text-gray-300 block mb-1">Original Client (Read-Only)</label>
+              <label className="text-gray-300 block mb-1">Client (Doar Citire)</label>
               <input type="text" readOnly value={formData.clientName} className="w-full bg-[#1a1a1a]/40 border border-white/5 rounded-md px-4 py-2 text-gray-400 outline-none"/>
             </div>
           </div>
@@ -163,23 +163,23 @@ const StornoInvoice = () => {
 
         <section>
           <h2 className="text-xl font-semibold mb-4 text-[#80FFF9] border-b border-white/10 pb-2">
-            Reversed Items (Negative Quantities)
+            Servicii (Cantități Negative)
           </h2>
 
           {formData.items.map((item, index) => (
             <div key={index} className="grid md:grid-cols-12 gap-4 items-end p-4 bg-[#1a1a1a]/70 border border-white/10 rounded-lg mb-3">
               <div className="md:col-span-6">
-                <label className="text-gray-300 block mb-1">Description</label>
+                <label className="text-gray-300 block mb-1">Descrire</label>
                 <input type="text" readOnly value={item.description} className="w-full bg-transparent border border-white/5 rounded-md px-3 py-2 text-gray-400 outline-none" />
               </div>
 
               <div className="md:col-span-2">
-                <label className="text-gray-300 block mb-1">Quantity</label>
+                <label className="text-gray-300 block mb-1">Cantitate</label>
                 <input type="text" readOnly value={item.quantity} className="w-full bg-transparent border border-white/5 rounded-md px-3 py-2 text-red-400 font-medium outline-none text-center" />
               </div>
 
               <div className="md:col-span-2">
-                <label className="text-gray-300 block mb-1">Unit Price</label>
+                <label className="text-gray-300 block mb-1">Preț Unitar</label>
                 <input type="text" readOnly value={`${item.unit_price.toFixed(2)} ${currency}`} className="w-full bg-transparent border border-white/5 rounded-md px-3 py-2 text-gray-400 outline-none text-right" />
               </div>
 
@@ -193,18 +193,18 @@ const StornoInvoice = () => {
 
         <section>
           <h2 className="text-xl font-semibold mb-4 text-[#80FFF9] border-b border-white/10 pb-2">
-            Summary & Accounting Notes
+            Rezumat și note contabile
           </h2>
 
           <div className="grid md:grid-cols-2 gap-10">
             <div>
-              <label className="text-gray-300 block mb-1">Storno Justification Notes</label>
+              <label className="text-gray-300 block mb-1">Note de justificare storno</label>
               <textarea name="notes" value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows="4" className="w-full bg-[#1a1a1a]/70 border border-white/10 rounded-md px-4 py-2 text-white focus:border-[#80FFF9] resize-none outline-none"/>
             </div>
 
             <div className="space-y-2 text-gray-300 bg-[#1a1a1a]/30 p-4 rounded-lg border border-white/5">
               <div className="flex justify-between">
-                <span>Subtotal Storno:</span>
+                <span>Subtotal:</span>
                 <span className="text-red-400">{formData.subtotal.toFixed(2)} {currency}</span>
               </div>
 
@@ -216,7 +216,7 @@ const StornoInvoice = () => {
               )}
 
               <div className="flex justify-between font-semibold text-[#80FFF9] border-t border-white/10 pt-2 text-lg">
-                <span>Total Credit / Storno:</span>
+                <span>Total:</span>
                 <span className="text-[#80FFF9]">{formData.total.toFixed(2)} {currency}</span>
               </div>
             </div>
@@ -229,12 +229,12 @@ const StornoInvoice = () => {
 
             <button type="button" onClick={() => navigate(-1)} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 border border-white/20 rounded-xl text-xs font-mono uppercase tracking-wider text-gray-300 hover:text-white hover:bg-white/10 transition duration-300">
               <X size={16} />
-              Cancel
+              Anulare
             </button>
 
             <button type="submit" disabled={loading || formData.items.length === 0} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-teal-500/20 to-indigo-600/20 hover:from-teal-500/30 hover:to-indigo-600/30 border border-teal-500/30 hover:border-teal-400/60 text-xs font-mono uppercase tracking-wider text-[#80FFF9] font-bold shadow-lg transition duration-300">
               <Save size={16} />
-              {loading ? "Generating Storno..." : "Save Storno Invoice"}
+              {loading ? "Generează Storno..." : "Salvează Factura de Stornare"}
             </button>
 
           </div>

@@ -47,7 +47,7 @@ const AiHistoryLog = () => {
         <div className="flex items-center gap-2">
           <History className="text-indigo-400" size={20} />
           <h2 className="text-base font-bold text-transparent bg-clip-text bg-linear-to-r from-white to-gray-400">
-            AI Generation History Log
+            Istoric
           </h2>
         </div>
         <span className="text-xs font-mono text-gray-500 bg-white/5 px-2.5 py-1 rounded-full border border-white/5">

@@ -39,20 +39,20 @@ const AddClients = () => {
     e.preventDefault();
 
     if (!formData.name) {
-      toast.error("Please fill in the required Denumire field!");
+      toast.error("Completează toate câmpurile obligatorii!");
       return;
     }
 
     try {
       const { data } = await API.post("/clients", formData);
-      toast.success(`Client ${data.name} added successfully!`);
+      toast.success(`Client ${data.name} adăugat cu succes!`);
       navigate("/dashboard/clients");
     } catch (err) {
       console.error(err);
       if (err.response?.status === 401) {
-        toast.error("Unauthorized! Please login again.");
+        toast.error("Neautorizat! Conectează-te din nou!");
       } else {
-        toast.error("Failed to add client. Try again!");
+        toast.error("Adăugarea clientului a eșuat. Încearcă din nou!");
       }
     }
   };
@@ -76,7 +76,7 @@ const AddClients = () => {
       phone: "",
       company: "",
     });
-    toast.info("Form reset successfully");
+    toast.info("Formularul a fost resetat!");
   };
 
   return (
@@ -88,13 +88,13 @@ const AddClients = () => {
         <div>
           <h1 className="text-2xl sm:text-3xl font-semibold flex items-center gap-2">
             <UserPlus className="text-[#80FFF9]" size={26} />
-            Add New Client
+            Adaugă Un Client Nou
           </h1>
-          <p className="text-gray-400 text-sm">
-            Add clients to your business contacts with full fiscal details
+          <p className="text-gray-400 text-sm mt-3">
+            Adaugă clienți în agenda afacerii tale cu toate datele necesare pentru facturare
           </p>
-          <p className="text-gray-500 text-xs mt-2 font-mono">
-            <span className="text-red-500">*</span> Required fields
+          <p className="text-gray-500 text-xs mt-3 font-mono">
+            <span className="text-red-500">*</span> Câmpurii Obligatorii
           </p>
         </div>
       </div>
@@ -103,7 +103,7 @@ const AddClients = () => {
 
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold tracking-wider text-indigo-400 uppercase border-b border-white/5 pb-2">
-            General & Fiscal Info
+            Informații Generale Și Fiscale
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -138,7 +138,7 @@ const AddClients = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Platitor TVA</label>
+            <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Plătitor TVA</label>
             <div className="flex gap-4 mt-1">
               <button type="button" onClick={() => handleVatChange(true)} className={`px-4 py-1.5 rounded-lg border text-xs font-mono uppercase tracking-wider transition duration-300 ${formData.is_tva_payer ? "bg-[#80FFF9]/10 border-[#80FFF9] text-[#80FFF9]" : "bg-[#161616] border-white/10 text-gray-400 hover:border-white/20"}`}>
                 Da
@@ -152,11 +152,11 @@ const AddClients = () => {
 
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold tracking-wider text-indigo-400 uppercase border-b border-white/5 pb-2">
-            Address & Location
+            Adresă & Locație
           </h2>
 
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Adresa</label>
+            <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Adresă</label>
             <input type="text" name="address" placeholder="Strada, Numar, Bloc, Apartament" value={formData.address} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
           </div>
 
@@ -167,20 +167,20 @@ const AddClients = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Judet</label>
-              <input type="text" name="county" placeholder="Judet / Sector" value={formData.county} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
+              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Județ</label>
+              <input type="text" name="county" placeholder="Județ / Sector" value={formData.county} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Tara</label>
-              <input type="text" name="country" placeholder="Tara" value={formData.country} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
+              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Țara</label>
+              <input type="text" name="country" placeholder="Țara" value={formData.country} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
             </div>
           </div>
         </div>
 
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold tracking-wider text-indigo-400 uppercase border-b border-white/5 pb-2">
-            Bank Details
+            Detalii Bancare
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -191,20 +191,20 @@ const AddClients = () => {
 
             <div>
               <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Banca</label>
-              <input type="text" name="bank" placeholder="Numele Bancii" value={formData.bank} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
+              <input type="text" name="bank" placeholder="Numele Băncii" value={formData.bank} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
             </div>
           </div>
         </div>
 
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold tracking-wider text-indigo-400 uppercase border-b border-white/5 pb-2">
-            Contact Persons
+            Persoană de Contact
           </h2> 
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Persoana contact</label>
-              <input type="text" name="contact_person" placeholder="Nume persoana" value={formData.contact_person} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
+              <label className="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Nume</label>
+              <input type="text" name="contact_person" placeholder="Nume persoană" value={formData.contact_person} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" />
             </div>
 
             <div>
@@ -228,17 +228,17 @@ const AddClients = () => {
             
             <button type="button" onClick={handleReset} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 border border-white/20 rounded-xl text-xs font-mono uppercase tracking-wider text-gray-300 hover:text-white hover:bg-white/10 transition duration-300">
               <RotateCcw size={14} />
-              Reset
+              Resetare
             </button>
 
             <button type="button" onClick={() => navigate(-1)} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 border border-white/20 rounded-xl text-xs font-mono uppercase tracking-wider text-gray-300 hover:text-white hover:bg-white/10 transition duration-300">
               <X size={14} />
-              Cancel
+              Anulare
             </button>
 
-            <button type="submit" className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-teal-500/20 to-indigo-600/20 hover:from-teal-500/30 hover:to-indigo-600/30 border border-teal-500/30 hover:border-teal-400/60 text-xs font-mono uppercase tracking-wider text-[#80FFF9] font-bold shadow-lg transition duration-300">
+            <button type="submit" className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 rounded-xl bg-linear-to-r from-teal-500/20 to-indigo-600/20 hover:from-teal-500/30 hover:to-indigo-600/30 border border-teal-500/30 hover:border-teal-400/60 text-xs font-mono uppercase tracking-wider text-[#80FFF9] font-bold shadow-lg transition duration-300">
               <Save size={14} />
-              Save Client
+              Adaugă Client
             </button>
 
           </div>

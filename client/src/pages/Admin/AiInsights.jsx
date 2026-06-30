@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Brain, Sparkles, RefreshCw, BarChart2,Lock, ShieldCheck, FileText, Trash2, Eye, Calendar } from "lucide-react";
+import { Brain, Sparkles, RefreshCw, BarChart2,Lock, ShieldCheck,Loader2, FileText, Trash2, Eye, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "../../utils/api";
 import { toast } from "sonner";
@@ -162,7 +162,7 @@ const AiInsights = () => {
             <Brain className="text-[#80FFF9]" size={26} />
             AI Financial Insights
           </div>
-          <p className="text-gray-400 text-sm mt-1">
+          <p className="text-gray-400 text-sm mt-3">
             Analiză strategică locală bazată pe registrul tău de facturi fiscale.
           </p>
         </div>

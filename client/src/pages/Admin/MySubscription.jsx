@@ -55,7 +55,7 @@ const MySubscription = () => {
         <div>
           <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
             <Crown className="text-[#80FFF9]" size={30} />
-          My Subscription
+            Abonamente
           </h1>
           <p className="text-gray-400 text-sm mt-1">
             Gestionează planul tău, facturarea și accesul la funcțiile AI.
@@ -85,7 +85,7 @@ const MySubscription = () => {
               onClick={() => handleAction("create-billing-portal")}
               className="flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition text-sm"
             >
-              <CreditCard size={16} /> Manage Billing
+              <CreditCard size={16} /> Gestionează
             </button>
             {isActive && (
               <button 
@@ -112,7 +112,7 @@ const MySubscription = () => {
               <p className="text-sm text-gray-400 mb-6">{tier.desc}</p>
               <button 
                 onClick={() => handleAction("create-checkout-session", { plan: tier.name.toLowerCase() })}
-                className={`w-full py-3 rounded-xl bg-gradient-to-r from-${tier.color}-600/20 to-indigo-600/20 border border-${tier.color}-500/30 hover:bg-${tier.color}-600/30 transition text-sm font-medium`}
+                className={`w-full py-3 rounded-xl bg-linear-to-r from-${tier.color}-600/20 to-indigo-600/20 border border-${tier.color}-500/30 hover:bg-${tier.color}-600/30 transition text-sm font-medium`}
               >
                 Activează {tier.name}
               </button>

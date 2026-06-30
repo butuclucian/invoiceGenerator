@@ -15,7 +15,7 @@ const RecurringInvoice = () => {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        toast.error("Please log in to view invoices");
+        toast.error("Trebuie să fii conectat pentru a vizualiza facturile");
         return;
       }
 
@@ -27,8 +27,8 @@ const RecurringInvoice = () => {
       setInvoices(recurringOnly);
     } catch (err) {
       if (err.response?.status === 401)
-        toast.error("Unauthorized. Please log in again.");
-      else toast.error("Failed to load recurring invoices");
+        toast.error("Neautorizat. Contectează-te și încearcă din nou.");
+      else toast.error("Eroare la încărcarea facturilor");
     } finally {
       setLoading(false);
     }
@@ -53,10 +53,10 @@ const RecurringInvoice = () => {
       await API.delete(`/invoices/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Recurring invoice deleted successfully");
+      toast.success("Factura recurentă a fost ștearsă cu succs");
       fetchRecurringInvoices();
     } catch {
-      toast.error("Failed to delete recurring invoice");
+      toast.error("Ștergerea facturii recurente a eșuat");
     }
   };
 
@@ -81,10 +81,10 @@ const RecurringInvoice = () => {
         <div>
           <h1 className="text-2xl sm:text-3xl font-semibold flex items-center gap-2">
             <Repeat className="text-[#80FFF9]" size={26} />
-            Recurring Invoices
+            Facturi Recurente
           </h1>
-          <p className="text-gray-400 text-sm">
-            Manage and track your automatically repeating invoices
+          <p className="text-gray-400 text-sm mt-3">
+            Gestionează și urmărește toate facturile recurente
           </p>
         </div>
       </div>
@@ -97,10 +97,10 @@ const RecurringInvoice = () => {
         <div className="text-center py-16 border border-dashed border-white/20 rounded-xl bg-[#1a1a1a]/60">
           <Repeat className="w-16 h-16 text-white/20 mx-auto mb-3" />
           <h3 className="text-lg font-medium text-gray-300">
-            No recurring invoices found
+            Nicio Factură Recurentă Găsită!
           </h3>
-          <p className="text-sm text-gray-500 mt-1">
-            Try adding a recurring invoice to get started.
+          <p className="text-sm text-gray-500 mt-3">
+            Încearcă să creezi o factură recurentă!
           </p>
         </div>
       ) : (
@@ -109,12 +109,12 @@ const RecurringInvoice = () => {
             <table className="w-full text-sm border-collapse">
               <thead>
                 <tr className="text-gray-400 border-b border-white/10">
-                  <th className="p-4 text-left">Invoice</th>
+                  <th className="p-4 text-left">Factură</th>
                   <th className="p-4 text-left">Client</th>
-                  <th className="p-4 text-left">Frequency</th>
-                  <th className="p-4 text-left">Next Billing</th>
+                  <th className="p-4 text-left">Frecvență</th>
+                  <th className="p-4 text-left">Următoarea Facturare</th>
                   <th className="p-4 text-left">Status</th>
-                  <th className="p-4 text-right">Actions</th>
+                  <th className="p-4 text-right">Acțiuni</th>
                 </tr>
               </thead>
 
@@ -159,28 +159,28 @@ const RecurringInvoice = () => {
                       <button onClick={() => handlePreview(inv._id)} className="group relative p-2 hover:text-[#80FFF9]" >
                         <Eye size={16} />
                         <span className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2  px-3 py-1.5 bg-black/90 text-[12px] text-white rounded-md shadow-lg shadow-black/50 opacity-0 group-hover:opacity-100 transition-transform duration-150 scale-95 group-hover:scale-100">
-                          Preview
+                          Previzualizare
                         </span>
                       </button>
 
                       <button onClick={() => handleEdit(inv._id)} className="group relative p-2 hover:text-indigo-400" >
                         <Edit size={16} />
                         <span className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2  px-3 py-1.5 bg-black/90 text-[12px] text-white rounded-md  opacity-0 group-hover:opacity-100 transition-transform duration-150  scale-95 group-hover:scale-100">
-                          Edit
+                          Editare
                         </span>
                       </button>
 
                       <button onClick={() => handleDownload(inv.invoice_number)} className="group relative p-2 hover:text-green-400" >
                         <Download size={16} />
                         <span className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2  px-3 py-1.5 bg-black/90 text-[12px] text-white rounded-md shadow-lg shadow-black/50 opacity-0 group-hover:opacity-100 transition-transform duration-150 scale-95 group-hover:scale-100">
-                          Download
+                          Descărcare
                         </span>
                       </button>
 
                       <button onClick={() => handleDelete(inv._id)} className="group relative p-2 hover:text-red-400" >
                         <Trash2 size={16} />
                         <span className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2  px-3 py-1.5 bg-black/90 text-[12px] text-white rounded-md shadow-lg shadow-black/50 opacity-0 group-hover:opacity-100 transition-transform duration-150 scale-95 group-hover:scale-100">
-                          Delete
+                          Ștergere
                         </span>
                       </button>
 
@@ -217,8 +217,8 @@ const RecurringInvoice = () => {
                 <div className="mt-3 text-sm text-gray-300">
                   <p><span className="text-gray-400">Client:</span> {inv.client?.name || "Unknown"}</p>
                   <p><span className="text-gray-400">Email:</span> {inv.client?.email || "N/A"}</p>
-                  <p><span className="text-gray-400">Frequency:</span> {inv.frequency || "Monthly"}</p>
-                  <p><span className="text-gray-400">Next Billing:</span> {formatDate(inv.next_billing)}</p>
+                  <p><span className="text-gray-400">Frecvență:</span> {inv.frequency || "Monthly"}</p>
+                  <p><span className="text-gray-400">Următoarea Facturare:</span> {formatDate(inv.next_billing)}</p>
                 </div>
 
                 <div className="mt-4 flex justify-end gap-4 text-gray-400">

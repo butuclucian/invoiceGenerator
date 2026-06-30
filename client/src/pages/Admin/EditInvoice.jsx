@@ -156,8 +156,8 @@ const EditInvoice = () => {
             <FileEdit className="text-[#80FFF9]" size={26} />
             Edit Invoice
           </h1>
-          <p className="text-gray-400 text-sm">Update existing invoice details and payment metrics</p>
-          <p className="text-gray-500 text-xs mt-2 font-mono"><span className="text-red-500">*</span> Required fields</p>
+          <p className="text-gray-400 text-sm mt-3">Update existing invoice details and payment metrics</p>
+          <p className="text-gray-500 text-xs mt-3 font-mono"><span className="text-red-500">*</span> Required fields</p>
         </div>
       </div>
 

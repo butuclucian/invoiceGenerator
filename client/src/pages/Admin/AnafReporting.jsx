@@ -44,7 +44,7 @@ const AnafReporting = () => {
           setCurrency(userCurrency);
         }
       } catch (e) {
-        console.error("Could not fetch user currency:", e);
+        console.error(e);
       }
 
       const paidInvoicesInYear = invRes.data.filter((inv) => {
@@ -83,8 +83,8 @@ const AnafReporting = () => {
       });
 
     } catch (err) {
-      console.error("ANAF Calculation Error:", err);
-      toast.error("Failed to compile ANAF fiscal report");
+      console.error(err);
+      toast.error("Generarea raportului fiscal ANAF a eșuat");
     } finally {
       setLoading(false);
     }
@@ -105,11 +105,10 @@ const AnafReporting = () => {
         <div>
           <h1 className="text-3xl font-semibold flex items-center gap-2">
             <FileSpreadsheet className="text-[#80FFF9]" size={26} />
-            ANAF Reporting Portal
+            Raport ANAF
           </h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-400 text-sm mt-3">
             Generare date pentru Declarația Unică și centralizator venituri anuale
-            {/* asdsa */}
           </p>
         </div>
       </div>
@@ -151,7 +150,7 @@ const AnafReporting = () => {
               <span className="text-[11px] text-gray-500 block mt-2">Estimare operațională (15%)</span>
             </div>
 
-            <div className="bg-[#1a1a1a]/60 border border-white/10 rounded-xl p-6 bg-gradient-to-br from-indigo-600/5 to-transparent">
+            <div className="bg-[#1a1a1a]/60 border border-white/10 rounded-xl p-6 bg-linear-to-br from-indigo-600/5 to-transparent">
               <span className="text-xs text-gray-400 font-semibold tracking-wider uppercase block mb-1">Venit Net Impozitabil</span>
               <p className="text-2xl font-bold text-[#80FFF9]">{formatCurrency(reportData.netProfit, currency)}</p>
               <span className="text-[11px] text-gray-500 block mt-2">Baza de calcul pentru taxe</span>

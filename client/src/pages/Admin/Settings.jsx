@@ -61,8 +61,8 @@ const Settings = () => {
           }));
         }
       } catch (err) {
-        console.error("Load settings error:", err);
-        toast.error("Failed to load settings.");
+        console.error(err);
+        toast.error("Eroare la încărcarea setărilor");
       } finally {
         setLoading(false);
       }
@@ -82,9 +82,9 @@ const Settings = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success("Profile details updated!");
+      toast.success("Datele profilului actualizate");
     } catch (err) {
-      toast.error("Profile update failed.");
+      toast.error("Eroare la actualizarea profilului.");
     } finally {
       setSaving(false);
     }
@@ -97,9 +97,9 @@ const Settings = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      toast.success("Billing profile updated!");
+      toast.success("Date fiscale actualizate");
     } catch (err) {
-      toast.error("Failed to update billing profile.");
+      toast.error("Eroare la actualizarea datelor fiscale");
     }
   };
 
@@ -107,24 +107,24 @@ const Settings = () => {
     const { oldPassword, newPassword, confirmPassword } = passwordForm;
 
     if (!oldPassword || !newPassword || !confirmPassword) {
-      return toast.error("Please fill in all password fields.");
+      return toast.error("Completează toate câmpurile parolelor");
     }
 
     if (newPassword !== confirmPassword) {
-      return toast.error("New passwords do not match.");
+      return toast.error("Parola nouă nu corespunde");
     }
 
     try {
       await API.put("/auth/password", { oldPassword, newPassword });
-      toast.success("Password updated!");
+      toast.success("Parolă actualizată!");
       setPasswordForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to update password.");
+      toast.error(err.response?.data?.message || "Eroare la actualizarea parolei.");
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure? This cannot be undone.")) return;
+    if (!window.confirm("Esti sigur?")) return;
 
     try {
       const token = localStorage.getItem("token");
@@ -135,7 +135,7 @@ const Settings = () => {
       localStorage.removeItem("token");
       window.location.href = "/login";
     } catch (err) {
-      toast.error("Failed to delete account.");
+      toast.error("Eroare la ștergerea contului.");
     }
   };
 
@@ -168,44 +168,44 @@ const Settings = () => {
         <div>
           <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-2">
             <ShieldCheck className="text-[#80FFF9]" size={26} />
-            Settings
+            Setări
           </h1>
-          <p className="text-gray-400 text-sm">Account & company data management</p>
+          <p className="text-gray-400 text-sm">Gestionarea datelor contului și ale companiei</p>
         </div>
 
         <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-5 sm:p-6 shadow-lg">
           <h2 className="text-lg md:text-xl font-semibold flex items-center gap-2 mb-4">
             <UserIcon size={18} className="text-[#80FFF9]" />
-            User Profile Info
+            Datele Utilizatorului
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-gray-400 text-sm">Full Name</label>
+              <label className="text-gray-400 text-sm">Nume Complet</label>
               <input type="text" value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200 focus:outline-none focus:border-[#80FFF9]/50"/>
             </div>
 
             <div>
-              <label className="text-gray-400 text-sm">Email Address</label>
+              <label className="text-gray-400 text-sm">Email</label>
               <input type="email" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200 focus:outline-none focus:border-[#80FFF9]/50"/>
             </div>
           </div>
 
           <button onClick={handleProfileSave} disabled={saving} className="mt-5 px-4 py-2 rounded-xl bg-[#80FFF9]/20 border border-[#80FFF9]/40 hover:bg-[#80FFF9]/30 transition flex items-center gap-2">
             {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-            Save Profile Info
+            Salvare
           </button>
         </div>
 
         <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-5 sm:p-6 shadow-lg">
           <h2 className="text-lg md:text-xl font-semibold mb-4 flex items-center gap-2">
             <ShieldCheck size={18} className="text-[#80FFF9]" />
-            Change Password
+            Schimbă parola
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="relative">
-              <label className="text-gray-400 text-sm">Old Password</label>
+              <label className="text-gray-400 text-sm">Parola Actuală</label>
               <input type={showPass.old ? "text" : "password"} value={passwordForm.oldPassword} placeholder="Enter old password..." onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200"/>
               <button type="button" onClick={() => setShowPass({ ...showPass, old: !showPass.old })} className="absolute right-3 top-9 text-gray-400 hover:text-white">
                 {showPass.old ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -213,7 +213,7 @@ const Settings = () => {
             </div>
 
             <div className="relative">
-              <label className="text-gray-400 text-sm">New Password</label>
+              <label className="text-gray-400 text-sm">Parolă Nouă</label>
               <input
                 type={showPass.new ? "text" : "password"}
                 value={passwordForm.newPassword}
@@ -244,7 +244,7 @@ const Settings = () => {
             </div>
 
             <div className="relative">
-              <label className="text-gray-400 text-sm">Confirm New Password</label>
+              <label className="text-gray-400 text-sm">Confirmă Parola Nouă</label>
               <input
                 type={showPass.confirm ? "text" : "password"}
                 value={passwordForm.confirmPassword}
@@ -267,58 +267,58 @@ const Settings = () => {
             className="mt-5 px-4 py-2 rounded-xl bg-[#80FFF9]/20 border border-[#80FFF9]/40 hover:bg-[#80FFF9]/30 transition flex items-center gap-2"
           >
             <SaveIcon size={18} className="text-[#80FFF9]" />
-            Update Password
+            Actualizează Parola
           </button>
         </div>
 
         <div className="bg-[#111]/80 border border-white/10 rounded-2xl p-5 sm:p-6 shadow-lg">
           <h2 className="text-lg md:text-xl font-semibold flex items-center gap-2 mb-4">
-            <Building2 size={18} className="text-[#80FFF9]" /> Billing Profile (Freelancer / PFA Details)
+            <Building2 size={18} className="text-[#80FFF9]" /> Date Fiscale
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
-              <label className="text-gray-400 text-sm">Business / Legal Name</label>
+              <label className="text-gray-400 text-sm">Denumire</label>
               <input type="text" placeholder="ex. Popescu Ion PFA" value={billing.business_name} onChange={(e) => setBilling({ ...billing, business_name: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200 focus:outline-none focus:border-[#80FFF9]/30"/>
             </div>
 
             <div>
-              <label className="text-gray-400 text-sm">CIF / CUI / Fiscal ID</label>
+              <label className="text-gray-400 text-sm">CIF / CUI</label>
               <input type="text" placeholder="ex: 12345678 or RO12345678" value={billing.cif} onChange={(e) => setBilling({ ...billing, cif: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200 focus:outline-none focus:border-[#80FFF9]/30"/>
             </div>
 
             <div className="md:col-span-1">
-              <label className="text-gray-400 text-sm">Trade Registry No. (Reg. Com.)</label>
+              <label className="text-gray-400 text-sm">Reg. Com.</label>
               <input type="text" placeholder="ex: F35/123/2026" value={billing.registration_number} onChange={(e) => setBilling({ ...billing, registration_number: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200 focus:outline-none focus:border-[#80FFF9]/30"/>
             </div>
 
             <div>
-              <label className="text-gray-400 text-sm">Billing Phone</label>
+              <label className="text-gray-400 text-sm">Telefon</label>
               <input type="text" placeholder="ex. 0712 345 678" value={billing.phone} onChange={(e) => setBilling({ ...billing, phone: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200 focus:outline-none focus:border-[#80FFF9]/30"/>
             </div>
 
             <div>
-              <label className="text-gray-400 text-sm">Billing Email</label>
-              <input type="email" placeholder="ex. username@gmail.com" value={billing.email} onChange={(e) => setBilling({ ...billing, email: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200 focus:outline-none focus:border-[#80FFF9]/30"/>
+              <label className="text-gray-400 text-sm">Email</label>
+              <input type="email" placeholder="ex. nume@gmail.com" value={billing.email} onChange={(e) => setBilling({ ...billing, email: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200 focus:outline-none focus:border-[#80FFF9]/30"/>
             </div>
 
             <div className="md:col-span-3">
-              <label className="text-gray-400 text-sm">Full Address (Include City, County)</label>
+              <label className="text-gray-400 text-sm">Adresa Completă</label>
               <input type="text" placeholder="ex: Str. Inovației, Nr. 10, Timișoara, Timiș" value={billing.address} onChange={(e) => setBilling({ ...billing, address: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200 focus:outline-none focus:border-[#80FFF9]/30" />
             </div>
 
             <div className="md:col-span-2">
-              <label className="text-gray-400 text-sm">IBAN Account</label>
+              <label className="text-gray-400 text-sm">IBAN</label>
               <input type="text" placeholder="ex. RO78BTRL0000000000000000" value={billing.iban} onChange={(e) => setBilling({ ...billing, iban: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200 focus:outline-none focus:border-[#80FFF9]/30"/>
             </div>
 
             <div>
-              <label className="text-gray-400 text-sm">Bank Name</label>
+              <label className="text-gray-400 text-sm">Bancă</label>
               <input type="text" placeholder="ex. BRD" value={billing.bank} onChange={(e) => setBilling({ ...billing, bank: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200 focus:outline-none focus:border-[#80FFF9]/30"/>
             </div>
 
             <div className="md:col-span-3">
-              <label className="text-gray-400 text-sm">Invoice Logo URL</label>
+              <label className="text-gray-400 text-sm">Logo Factură</label>
               <input type="text" placeholder="https://example.com/logo.png" value={billing.logo} onChange={(e) => setBilling({ ...billing, logo: e.target.value })} className="w-full bg-[#1a1a1a] border border-white/10 rounded-md px-4 py-2 mt-1 text-gray-200 focus:outline-none focus:border-[#80FFF9]/30"/>
               {billing.logo && (
                 <img src={billing.logo} alt="Logo Preview" className="w-20 h-20 rounded-lg object-contain mt-3 border border-white/10" />
@@ -328,7 +328,7 @@ const Settings = () => {
 
           <button onClick={handleBillingSave} className="mt-5 px-4 py-2 rounded-xl bg-[#80FFF9]/20 border border-[#80FFF9]/40 hover:bg-[#80FFF9]/30 transition flex items-center gap-2">
             <SaveIcon size={18} className="text-[#80FFF9]" />
-            Save Billing Info
+            Salveaza Datele Fiscale
           </button>
         </div>
 
@@ -337,7 +337,7 @@ const Settings = () => {
             onClick={handleDelete}
             className="flex items-center justify-center gap-2 border border-red-500/30 text-red-400 px-4 py-2 rounded-xl hover:bg-red-500/10 transition w-full sm:w-auto"
           >
-            <Trash2 size={18} /> Delete Account
+            <Trash2 size={18} /> Șterge Contul
           </button>
         </div>
 

@@ -188,7 +188,7 @@ const AIGenerator = () => {
         toast.error("AI-ul local nu a extras o structură validă");
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Ollama local LLM request failed");
+      toast.error(err.response?.data?.message || "Ollama local LLM cerere eșuată");
     } finally {
       setLoading(false);
     }
@@ -287,10 +287,10 @@ const AIGenerator = () => {
         <div>
           <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
             <Brain className="text-[#80FFF9]" size={26} />
-            AI Invoice Generator (Ollama Local)
+            IA Generator (Ollama Local)
           </h1>
           <p className="text-gray-400 text-sm mt-1">
-            Introdu orice text - email, mesaj, și AI-ul local generează structura facturii securizat.
+            Introdu orice text - email, mesaj, și IA generează structura facturii securizat.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -315,7 +315,7 @@ const AIGenerator = () => {
 
           <div className="p-6">
             <p className="text-gray-400 text-sm mb-4">
-              AI-ul va folosi aceste prețuri când detectează serviciile în text. Modifică oricând.
+              IA va folosi aceste prețuri când detectează serviciile în text. Modifică oricând.
             </p>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
@@ -356,14 +356,14 @@ const AIGenerator = () => {
         <div className="flex justify-center gap-4 mt-5">
           <button onClick={handleReset} disabled={loading} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 border border-white/20 rounded-xl text-xs font-mono uppercase tracking-wider text-gray-300 hover:text-white hover:bg-white/10 transition duration-300">
             <RotateCcw size={15} />
-            Reset
+            Resetare
           </button>
 
           <button onClick={handleExtract} disabled={loading || !text.trim()} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 rounded-xl bg-linear-to-r from-teal-500/20 to-indigo-600/20 hover:from-teal-500/30 hover:to-indigo-600/30 border border-teal-500/30 hover:border-teal-400/60 text-xs font-mono uppercase tracking-wider text-[#80FFF9] font-bold shadow-lg transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
             {loading ? (
               <><Loader2 className="animate-spin" size={15} /> Se generează...</>
             ) : (
-              <><FileText size={15} /> Generează Invoice</>
+              <><FileText size={15} /> Generează Factură</>
             )}
           </button>
         </div>
@@ -380,10 +380,10 @@ const AIGenerator = () => {
 
             <div className="flex items-center gap-4 text-xs text-gray-500">
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Ready
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Gata
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-500"></span> Needs review
+                <span className="w-2 h-2 rounded-full bg-amber-500"></span> Necesită Revizuire
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-gray-500"></span> Draft

@@ -52,7 +52,7 @@ const CreateInvoice = () => {
           const paddedNumber = String(nextNumber).padStart(4, "0");
           nextInvoiceNumber = `INV-${paddedNumber}`;
         } catch (invErr) {
-          console.error("Failed to calculate next invoice number:", invErr);
+          console.error(invErr);
         }
 
         let defaultTax = 19;
@@ -67,7 +67,7 @@ const CreateInvoice = () => {
             setCurrency(userCurrency);
           }
         } catch (userErr) {
-          console.error("Failed to load user profile for default settings:", userErr);
+          console.error(userErr);
         }
 
         if (location.state?.aiData) {
@@ -111,7 +111,7 @@ const CreateInvoice = () => {
             setFormData(prev => ({ ...prev, _aiPendingId: location.state.invoiceId }));
           }
 
-          toast.info("Form pre-filled with AI extracted data!");
+          toast.info("Formular pre-completat cu datele extrase de IA!");
         } else {
           setFormData(prev => ({ 
             ...prev, 
@@ -122,7 +122,7 @@ const CreateInvoice = () => {
 
       } catch (err) {
         console.error(err);
-        toast.error("Could not load required form data from server");
+        toast.error("Nu se pot încărca datele din baza de date!");
       }
     };
 
@@ -209,14 +209,14 @@ const CreateInvoice = () => {
       paid_at: ""
     });
     setUiAmounts({ tax_amount: 0, discount_amount: 0 });
-    toast.info("Form reset successfully");
+    toast.info("Formulare resetat cu succes");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.client) return toast.error("Please select a client");
-    if (formData.items.some((item) => !item.description)) return toast.error("Please complete all item descriptions");
+    if (!formData.client) return toast.error("Alege un client");
+    if (formData.items.some((item) => !item.description)) return toast.error("Completează toate descrierile serviciilor");
 
     setLoading(true);
 
@@ -228,15 +228,15 @@ const CreateInvoice = () => {
     try {
       if (formData._aiPendingId) {
         await API.put(`/invoices/${formData._aiPendingId}/approve`, payload);
-        toast.success("AI Invoice approved and generated successfully!");
+        toast.success("Factura generată de IA a fost aprobată si generată cu succes");
       } else {
         await API.post("/invoices", payload);
-        toast.success("Invoice created successfully!");
+        toast.success("Factură creată cu succes!");
       }
       navigate("/dashboard/invoices");
     } catch (err) {
       console.error(err.response?.data || err);
-      toast.error(err.response?.data?.message || "Failed to save invoice");
+      toast.error(err.response?.data?.message || "Eroare la salvarea facturii!");
     } finally {
       setLoading(false);
     }
@@ -251,17 +251,17 @@ const CreateInvoice = () => {
         <div>
           <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
             <FilePlus2 className="text-[#80FFF9]" size={26} />
-            Invoices
+            Facturi
           </h1>
-          <p className="text-gray-400 text-sm">Create and manage your billing documents</p>
-          <p className="text-gray-500 text-xs mt-2 font-mono"><span className="text-red-500">*</span> Required fields</p>
+          <p className="text-gray-400 text-sm mt-3">Crează și administrează facturi</p>
+          <p className="text-gray-500 text-xs mt-3 font-mono"><span className="text-red-500">*</span> Câmpuri Obligatorii</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="max-w-6xl mx-auto space-y-10 relative z-10">
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold text-indigo-400 uppercase tracking-wider border-b border-white/5 pb-2">
-            Invoice Details
+            Detaliile Facturii
           </h2>
           
           <div className="grid md:grid-cols-4 gap-6">
@@ -270,15 +270,15 @@ const CreateInvoice = () => {
               <input type="text" name="series" value={formData.series} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition"/>
             </div>
             <div>
-              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Invoice Number <span className="text-red-500">*</span></label>
+              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Numărul Facturii <span className="text-red-500">*</span></label>
               <input type="text" name="invoice_number" value={formData.invoice_number} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" required/>
             </div>
             <div>
-              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Date <span className="text-red-500">*</span></label>
+              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Dată <span className="text-red-500">*</span></label>
               <input type="date" name="date" value={formData.date} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" required/>
             </div>
             <div>
-              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Due Date</label>
+              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Dată Scadentă</label>
               <input type="date" name="due_date" value={formData.due_date} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition"/>
             </div>
           </div>
@@ -287,7 +287,7 @@ const CreateInvoice = () => {
             <div>
               <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Client <span className="text-red-500">*</span></label>
               <select name="client" value={formData.client} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" required>
-                <option value="">Select a client</option>
+                <option value="">Alege Un Client</option>
                 {clients.map((c) => (
                   <option key={c._id} value={c._id}>
                     {c.name} {c.brand ? `(${c.brand})` : ""} — {c.email}
@@ -310,28 +310,28 @@ const CreateInvoice = () => {
 
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold text-indigo-400 uppercase tracking-wider border-b border-white/5 pb-2 flex justify-between items-center">
-            Items Inventory
+            Servicii
             <button type="button" onClick={addItem} className="flex items-center gap-1.5 text-xs text-[#80FFF9] bg-[#80FFF9]/5 border border-[#80FFF9]/20 rounded-lg px-3 py-1 hover:bg-[#80FFF9]/10 transition">
-              <Plus size={14} /> Add Line
+              <Plus size={14} /> Adaugă
             </button>
           </h2>
 
           {formData.items.map((item, index) => (
             <div key={index} className="grid md:grid-cols-12 gap-4 items-end p-4 bg-[#161616] border border-white/5 rounded-xl transition group">
               <div className="md:col-span-5">
-                <label className="text-[11px] font-mono uppercase text-gray-400 block mb-1">Description <span className="text-red-500">*</span></label>
-                <input type="text" value={item.description} onChange={(e) => handleItemChange(index, "description", e.target.value)} className="w-full bg-[#121212] border border-white/10 rounded-md px-3 py-1.5 text-sm text-white focus:border-[#80FFF9] outline-none transition" required/>
+                <label className="text-[11px] font-mono uppercase text-gray-400 block mb-1">Descriere <span className="text-red-500">*</span></label>
+                <input type="text" placeholder="ex. Analiză UI/UX" value={item.description} onChange={(e) => handleItemChange(index, "description", e.target.value)} className="w-full bg-[#121212] border border-white/10 rounded-md px-3 py-1.5 text-sm text-white focus:border-[#80FFF9] outline-none transition" required/>
               </div>
               <div className="md:col-span-2">
-                <label className="text-[11px] font-mono uppercase text-gray-400 block mb-1">Qty</label>
+                <label className="text-[11px] font-mono uppercase text-gray-400 block mb-1">Cantitate</label>
                 <input type="number" value={item.quantity} onChange={(e) => handleItemChange(index, "quantity", e.target.value)} className="w-full bg-[#121212] border border-white/10 rounded-md px-3 py-1.5 text-sm text-white focus:border-[#80FFF9] outline-none transition"/>
               </div>
               <div className="md:col-span-2">
-                <label className="text-[11px] font-mono uppercase text-gray-400 block mb-1">Unit Price</label>
+                <label className="text-[11px] font-mono uppercase text-gray-400 block mb-1">Preț Unitar</label>
                 <input type="number" value={item.unit_price} onChange={(e) => handleItemChange(index, "unit_price", e.target.value)} className="w-full bg-[#121212] border border-white/10 rounded-md px-3 py-1.5 text-sm text-white focus:border-[#80FFF9] outline-none transition"/>
               </div>
               <div className="md:col-span-2">
-                <label className="text-[11px] font-mono uppercase text-gray-500 block mb-1">Total Line</label>
+                <label className="text-[11px] font-mono uppercase text-gray-500 block mb-1">Preț Final</label>
                 <input readOnly value={`${item.total.toFixed(2)} ${currency}`} className="w-full bg-[#121212]/50 border border-white/5 rounded-md px-3 py-1.5 text-sm text-gray-400 font-mono"/>
               </div>
               <div className="md:col-span-1 flex justify-end">
@@ -345,37 +345,37 @@ const CreateInvoice = () => {
 
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold text-indigo-400 uppercase tracking-wider border-b border-white/5 pb-2">
-            Taxing & Financial Summary
+            Taxe & Reduceri
           </h2>
 
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Tax Rate (TVA %) <span className="text-red-500">*</span></label>
+              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">TVA (%) <span className="text-red-500">*</span></label>
               <input type="number" name="tax_rate" value={formData.tax_rate} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" required/>
             </div>
             <div>
-              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Discount Rate (%) <span className="text-red-500">*</span></label>
+              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Reducere (%) <span className="text-red-500">*</span></label>
               <input type="number" name="discount_rate" value={formData.discount_rate} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition" required/>
             </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 pt-2">
             <div>
-              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Payment Method</label>
+              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Metodă De Plată</label>
               <select name="payment_method" value={formData.payment_method} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition">
-                <option value="not_paid">Not Paid (Neîncasat)</option>
-                <option value="cash">Cash (Numerar)</option>
+                <option value="not_paid">Neîncasat</option>
+                <option value="cash">Numerar</option>
                 <option value="card">Card POS</option>
-                <option value="bank_transfer">Bank Transfer (Ordin de plată)</option>
+                <option value="bank_transfer">Ordin de plată</option>
                 <option value="stripe">Stripe Online</option>
               </select>
             </div>
             <div>
-              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Paid Amount ({currency})</label>
+              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Sumă Plătită ({currency})</label>
               <input type="number" name="paid_amount" value={formData.paid_amount} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition"/>
             </div>
             <div>
-              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Payment Date (Paid At)</label>
+              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Data Plății (Paid At)</label>
               <input type="date" name="paid_at" value={formData.paid_at} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition"/>
             </div>
           </div>
@@ -387,13 +387,13 @@ const CreateInvoice = () => {
             </div>
             {uiAmounts.discount_amount > 0 && (
               <div className="flex justify-between text-red-400/90">
-                <span>Discount ({formData.discount_rate}%):</span>
+                <span>Reducere ({formData.discount_rate}%):</span>
                 <span>- {uiAmounts.discount_amount.toFixed(2)} {currency}</span>
               </div>
             )}
             {uiAmounts.tax_amount > 0 && (
               <div className="flex justify-between text-teal-400/90">
-                <span>Tax / TVA ({formData.tax_rate}%):</span>
+                <span>TVA ({formData.tax_rate}%):</span>
                 <span>+ {uiAmounts.tax_amount.toFixed(2)} {currency}</span>
               </div>
             )}
@@ -405,42 +405,42 @@ const CreateInvoice = () => {
 
           <div className="grid md:grid-cols-2 gap-6 mt-6">
             <div>
-              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Payment Terms</label>
-              <input type="text" name="payment_terms" placeholder="e.g. Net 30" value={formData.payment_terms} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition"/>
+              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Termen De Plată</label>
+              <input type="text" name="payment_terms" placeholder="e.g. 30 zile" value={formData.payment_terms} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition"/>
             </div>
             <div>
-              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Notes</label>
-              <textarea name="notes" placeholder="Additional details..." value={formData.notes} onChange={handleChange} rows="2" className="w-full bg-[#161616] border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition resize-none"/>
+              <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Observații</label>
+              <textarea name="notes" placeholder="Detalii suplimentare..." value={formData.notes} onChange={handleChange} rows="2" className="w-full bg-[#161616] border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition resize-none"/>
             </div>
           </div>
         </div>
 
         <div className="bg-[#121212]/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <h2 className="text-sm font-mono font-bold text-indigo-400 uppercase tracking-wider border-b border-white/5 pb-2">
-            Recurring Invoice Automation
+            Factură Recurentă
           </h2>
 
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <input type="checkbox" id="recurring" checked={formData.recurring} onChange={(e) => setFormData({...formData, recurring: e.target.checked})} className="w-4 h-4 accent-[#80FFF9] cursor-pointer bg-[#161616] border-white/10 rounded"/>
               <label htmlFor="recurring" className="text-gray-300 text-sm select-none cursor-pointer">
-                Mark this invoice as recurring (auto-generated periodically)
+                Marchează această factură ca fiind recurentă (generare automată periodică)
               </label>
             </div>
 
             {formData.recurring && (
               <div className="grid md:grid-cols-2 gap-6 mt-4 animate-fadeIn">
                 <div>
-                  <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Frequency <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Frecvență  <span className="text-red-500">*</span></label>
                   <select name="frequency" value={formData.frequency} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition">
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="quarterly">Quarterly</option>
-                    <option value="yearly">Yearly</option>
+                    <option value="weekly">Săptămânal</option>
+                    <option value="monthly">Lunar</option>
+                    <option value="quarterly">Trimestrial</option>
+                    <option value="yearly">Anual</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Next Billing Date <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Următoarea dată de facturare <span className="text-red-500">*</span></label>
                   <input type="date" name="next_billing" value={formData.next_billing} onChange={handleChange} className="w-full bg-[#161616] border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:border-[#80FFF9] outline-none transition"/>
                 </div>
               </div>
@@ -451,14 +451,14 @@ const CreateInvoice = () => {
         <div className="fixed bottom-0 right-0 left-0 md:left-64 bg-[#111111]/90 border-t border-white/10 backdrop-blur-md py-4 z-40">
           <div className="flex flex-row justify-center items-center gap-3 sm:gap-4 px-4">
             <button type="button" onClick={handleReset} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 border border-white/20 rounded-xl text-xs font-mono uppercase tracking-wider text-gray-300 hover:text-white hover:bg-white/10 transition duration-300">
-              <RotateCcw size={14} /> Reset
+              <RotateCcw size={14} /> Resetare
             </button>
             <button type="button" onClick={() => navigate(-1)} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 border border-white/20 rounded-xl text-xs font-mono uppercase tracking-wider text-gray-300 hover:text-white hover:bg-white/10 transition duration-300">
-              <X size={14} /> Cancel
+              <X size={14} /> Anulare
             </button>
-            <button type="submit" disabled={loading} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-teal-500/20 to-indigo-600/20 hover:from-teal-500/30 hover:to-indigo-600/30 border border-teal-500/30 hover:border-teal-400/60 text-xs font-mono uppercase tracking-wider text-[#80FFF9] font-bold shadow-lg transition duration-300 disabled:opacity-40 disabled:cursor-not-allowed">
+            <button type="submit" disabled={loading} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 rounded-xl bg-linear-to-r from-teal-500/20 to-indigo-600/20 hover:from-teal-500/30 hover:to-indigo-600/30 border border-teal-500/30 hover:border-teal-400/60 text-xs font-mono uppercase tracking-wider text-[#80FFF9] font-bold shadow-lg transition duration-300 disabled:opacity-40 disabled:cursor-not-allowed">
               <Save size={14} />
-              {loading ? "Saving Document..." : "Save Invoice"}
+              {loading ? "Factura se generează..." : "Crează Factură"}
             </button>
           </div>
         </div>

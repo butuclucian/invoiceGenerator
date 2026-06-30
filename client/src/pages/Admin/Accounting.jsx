@@ -1,20 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-  DollarSign,
-  TrendingUp,
-  CreditCard,
-  FileText,
-  Calculator,
-} from "lucide-react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+import { DollarSign, TrendingUp, CreditCard, FileText, Calculator,} from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer,} from "recharts";
 import API from "../../utils/api";
 import { toast } from "sonner";
 
@@ -28,7 +14,7 @@ const Accounting = () => {
         const { data } = await API.get("/invoices");
         setInvoices(data);
       } catch {
-        toast.error("Failed to load invoices");
+        toast.error("Eroare la încărcarea facturilor");
       } finally {
         setLoading(false);
       }
@@ -39,7 +25,7 @@ const Accounting = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-400">
-        Loading accounting data...
+        Se încarcă datele de gestiune...
       </div>
     );
   }
@@ -77,37 +63,37 @@ const Accounting = () => {
     .slice(0, 5)
     .map((inv) => ({
       id: inv._id,
-      type: "Invoice",
-      amount: `$${inv.total.toFixed(2)}`,
+      type: "Factură",
+      amount: `${inv.total.toFixed(2)} RON`,
       status: inv.status,
       date: inv.date?.split("T")[0],
     }));
 
   const stats = [
     {
-      title: "Total Income",
-      value: `$${totalIncome.toFixed(2)}`,
+      title: "Venituri Totale",
+      value: `${totalIncome.toFixed(2)} RON`,
       icon: <DollarSign size={22} />,
       color: "text-green-400",
       bg: "bg-green-500/10",
     },
     {
-      title: "Expenses",
-      value: `$${expenses.toFixed(2)}`,
+      title: "Cheltuieli",
+      value: `${expenses.toFixed(2)} RON`,
       icon: <CreditCard size={22} />,
       color: "text-red-400",
       bg: "bg-red-500/10",
     },
     {
       title: "Profit",
-      value: `$${profit.toFixed(2)}`,
+      value: `${profit.toFixed(2)} RON`,
       icon: <TrendingUp size={22} />,
       color: "text-[#80FFF9]",
       bg: "bg-[#80FFF9]/10",
     },
     {
-      title: "Outstanding Invoices",
-      value: `${outstandingCount} Pending`,
+      title: "Facturi Neplătite",
+      value: `${outstandingCount} În așteptare`,
       icon: <FileText size={22} />,
       color: "text-yellow-400",
       bg: "bg-yellow-500/10",
@@ -123,10 +109,10 @@ const Accounting = () => {
         <div>
           <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-2">
             <Calculator className="text-[#80FFF9]" size={26} />
-            Accounting
+            Gestiune
           </h1>
           <p className="text-gray-400 text-sm">
-            Manage your financial overview and transactions
+            Gestionează situația financiară și tranzacțiile tale
           </p>
         </div>
       </div>
@@ -152,7 +138,7 @@ const Accounting = () => {
 
       <div className="bg-[#1a1a1a]/80 p-4 sm:p-6 rounded-xl border border-white/10 shadow-lg mb-10">
         <h2 className="text-lg sm:text-xl font-semibold text-[#80FFF9] mb-4">
-          Cash Flow (Income vs Expenses)
+          Flux de numerar (Venituri vs Cheltuieli)
         </h2>
         <ResponsiveContainer width="100%" height={280}>
           <LineChart data={cashFlowData}>
@@ -184,17 +170,17 @@ const Accounting = () => {
 
       <div className="bg-[#1a1a1a]/80 p-4 sm:p-6 rounded-xl border border-white/10 shadow-lg">
         <h2 className="text-lg sm:text-xl font-semibold text-[#80FFF9] mb-4">
-          Recent Transactions
+          Tranzacții Recente
         </h2>
 
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/10 text-gray-400">
-                <th className="text-left py-3 px-4">Type</th>
-                <th className="text-left py-3 px-4">Amount</th>
+                <th className="text-left py-3 px-4">Tip</th>
+                <th className="text-left py-3 px-4">Sumă</th>
                 <th className="text-left py-3 px-4">Status</th>
-                <th className="text-left py-3 px-4">Date</th>
+                <th className="text-left py-3 px-4">Dată</th>
               </tr>
             </thead>
 

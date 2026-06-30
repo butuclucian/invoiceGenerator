@@ -30,10 +30,10 @@ const CookieBanner = () => {
 
       <div className="flex justify-end gap-3 mt-4">
         <button onClick={reject} className="px-4 py-2 text-sm border border-white/20 rounded-lg hover:bg-white/10 transition">
-          Decline
+          Refuză
         </button>
         <button onClick={accept} className="px-4 py-2 text-sm bg-[#80FFF9] text-black rounded-lg hover:bg-[#80fff9]/80 transition">
-          Accept
+          Acceptă
         </button>
       </div>
     </div>

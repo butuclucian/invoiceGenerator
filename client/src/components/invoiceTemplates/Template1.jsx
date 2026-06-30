@@ -14,50 +14,70 @@ const Template2 = ({ invoice, billingProfile }) => {
 
   const items = invoice.items || [];
 
+  const discountAmount = invoice.discount_rate
+    ? (invoice.subtotal * invoice.discount_rate) / 100
+    : 0;
+
+  const taxAmount = invoice.tax_rate
+    ? ((invoice.subtotal - discountAmount) * invoice.tax_rate) / 100
+    : 0;
+
   return (
     <div style={{width: "794px", minHeight: "1123px", backgroundColor: "#F5F2EC", padding: "36px 50px", fontFamily: "Helvetica, Arial, sans-serif", color: "#1a1a1a", boxSizing: "border-box"}}>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
-        <h1 style={{ fontSize: "32px", fontWeight: "bold", margin: 0, letterSpacing: "1px" }}>invoice</h1>
+        <h1 style={{ fontSize: "32px", fontWeight: "bold", margin: 0, letterSpacing: "1px" }}>factură</h1>
         <div style={{ textAlign: "right", fontSize: "11px" }}>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "16px", marginBottom: "3px" }}>
-            <span style={{ color: "#666" }}>invoice no:</span>
-            <span>INV-{invoice.invoice_number}</span>
+            <span style={{ color: "#666" }}>nr factură:</span>
+            <span>{invoice.invoice_number}</span>
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "16px", marginBottom: "3px" }}>
-            <span style={{ color: "#666" }}>date:</span>
+            <span style={{ color: "#666" }}>dată:</span>
             <span>{fmt(invoice.date)}</span>
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "16px" }}>
-            <span style={{ color: "#666" }}>due date:</span>
+            <span style={{ color: "#666" }}>dată scadentă:</span>
             <span>{fmt(invoice.due_date)}</span>
           </div>
         </div>
       </div>
 
       <div style={{ marginBottom: "6px" }}>
-        <span style={{ fontWeight: "bold", fontSize: "12px", marginRight: "24px" }}>customer</span>
-        <span style={{ fontSize: "11px", marginRight: "16px" }}>{cl.name || "Digital Growth Agency Ltd"}</span>
-        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{cl.address || "14 King Street, Manchester, M2 6AG, UK"}</span>
-        <span style={{ fontSize: "11px", color: "#555" }}>{cl.vat || "GB987654321"}</span>
+        <span style={{ fontWeight: "bold", fontSize: "12px", marginRight: "24px" }}>client</span>
+        <span style={{ fontSize: "11px", marginRight: "16px" }}>{cl.brand || "brand indisponibil"}</span>
+        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{cl.cui || "cui indisponibil"}</span>
+        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{cl.reg_com || "reg.com indisponibil"}</span>
+        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{cl.address || "adresă indisponibilă"}</span>
+        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{cl.city || "oraș indisponibil"}</span>
+        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{cl.country || "țară indisponibilă"}</span>
+        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{cl.iban || "iban indisponibil"}</span>
+        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{cl.bank || "nume bancă indisponibil"}</span>
+        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{cl.contact_person || "persoană de contact indisponibilă"}</span>
+        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{cl.email || "email indisponibil"}</span>
+
       </div>
       <hr style={{ border: "none", borderTop: "1px solid #1a1a1a", margin: "0 0 14px 0" }} />
 
       <div style={{ marginBottom: "30px" }}>
-        <span style={{ fontWeight: "bold", fontSize: "12px", marginRight: "24px" }}>supplier</span>
-        <span style={{ fontSize: "11px", marginRight: "16px" }}>{b.business_name || "BrightTech Solutions Ltd"}</span>
-        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{b.phone || "+44 20 7946 0958"}</span>
-        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{b.address || "221B Baker Street, London"}</span>
-        <span style={{ fontSize: "11px", color: "#555" }}>{b.email || "contact@brighttech.co.uk"}</span>
+        <span style={{ fontWeight: "bold", fontSize: "12px", marginRight: "24px" }}>furnizor</span>
+        <span style={{ fontSize: "11px", marginRight: "16px" }}>{b.business_name || "Nume firmă indisponibil"}</span>
+        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{b.email || "Email indisponibil"}</span>
+        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{b.cif || "Cif indisponibil"}</span>
+        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{b.registration_number || "Reg.Com indisponibil"}</span>
+        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{b.address || "Adresă indisponibilă"}</span>
+        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{b.country || "Țară indisponibil"}</span>
+        <span style={{ fontSize: "11px", marginRight: "16px", color: "#555" }}>{b.iban || "Iban indisponibi"}</span>
+        <span style={{ fontSize: "11px", color: "#555" }}>{b.bank || "Nume bancă indisponibil"}</span>
       </div>
 
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px", marginBottom: "8px" }}>
         <thead>
           <tr style={{ borderTop: "1px solid #1a1a1a", borderBottom: "1px solid #1a1a1a" }}>
-            <th style={{ padding: "7px 4px", textAlign: "left", fontWeight: "normal", color: "#666", width: "36px" }}>no</th>
-            <th style={{ padding: "7px 4px", textAlign: "left", fontWeight: "normal", color: "#666" }}>item description</th>
-            <th style={{ padding: "7px 4px", textAlign: "left", fontWeight: "normal", color: "#666", width: "110px" }}>price</th>
-            <th style={{ padding: "7px 4px", textAlign: "left", fontWeight: "normal", color: "#666", width: "80px" }}>quantity</th>
+            <th style={{ padding: "7px 4px", textAlign: "left", fontWeight: "normal", color: "#666", width: "36px" }}>nr</th>
+            <th style={{ padding: "7px 4px", textAlign: "left", fontWeight: "normal", color: "#666" }}>descriere</th>
+            <th style={{ padding: "7px 4px", textAlign: "left", fontWeight: "normal", color: "#666", width: "110px" }}>preț</th>
+            <th style={{ padding: "7px 4px", textAlign: "left", fontWeight: "normal", color: "#666", width: "80px" }}>cantitate</th>
             <th style={{ padding: "7px 4px", textAlign: "right", fontWeight: "normal", color: "#666", width: "110px" }}>total</th>
           </tr>
         </thead>
@@ -76,22 +96,22 @@ const Template2 = ({ invoice, billingProfile }) => {
       <hr style={{ border: "none", borderTop: "1px solid #1a1a1a", margin: "0 0 10px 0" }} />
 
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "20px" }}>
-        <span>subtotal (excl. vat)</span>
+        <span>subtotal (fără. tva)</span>
         <span style={{ fontWeight: "bold" }}>{(invoice.subtotal ?? 0).toFixed(2)} {currency}</span>
       </div>
 
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "40px" }}>
         <div style={{ minWidth: "280px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "6px" }}>
-            <span style={{ color: "#666" }}>vat ({b.vat_rate || 20}%)</span>
-            <span>{(invoice.tax_amount ?? 0).toFixed(2)} {currency}</span>
+            <span style={{ color: "#666" }}>tva ({invoice.tax_rate || 19}%)</span>
+             <span>+{taxAmount.toFixed(2)} RON</span>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "8px" }}>
-            <span style={{ color: "#666" }}>discount ({b.discount_rate || 10}%)</span>
-            <span>{(invoice.discount_amount ?? 0).toFixed(2)} {currency}</span>
+            <span style={{ color: "#666" }}>reducere ({invoice.discount_rate || 0}%)</span>
+            <span>-{discountAmount.toFixed(2)} RON</span>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", fontWeight: "bold" }}>
-            <span>total (incl. VAT)</span>
+            <span>total (incl. tva)</span>
             <span>{(invoice.total ?? 0).toFixed(2)} {currency}</span>
           </div>
         </div>
@@ -99,16 +119,16 @@ const Template2 = ({ invoice, billingProfile }) => {
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
-          <p style={{ fontWeight: "bold", fontSize: "13px", marginBottom: "8px" }}>payment options</p>
-          <p style={{ fontSize: "11px", margin: "2px 0" }}>Bank Transfer</p>
-          <p style={{ fontSize: "11px", margin: "2px 0" }}>{b.business_name || "BrightTech Solutions Ltd"}</p>
-          <p style={{ fontSize: "11px", margin: "2px 0" }}>{b.iban || "GB29NWBK60161331926819"}</p>
-          <p style={{ fontSize: "11px", margin: "2px 0" }}>{b.bank_name || "Barclays"}</p>
+          <p style={{ fontWeight: "bold", fontSize: "13px", marginBottom: "8px" }}>opțiune de plată</p>
+          <p style={{ fontSize: "11px", margin: "2px 0" }}>Transfer Bancar</p>
+          <p style={{ fontSize: "11px", margin: "2px 0" }}>{b.business_name || "Nume firmă indisponibil"}</p>
+          <p style={{ fontSize: "11px", margin: "2px 0" }}>{b.iban || "Iban indisponibil"}</p>
+          <p style={{ fontSize: "11px", margin: "2px 0" }}>{b.bank_name || "Nume bancă indisponibil"}</p>
         </div>
         <div style={{ textAlign: "right", fontSize: "11px" }}>
-          <p style={{ margin: "2px 0" }}>✉ {b.email || "contact@brighttech.co.uk"}</p>
-          <p style={{ margin: "2px 0" }}>⊞ {b.address || "221B Baker Street, London"}</p>
-          <p style={{ margin: "2px 0" }}>☎ {b.phone || "+44 20 7946 0958"}</p>
+          <p style={{ margin: "2px 0" }}>{b.email || "indisponibil"}</p>
+          <p style={{ margin: "2px 0" }}>{b.address || "indisponibil"}</p>
+          <p style={{ margin: "2px 0" }}>{b.phone || "indisponibil"}</p>
         </div>
       </div>
 

@@ -26,7 +26,7 @@ const CalendarPage = () => {
 
       setEvents(data);
     } catch (err) {
-      toast.error("Failed to load events");
+      toast.error("Eroare la încărcarea evenimentelor");
     }
   };
 
@@ -50,7 +50,7 @@ const CalendarPage = () => {
 
   const addNote = async () => {
     if (!newNote.time || !newNote.title)
-      return toast.error("Please complete all fields!");
+      return toast.error("Completează toate datele!");
 
     const token = localStorage.getItem("token");
 
@@ -70,9 +70,9 @@ const CalendarPage = () => {
           prev.map((e) => (e._id === editingEventId ? data : e))
         );
 
-        toast.success("Event updated!");
+        toast.success("Eveniment modificat!");
       } catch {
-        toast.error("Failed to update event");
+        toast.error("Modifcarea evenimentului a eșuat!");
       }
 
       setEditingEventId(null);
@@ -93,11 +93,11 @@ const CalendarPage = () => {
       );
 
       setEvents((prev) => [...prev, data]);
-      toast.success("Event added!");
+      toast.success("Eveniment adăugat!");
       setNewNote({ time: "", title: "" });
       setOpenPopup(false);
     } catch {
-      toast.error("Failed to add event");
+      toast.error("Adăugarea evenimentului a eșuat");
     }
   };
 
@@ -110,9 +110,9 @@ const CalendarPage = () => {
       });
 
       setEvents(events.filter((ev) => ev._id !== id));
-      toast.success("Event removed");
+      toast.success("Eveniment șters");
     } catch {
-      toast.error("Failed to delete event");
+      toast.error("Ștergerea evenimentului a eșuat");
     }
   };
 
@@ -127,13 +127,13 @@ const CalendarPage = () => {
             <CalendarDays className="text-[#80FFF9]" size={26} />
             Calendar
           </h1>
-          <p className="text-gray-400 text-sm">
-            Track meetings, reminders and invoice-related events.
+          <p className="text-gray-400 text-sm mt-3">
+            Urmărește întâlniri, memento-uri și evenimente legate de facturi.
           </p>
         </div>
         <button onClick={() => setOpenPopup(true)} className="px-4 py-2 rounded-xl bg-indigo-600/20 border border-indigo-600/40 hover:bg-indigo-600/30 transition flex items-center gap-2" >
           <Plus size={16} className="text-indigo-400" />
-          New Event
+          Adaugă Eveniment
         </button>
       </div>
 
@@ -232,10 +232,10 @@ const CalendarPage = () => {
           </div>
 
           <div className="bg-[#111]/60 border border-white/10 rounded-2xl p-6 shadow-lg flex flex-col">
-            <h2 className="text-lg font-semibold mb-3"> Events this month</h2>
+            <h2 className="text-lg font-semibold mb-3"> Evenimentele din această lună</h2>
 
             {monthEvents.length === 0 ? (
-              <p className="text-gray-500 text-sm">No events this month.</p>
+              <p className="text-gray-500 text-sm">Nu sunt evenimente luna asta.</p>
             ) : (
               <div className="flex flex-col gap-3 max-h-[250px] overflow-y-auto pr-2">
                 {monthEvents.map((ev) => (

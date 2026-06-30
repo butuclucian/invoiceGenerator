@@ -17,7 +17,7 @@ const Reports = () => {
         setInvoices(data);
       } catch (err) {
         console.error(err);
-        toast.error("Failed to load reports data");
+        toast.error("Eroare la încărcarea datelor");
       } finally {
         setLoading(false);
       }
@@ -28,7 +28,7 @@ const Reports = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-400">
-        Loading reports...
+        Încărcarea rapoartelor...
       </div>
     );
   }
@@ -81,10 +81,10 @@ const Reports = () => {
         <div>
           <h1 className="text-3xl font-semibold text-white flex items-center gap-2">
             <BarChart3 className="text-[#80FFF9]" size={26} />
-            Reports
+            Rapoarte
           </h1>
           <p className="text-gray-400 text-sm">
-            Visualize your business insights and performance metrics
+            Vizualizează rapoartele și performanțele afacerii tale
           </p>
         </div>
 
@@ -96,7 +96,7 @@ const Reports = () => {
           <div className="flex items-center gap-2 mb-4">
             <PieIcon className="text-[#80FFF9]" size={20} />
             <h2 className="text-xl font-semibold text-white">
-              Invoice Status Overvirew
+              Prezentare generală a statusului facturilor
             </h2>
           </div>
 
@@ -130,7 +130,7 @@ const Reports = () => {
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="text-[#80FFF9]" size={20} />
             <h2 className="text-xl font-semibold text-white">
-              Revenue Over Time
+              Venituri
             </h2>
           </div>
 
@@ -156,7 +156,7 @@ const Reports = () => {
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="text-[#80FFF9]" size={20} />
             <h2 className="text-xl font-semibold text-white">
-              Top Clients by Total Invoiced
+              Top clienți după total facturat
             </h2>
           </div>
           <ResponsiveContainer width="100%" height={350}>
