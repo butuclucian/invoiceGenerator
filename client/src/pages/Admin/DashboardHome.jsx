@@ -240,7 +240,7 @@ const DashboardHome = () => {
                   onClick={() => navigate("/dashboard/subscription")}
                   className="w-80 py-3 bg-white hover:bg-gray-100 text-black rounded-xl font-semibold transition flex items-center justify-center gap-2"
                 >
-                  Upgrade la Pro
+                  Fa Upgrade la Pro
                 </button>
               </div>
             </>
