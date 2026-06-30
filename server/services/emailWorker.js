@@ -60,7 +60,7 @@ export const startEmailWorker = () => {
             `[AI Pipeline - Email ${i + 1}/${messages.length}] Sosit de la: ${emailSenderText} (${fallbackEmail})`,
           );
 
-          const targetUserId = "6a2bddddbd03f631953b0521";
+          const targetUserId = "6a43b7bbd9de84adecaa493a";
 
           await generateInvoiceFromTextInternal(
             emailBody,
