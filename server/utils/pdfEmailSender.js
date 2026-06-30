@@ -121,7 +121,7 @@ const generateInvoicePDF = (invoice, billingProfile) => {
   const startY = doc.y;
   doc.fontSize(10).font("Helvetica-Bold").fillColor(textColor).text("Furnizor", 50, startY);
   doc.font("Helvetica").fontSize(9).fillColor(textColor);
-  doc.text(b.business_name || "Nume firmă indisponibil", 50, doc.y + 2);
+  doc.text(b.business_name || "Nume firma indisponibil", 50, doc.y + 2);
   doc.text(b.email || "Email indisponibil", 50, doc.y + 2);
   doc.text(b.cif || "Cif indisponibil", 50, doc.y + 2);
   doc.text(b.registration_number || "Reg.Com indisponibil", 50, doc.y + 2);
@@ -205,14 +205,14 @@ const generateInvoicePDF = (invoice, billingProfile) => {
 export { generateInvoicePDF };
 
 
-export const sendInvoiceEmail = async (invoice, client) => {
-  if (!client?.email) {
+export const sendInvoiceEmail = async (invoice, billingProfile) => {
+  if (!cl?.email) {
     console.warn("[EmailService] Client has no email, skipping email send.");
     return;
   }
 
   try {
-    const pdfPath = await generateInvoicePDF(invoice, client);
+    const pdfPath = await generateInvoicePDF(invoice, billingProfile);
 
     const pdfData = fs.readFileSync(pdfPath);
     const pdfBase64 = pdfData.toString("base64");
@@ -223,18 +223,18 @@ export const sendInvoiceEmail = async (invoice, client) => {
       subject: `Factură nouă emisă de invoiceGenAI: ${invoice.invoice_number}`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 12px;">
-          <h2 style="color: #4F46E5; text-align: center;">Hello ${client.name || "Client"},</h2>
-          <p style="text-align: center; font-size: 15px;">You’ve received a new invoice from <b>invoiceGenAI</b>.</p>
+          <h2 style="color: #4F46E5; text-align: center;">Salutare ${cl.name || "Client"},</h2>
+          <p style="text-align: center; font-size: 15px;">Aceasta este noua factura de la <b>invoiceGenAi</b>.</p>
           
           <div style="margin: 20px auto; max-width: 400px; background: #f9f9f9; padding: 20px; border-radius: 10px; border-left: 4px solid #4F46E5;">
-            <p style="margin: 5px 0;"><b>Invoice Number:</b> ${invoice.invoice_number}</p>
-            <p style="margin: 5px 0;"><b>Total Amount:</b> ${invoice.total?.toFixed(2)} ${invoice.currency || 'RON'}</p>
-            <p style="margin: 5px 0;"><b>Due Date:</b> ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('ro-RO') : "—"}</p>
+            <p style="margin: 5px 0;"><b>Numarul facturii:</b> ${invoice.invoice_number}</p>
+            <p style="margin: 5px 0;"><b>Suma totala:</b> ${invoice.total?.toFixed(2)} ${invoice.currency || 'RON'}</p>
+            <p style="margin: 5px 0;"><b>Data scadenta:</b> ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('ro-RO') : "—"}</p>
           </div>
           
-          <p style="text-align: center; font-size: 14px; color: #666;">The official PDF document is attached to this email.</p>
+          <p style="text-align: center; font-size: 14px; color: #666;">Documentul PDF este atasat in acest email.</p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-          <p style="text-align: center; color: #999; font-size: 12px;">Thank you for your business!<br><b>invoiceGenAI Team</b></p>
+          <p style="text-align: center; color: #999; font-size: 12px;">Multumim pentru colaborare!<br><b>Echipa invoiceGenAi</b></p>
         </div>
       `,
       attachments: [
@@ -253,14 +253,14 @@ export const sendInvoiceEmail = async (invoice, client) => {
 
 
     fs.unlink(pdfPath, (err) => {
-      if (err) console.warn("[EmailService] Could not delete temp PDF:", err.message);
+      if (err) console.warn(err.message);
       else console.log("[EmailService] Temp PDF deleted successfully from workspace.");
     });
 
     return response;
 
   } catch (error) {
-    console.error("[EmailService] Fatal error sending invoice email:", error.message || error);
+    console.error(error.message || error);
     throw error; 
   }
 };
