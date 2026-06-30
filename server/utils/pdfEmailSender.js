@@ -6,30 +6,16 @@ dotenv.config();
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const generateInvoicePDF = (invoice, billingProfile) => {
+const generateInvoicePDF = (invoice, billingProfile, client) => {
   const pdfPath = `./invoice_${invoice.invoice_number}.pdf`;
-
   const doc = new PDFDocument({ margin: 50, size: "A4" });
-
   const writeStream = fs.createWriteStream(pdfPath);
-
   const b = billingProfile;
-
   const cl = invoice.client || {};
 
-  console.log("========== BILLING PROFILE ==========");
-  console.log(b);
-
-  console.log("========== CLIENT ==========");
-  console.log(cl);
-
-  console.log("========== INVOICE ==========");
-  console.log(invoice);
 
   const currency = b.currency || "RON";
-
   const items = invoice.items || [];
-
   const discountAmount = invoice.discount_rate
     ? (invoice.subtotal * invoice.discount_rate) / 100
     : 0;
@@ -41,11 +27,8 @@ const generateInvoicePDF = (invoice, billingProfile) => {
   doc.pipe(writeStream);
 
   const bgColor = "#F5F2EC";
-
   const textColor = "#1a1a1a";
-
   const gray = "#555555";
-
   doc.rect(0, 0, 600, 900).fill(bgColor);
 
   doc
@@ -222,14 +205,14 @@ const generateInvoicePDF = (invoice, billingProfile) => {
 
 export { generateInvoicePDF };
 
-export const sendInvoiceEmail = async (invoice, client) => {
-  if (!client?.email) {
+export const sendInvoiceEmail = async (invoice, billingProfile, client) => {
+  if (!invoice.client?.email) {
     console.warn("[EmailService] Client has no email, skipping email send.");
     return;
   }
 
   try {
-    const pdfPath = await generateInvoicePDF(invoice, client);
+    const pdfPath = await generateInvoicePDF(invoice, billingProfile, client);
 
     const pdfData = fs.readFileSync(pdfPath);
     const pdfBase64 = pdfData.toString("base64");

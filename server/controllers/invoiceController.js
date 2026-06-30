@@ -4,6 +4,7 @@ import Client from "../models/Client.js";
 import { sendInvoiceEmail } from "../utils/pdfEmailSender.js";
 import axios from "axios";
 import Report from "../models/Report.js";
+import BillingProfile from "../models/BillingProfile.js";
 
 const ollama = new Ollama({ 
   host: process.env.OLLAMA_HOST
@@ -69,7 +70,9 @@ export const createInvoice = async (req, res) => {
       newInvoice = await Invoice.findById(newInvoice._id).populate("client");
       if (newInvoice.client) {
         try {
-          await sendInvoiceEmail(newInvoice, newInvoice.client);
+          const billingProfile = await BillingProfile.findOne({ user: newInvoice.user});
+
+          await sendInvoiceEmail( newInvoice, billingProfile, newInvoice.client);
         } catch (mailErr) {
           console.error(mailErr.message);
         }
