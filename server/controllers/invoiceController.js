@@ -49,38 +49,76 @@ export const getInvoiceById = async (req, res) => {
 export const createInvoice = async (req, res) => {
   try {
     const { client, invoice_number, date, due_date, status, ...rest } = req.body;
-    const invoiceData = { user: req.user._id, date: date ? new Date(date) : new Date(), due_date: due_date ? new Date(due_date) : null, status: status || "draft", ...rest };
+
+    const invoiceData = {
+      user: req.user._id,
+      date: date ? new Date(date) : new Date(),
+      due_date: due_date ? new Date(due_date) : null,
+      status: status || "draft",
+      ...rest,
+    };
+
     if (status === "pending") {
       if (client) invoiceData.client = client;
       invoiceData.invoice_number = invoice_number || `AI-PENDING-${Date.now()}`;
-    } 
-    else {
+    } else {
       if (!client) {
-        return res.status(400).json({ message: "Client selection is required for manual invoices." });
+        return res.status(400).json({
+          message: "Client selection is required for manual invoices.",
+        });
       }
-      invoiceData.invoice_number = invoice_number || `INV-MANUAL-${Date.now()}`;
+
+      invoiceData.invoice_number =
+        invoice_number || `INV-MANUAL-${Date.now()}`;
+
       const existingClient = await Client.findById(client);
+
       if (!existingClient) {
-        return res.status(404).json({ message: "Selected client not found in database." });
+        return res.status(404).json({
+          message: "Selected client not found in database.",
+        });
       }
+
       invoiceData.client = existingClient._id;
     }
-    let newInvoice = await Invoice.create(invoiceData);
-    if (newInvoice.status === "sent" && newInvoice.client) {
-      newInvoice = await Invoice.findById(newInvoice._id).populate("client");
-      if (newInvoice.client) {
-        try {
-          const billingProfile = await BillingProfile.findOne({ user: newInvoice.user});
 
-          await sendInvoiceEmail( newInvoice, billingProfile, newInvoice.client);
+    let newInvoice = await Invoice.create(invoiceData);
+
+    if (newInvoice.status === "sent" && newInvoice.client) {
+      const invoiceWithClient = await Invoice.findById(newInvoice._id).populate(
+        "client"
+      );
+
+      const billingProfile = await BillingProfile.findOne({
+        user: newInvoice.user,
+      });
+
+      if (invoiceWithClient?.client) {
+        try {
+          await sendInvoiceEmail(
+            invoiceWithClient,
+            billingProfile,
+            invoiceWithClient.client
+          );
         } catch (mailErr) {
           console.error(mailErr.message);
         }
       }
     }
-    res.status(201).json({ success: true, message: status === "pending" ? "AI request saved as pending" : "Invoice created successfully", invoice: newInvoice });
+
+    res.status(201).json({
+      success: true,
+      message:
+        status === "pending"
+          ? "AI request saved as pending"
+          : "Invoice created successfully",
+      invoice: newInvoice,
+    });
   } catch (err) {
-    res.status(500).json({ message: "Failed to create invoice", error: err.message });
+    res.status(500).json({
+      message: "Failed to create invoice",
+      error: err.message,
+    });
   }
 };
 
