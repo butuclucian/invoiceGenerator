@@ -18,6 +18,8 @@ const config = {
 };
 
 export const startEmailWorker = () => {
+  console.log("=== Email Background Worker pornit (Verificare la 30s) ===");
+
   setInterval(async () => {
     let connection;
     try {
@@ -34,6 +36,10 @@ export const startEmailWorker = () => {
         return;
       }
 
+      console.log(
+        `[IMAP] Am găsit ${messages.length} e-mail(uri) necitite. Se începe procesarea secvențială...`,
+      );
+
       for (let i = 0; i < messages.length; i++) {
         const item = messages[i];
         const all = item.parts.find((part) => part.which === "");
@@ -49,6 +55,11 @@ export const startEmailWorker = () => {
             "";
 
           const emailBody = parsed.text || "";
+
+          console.log(
+            `[AI Pipeline - Email ${i + 1}/${messages.length}] Sosit de la: ${emailSenderText} (${fallbackEmail})`,
+          );
+
           const targetUserId = "6a2bddddbd03f631953b0521";
 
           await generateInvoiceFromTextInternal(
@@ -58,9 +69,13 @@ export const startEmailWorker = () => {
           );
         }
       }
+
       connection.end();
+      console.log(
+        "[IMAP] Conexiune închisă. Toate e-mailurile curente au fost procesate.",
+      );
     } catch (error) {
-      console.error(error.message);
+      console.error("❌ Eroare în Email Worker:", error.message);
       if (connection) {
         try {
           connection.end();
