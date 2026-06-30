@@ -84,13 +84,13 @@ const DashboardHome = () => {
     },
     {
       title: "Facturi Încasate",
-      val: `${stats.paidCount.toFixed(2)} RON`,
+      val: `${stats.paidCount}`,
       icon: <CheckCircle2 />,
       color: "text-[#80FFF9]",
     },
     {
       title: "Facturi Neîncasate",
-      val: `${stats.unpaidCount.toFixed(2)} RON`,
+      val: `${stats.unpaidCount}`,
       icon: <AlertCircle />,
       color: "text-red-400",
     },
@@ -213,9 +213,8 @@ const DashboardHome = () => {
           </h2>
 
           {isAllowed ? (
-            <div className="w-full h-[200px] flex items-center justify-center text-white">
-              <p>Aici poți afișa datele reale din API-ul de rapoarte</p>
-            </div>
+            <>
+            </>
           ) : (
             <>
               <div className="relative w-full h-[200px] bg-white/5 rounded-xl border border-white/5 p-4 opacity-50">
