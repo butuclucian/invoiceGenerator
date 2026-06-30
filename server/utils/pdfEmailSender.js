@@ -86,14 +86,14 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // };
 
 
-const generateInvoicePDF = (invoice, client, billingProfile = {}) => {
+const generateInvoicePDF = (invoice, billingProfile) => {
   const pdfPath = `./invoice_${invoice.invoice_number}.pdf`;
   const doc = new PDFDocument({ margin: 50, size: 'A4' });
   const writeStream = fs.createWriteStream(pdfPath);
 
   const b = billingProfile;
   const cl = invoice.client || {};
-  const currency = billingProfile?.currency || "RON";
+  const currency = b.currency || "RON";
 
   const items = invoice.items || [];
 
@@ -205,14 +205,14 @@ const generateInvoicePDF = (invoice, client, billingProfile = {}) => {
 export { generateInvoicePDF };
 
 
-export const sendInvoiceEmail = async (invoice, client,  billingProfile) => {
+export const sendInvoiceEmail = async (invoice, client) => {
   if (!client?.email) {
     console.warn("[EmailService] Client has no email, skipping email send.");
     return;
   }
 
   try {
-    const pdfPath = await generateInvoicePDF(invoice, client, billingProfile);
+    const pdfPath = await generateInvoicePDF(invoice, client);
 
     const pdfData = fs.readFileSync(pdfPath);
     const pdfBase64 = pdfData.toString("base64");
