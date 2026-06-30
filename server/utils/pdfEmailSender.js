@@ -86,7 +86,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // };
 
 
-const generateInvoicePDF = (invoice, billingProfile) => {
+const generateInvoicePDF = (invoice, client, billingProfile) => {
   const pdfPath = `./invoice_${invoice.invoice_number}.pdf`;
   const doc = new PDFDocument({ margin: 50, size: 'A4' });
   const writeStream = fs.createWriteStream(pdfPath);
@@ -205,18 +205,14 @@ const generateInvoicePDF = (invoice, billingProfile) => {
 export { generateInvoicePDF };
 
 
-export const sendInvoiceEmail = async (invoice, billingProfile) => {
-
-  const b=billingProfile;
-  const cl = invoice.client || {};
-
-  if (!cl?.email) {
+export const sendInvoiceEmail = async (invoice, client,  billingProfile) => {
+  if (!client?.email) {
     console.warn("[EmailService] Client has no email, skipping email send.");
     return;
   }
 
   try {
-    const pdfPath = await generateInvoicePDF(invoice, billingProfile);
+    const pdfPath = await generateInvoicePDF(invoice, client, billingProfile);
 
     const pdfData = fs.readFileSync(pdfPath);
     const pdfBase64 = pdfData.toString("base64");
@@ -227,7 +223,7 @@ export const sendInvoiceEmail = async (invoice, billingProfile) => {
       subject: `Factură nouă emisă de invoiceGenAI: ${invoice.invoice_number}`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 12px;">
-          <h2 style="color: #4F46E5; text-align: center;">Salutare ${cl.name || "Client"},</h2>
+          <h2 style="color: #4F46E5; text-align: center;">Salutare ${client.name || "Client"},</h2>
           <p style="text-align: center; font-size: 15px;">Aceasta este noua factura de la <b>invoiceGenAi</b>.</p>
           
           <div style="margin: 20px auto; max-width: 400px; background: #f9f9f9; padding: 20px; border-radius: 10px; border-left: 4px solid #4F46E5;">
