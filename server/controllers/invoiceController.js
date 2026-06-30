@@ -204,19 +204,27 @@ export const updateInvoice = async (req, res) => {
     }
 
     if (req.body.status === "sent") {
-      try {
-        const targetClient = await Client.findById(updated.client);
+  try {
+    const invoiceWithClient = await Invoice.findById(updated._id).populate("client");
 
-        if (targetClient) {
-          await sendInvoiceEmail(updated, targetClient);
-        } else {
-          console.warn("[HTTP Update] Clientul asociat acestei facturi nu a fost găsit în baza de date.");
-        }
-        
-      } catch (mailErr) {
-        console.error(mailErr.message);
-      }
+    const billingProfile = await BillingProfile.findOne({
+      user: invoiceWithClient.user,
+    });
+
+    if (invoiceWithClient?.client) {
+      await sendInvoiceEmail(
+        invoiceWithClient,
+        billingProfile,
+        invoiceWithClient.client
+      );
+    } else {
+      console.warn("[HTTP Update] Clientul asociat acestei facturi nu a fost găsit.");
     }
+
+  } catch (mailErr) {
+    console.error(mailErr.message);
+  }
+}
     const populatedInvoice = await Invoice.findById(updated._id).populate("client");
     res.json(populatedInvoice);
 
