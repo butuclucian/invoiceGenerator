@@ -14,7 +14,7 @@ const generateInvoicePDF = (invoice, billingProfile, client) => {
   const cl = invoice.client || {};
 
 
-  const currency = b.currency || "RON";
+  const currency = invoice.currency || "RON";
   const items = invoice.items || [];
   const discountAmount = invoice.discount_rate
     ? (invoice.subtotal * invoice.discount_rate) / 100
