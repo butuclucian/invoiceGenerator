@@ -6,10 +6,104 @@ dotenv.config();
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const generateInvoicePDF = (invoice, client, business = {}) => {
+// const generateInvoicePDF = (invoice, client, business = {}) => {
+//   const pdfPath = `./invoice_${invoice.invoice_number}.pdf`;
+//   const doc = new PDFDocument({ margin: 50, size: 'A4' });
+//   const writeStream = fs.createWriteStream(pdfPath);
+
+//   doc.pipe(writeStream);
+
+//   const bgColor = "#F5F2EC";
+//   const textColor = "#1a1a1a";
+//   const gray = "#555555";
+
+//   doc.rect(0, 0, 600, 900).fill(bgColor);
+  
+//   doc.fillColor(textColor).font("Helvetica-Bold").fontSize(36).text("FACTURA", { align: "center" });
+//   doc.moveDown(0.5);
+//   doc.moveTo(50, doc.y).lineTo(545, doc.y).strokeColor(textColor).stroke();
+//   doc.moveDown(2);
+
+//   const startY = doc.y;
+//   doc.fontSize(10).font("Helvetica-Bold").fillColor(textColor).text("Furnizor", 50, startY);
+//   doc.font("Helvetica").fontSize(9).fillColor(textColor);
+//   doc.text(business.business_name || "Nume firmă", 50, doc.y + 2);
+//   doc.text(business.email || "", 50, doc.y + 2);
+//   doc.text(business.cif || "", 50, doc.y + 2);
+//   doc.text(business.address || "", 50, doc.y + 2);
+
+//   doc.font("Helvetica-Bold").text("Detalii Factura", 350, startY);
+//   doc.font("Helvetica").text(`Nr. Factura ${invoice.invoice_number}`, 350, startY + 12);
+//   doc.text(`Data ${new Date(invoice.date).toLocaleDateString("en-GB")}`, 350, startY + 24);
+//   doc.text(`Scadenta ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString("en-GB") : "-"}`, 350, startY + 36);
+
+//   doc.moveDown(4);
+
+//   let y = doc.y;
+//   doc.moveTo(50, y).lineTo(545, y).stroke();
+//   y += 10;
+  
+//   doc.font("Helvetica-Bold").fontSize(9).fillColor(gray);
+//   doc.text("Nr", 50, y);
+//   doc.text("Descriere", 80, y);
+//   doc.text("Preț", 350, y);
+//   doc.text("Cantitate", 420, y);
+//   doc.text("Total", 490, y);
+  
+//   y += 15;
+//   doc.moveTo(50, y).lineTo(545, y).stroke();
+//   y += 10;
+
+//   (invoice.items || []).forEach((item, i) => {
+//     doc.fillColor(textColor).font("Helvetica").fontSize(9);
+//     doc.text(String(i + 1).padStart(2, "0"), 50, y);
+//     doc.text(item.description, 80, y, { width: 250 });
+//     doc.text(`${item.unit_price.toFixed(2)}`, 350, y);
+//     doc.text(`${item.quantity}`, 420, y);
+//     doc.text(`${item.total.toFixed(2)}`, 490, y);
+//     y += 20;
+//   });
+
+//   y += 20;
+//   const currency = business.currency || "RON";
+//   doc.font("Helvetica").fontSize(9).fillColor(gray);
+//   doc.text("Subtotal:", 350, y);
+//   doc.text(`${invoice.subtotal.toFixed(2)} ${currency}`, 490, y);
+//   y += 15;
+//   doc.text(`TVA (${invoice.tax_rate || 19}%):`, 350, y);
+//   doc.text(`${(invoice.tax_amount || 0).toFixed(2)} ${currency}`, 490, y);
+//   y += 15;
+//   doc.font("Helvetica-Bold").fontSize(11).fillColor(textColor);
+//   doc.text("Total:", 350, y);
+//   doc.text(`${invoice.total.toFixed(2)} ${currency}`, 490, y);
+
+//   doc.end();
+
+//   return new Promise((resolve, reject) => {
+//     writeStream.on("finish", () => resolve(pdfPath));
+//     writeStream.on("error", reject);
+//   });
+// };
+
+
+const generateInvoicePDF = (invoice, billingProfile) => {
   const pdfPath = `./invoice_${invoice.invoice_number}.pdf`;
   const doc = new PDFDocument({ margin: 50, size: 'A4' });
   const writeStream = fs.createWriteStream(pdfPath);
+
+  const b = billingProfile;
+  const cl = invoice.client || {};
+  const currency = b.currency || "RON";
+
+  const items = invoice.items || [];
+
+  const discountAmount = invoice.discount_rate
+    ? (invoice.subtotal * invoice.discount_rate) / 100
+    : 0;
+
+  const taxAmount = invoice.tax_rate
+    ? ((invoice.subtotal - discountAmount) * invoice.tax_rate) / 100
+    : 0;
 
   doc.pipe(writeStream);
 
@@ -19,7 +113,7 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
 
   doc.rect(0, 0, 600, 900).fill(bgColor);
   
-  doc.fillColor(textColor).font("Helvetica-Bold").fontSize(36).text("FACTURĂ", { align: "center" });
+  doc.fillColor(textColor).font("Helvetica-Bold").fontSize(36).text("FACTURA", { align: "center" });
   doc.moveDown(0.5);
   doc.moveTo(50, doc.y).lineTo(545, doc.y).strokeColor(textColor).stroke();
   doc.moveDown(2);
@@ -27,15 +121,33 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
   const startY = doc.y;
   doc.fontSize(10).font("Helvetica-Bold").fillColor(textColor).text("Furnizor", 50, startY);
   doc.font("Helvetica").fontSize(9).fillColor(textColor);
-  doc.text(business.business_name || "Nume firmă", 50, doc.y + 2);
-  doc.text(business.email || "", 50, doc.y + 2);
-  doc.text(business.cif || "", 50, doc.y + 2);
-  doc.text(business.address || "", 50, doc.y + 2);
+  doc.text(b.business_name || "Nume firmă indisponibil", 50, doc.y + 2);
+  doc.text(b.email || "Email indisponibil", 50, doc.y + 2);
+  doc.text(b.cif || "Cif indisponibil", 50, doc.y + 2);
+  doc.text(b.registration_number || "Reg.Com indisponibil", 50, doc.y + 2);
+  doc.text(b.address || "Adresă indisponibilă", 50, doc.y + 2);
+  doc.text(b.country || "Țară indisponibil", 50, doc.y + 2);
+  doc.text(b.iban || "Iban indisponibi", 50, doc.y + 2);
+  doc.text(b.bank || "Nume bancă indisponibil", 50, doc.y + 2);
 
-  doc.font("Helvetica-Bold").text("Detalii Factură", 350, startY);
-  doc.font("Helvetica").text(`Nr. Factură: ${invoice.invoice_number}`, 350, startY + 12);
-  doc.text(`Dată: ${new Date(invoice.date).toLocaleDateString("en-GB")}`, 350, startY + 24);
-  doc.text(`Scadentă: ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString("en-GB") : "-"}`, 350, startY + 36);
+  const clientY = doc.y + 20;
+  doc.fontSize(10).font("Helvetica-Bold").fillColor(textColor).text("Client", 50, clientY);
+  doc.font("Helvetica").fontSize(9).fillColor(textColor);
+  doc.text(cl.brand || "brand indisponibil", 50, doc.y + 2);
+  doc.text(cl.cui || "cui indisponibil", 50, doc.y + 2);
+  doc.text(cl.reg_com || "reg.com indisponibil", 50, doc.y + 2);
+  doc.text(cl.address || "adresă indisponibilă", 50, doc.y + 2);
+  doc.text(cl.city || "oraș indisponibil", 50, doc.y + 2);
+  doc.text(cl.country || "țară indisponibilă", 50, doc.y + 2);
+  doc.text(cl.iban || "iban indisponibil", 50, doc.y + 2);
+  doc.text(cl.bank || "nume bancă indisponibil", 50, doc.y + 2);
+  doc.text(cl.contact_person || "persoană de contact indisponibilă", 50, doc.y + 2);
+  doc.text(cl.email || "email indisponibil", 50, doc.y + 2);
+
+  doc.font("Helvetica-Bold").text("Detalii Factura", 350, startY);
+  doc.font("Helvetica").text(`Nr. Factura ${invoice.invoice_number}`, 350, startY + 12);
+  doc.text(`Data ${new Date(invoice.date).toLocaleDateString("en-GB")}`, 350, startY + 24);
+  doc.text(`Scadenta ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString("en-GB") : "-"}`, 350, startY + 36);
 
   doc.moveDown(4);
 
@@ -46,7 +158,7 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
   doc.font("Helvetica-Bold").fontSize(9).fillColor(gray);
   doc.text("Nr", 50, y);
   doc.text("Descriere", 80, y);
-  doc.text("Preț", 350, y);
+  doc.text("Pret", 350, y);
   doc.text("Cantitate", 420, y);
   doc.text("Total", 490, y);
   
@@ -65,13 +177,15 @@ const generateInvoicePDF = (invoice, client, business = {}) => {
   });
 
   y += 20;
-  const currency = business.currency || "RON";
   doc.font("Helvetica").fontSize(9).fillColor(gray);
   doc.text("Subtotal:", 350, y);
   doc.text(`${invoice.subtotal.toFixed(2)} ${currency}`, 490, y);
   y += 15;
   doc.text(`TVA (${invoice.tax_rate || 19}%):`, 350, y);
-  doc.text(`${(invoice.tax_amount || 0).toFixed(2)} ${currency}`, 490, y);
+  doc.text(`+${invoice.taxAmount.toFixed(2)} ${currency}`, 490, y);
+  y += 15;
+  doc.text(`TVA (${invoice.discountAmount || 0}%):`, 350, y);
+  doc.text(`${discountAmount.toFixed(2)} ${currency}`, 490, y);
   y += 15;
   doc.font("Helvetica-Bold").fontSize(11).fillColor(textColor);
   doc.text("Total:", 350, y);
