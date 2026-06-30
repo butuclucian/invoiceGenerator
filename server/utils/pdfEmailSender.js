@@ -178,18 +178,21 @@ const generateInvoicePDF = (invoice, billingProfile) => {
 
   y += 20;
   doc.font("Helvetica").fontSize(9).fillColor(gray);
+  
   doc.text("Subtotal:", 350, y);
-  doc.text(`${invoice.subtotal.toFixed(2)} ${currency}`, 490, y);
+  doc.text(`${(invoice.subtotal || 0).toFixed(2)} ${currency}`, 490, y);
   y += 15;
+  
+  const finalTax = invoice.taxAmount ?? taxAmount ?? 0;
   doc.text(`TVA (${invoice.tax_rate || 19}%):`, 350, y);
-  doc.text(`+${invoice.taxAmount.toFixed(2)} ${currency}`, 490, y);
+  doc.text(`+${finalTax.toFixed(2)} ${currency}`, 490, y);
   y += 15;
-  doc.text(`TVA (${invoice.discountAmount || 0}%):`, 350, y);
-  doc.text(`${discountAmount.toFixed(2)} ${currency}`, 490, y);
+  doc.text(`Reducere:`, 350, y);
+  doc.text(`${(discountAmount || 0).toFixed(2)} ${currency}`, 490, y);
   y += 15;
   doc.font("Helvetica-Bold").fontSize(11).fillColor(textColor);
   doc.text("Total:", 350, y);
-  doc.text(`${invoice.total.toFixed(2)} ${currency}`, 490, y);
+  doc.text(`${(invoice.total || 0).toFixed(2)} ${currency}`, 490, y);
 
   doc.end();
 
