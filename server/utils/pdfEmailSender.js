@@ -125,7 +125,7 @@ const generateInvoicePDF = (invoice, billingProfile) => {
 export { generateInvoicePDF };
 
 
-export const sendInvoiceEmail = async (invoice, client) => {
+export const sendInvoiceEmail = async (invoice, client, billingProfile) => {
   if (!client?.email) {
     console.warn("[EmailService] Client has no email, skipping email send.");
     return;
