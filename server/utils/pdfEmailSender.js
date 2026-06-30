@@ -86,14 +86,14 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // };
 
 
-const generateInvoicePDF = (invoice, client, billingProfile) => {
+const generateInvoicePDF = (invoice, client, billingProfile = {}) => {
   const pdfPath = `./invoice_${invoice.invoice_number}.pdf`;
   const doc = new PDFDocument({ margin: 50, size: 'A4' });
   const writeStream = fs.createWriteStream(pdfPath);
 
   const b = billingProfile;
   const cl = invoice.client || {};
-  const currency = b.currency || "RON";
+  const currency = billingProfile?.currency || "RON";
 
   const items = invoice.items || [];
 
