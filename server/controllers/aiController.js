@@ -357,7 +357,7 @@ export const generateInvoiceFromTextInternal = async (text, fallbackEmail = null
     parsedData.subtotal = Number(subtotal.toFixed(2));
     parsedData.total = Number(total.toFixed(2));
 
-    const activeUserId = userId || "6a441b768d622aef5ce4aa4d";
+    const activeUserId = userId || "6a44ef2eb353f9e3aa50915a";
 
     let clientId = null;
     const hasClientName = !!parsedData.client?.name && parsedData.client.name.toLowerCase() !== "null";
